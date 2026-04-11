@@ -1,4 +1,5 @@
 <script lang="ts">
+	import './+page.css';
 </script>
 
 <svelte:head>

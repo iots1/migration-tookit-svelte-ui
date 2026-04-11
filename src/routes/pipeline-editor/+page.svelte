@@ -10,8 +10,8 @@
 	import PipelineToolbar from '$features/pipeline-editor/components/controls/PipelineToolbar.svelte';
 	import PipelineCanvas from '$features/pipeline-editor/PipelineCanvas.svelte';
 	import type { ConfigItem } from '$core/types/pipeline';
-
 	import type { Node, Edge } from '@xyflow/svelte';
+	import '$features/pipeline-editor/pipeline-editor.css';
 
 	const state = createEditorState();
 
