@@ -1,9 +1,10 @@
-import type {
-  BaseNode,
-  BaseEdge,
-  ConfigItem,
-  HistoryEntry,
-} from "$core/types/pipeline";
+import type { BaseEdge, BaseNode, HistoryEntry } from "$core/types/common";
+import type { ConfigItem, PipelineRunResponse } from "$core/types/pipeline";
+import {
+  runPipeline,
+  savePipeline,
+  toPipelineSavePayload,
+} from "$features/pipeline-editor/api";
 
 interface EditorState {
   readonly nodes: BaseNode[];
@@ -20,7 +21,6 @@ interface EditorState {
   readonly canUndo: boolean;
   readonly canRedo: boolean;
   readonly isDrawerOpen: boolean;
-  readonly isEditing: boolean;
   pushHistory: () => void;
   undo: () => boolean;
   redo: () => boolean;
@@ -29,12 +29,7 @@ interface EditorState {
   setEdges: (value: BaseEdge[]) => void;
   selectNode: (id: string | null) => void;
   setConfigs: (value: ConfigItem[]) => void;
-  setPipelineName: (value: string) => void;
-  setPipelineDescription: (value: string) => void;
-  setPipelineId: (value: string | null) => void;
   setLoading: (value: boolean) => void;
-  setSaving: (value: boolean) => void;
-  setRunning: (value: boolean) => void;
   setError: (value: string | null) => void;
   openDrawer: () => void;
   closeDrawer: () => void;
@@ -45,6 +40,11 @@ interface EditorState {
     nodes: BaseNode[],
     edges: BaseEdge[],
   ) => void;
+  setPipelineId: (value: string | null) => void;
+  /** Saves pipeline and returns its ID, or null on failure. */
+  save: (name: string, description: string) => Promise<string | null>;
+  /** Saves then runs pipeline, returns run response or null on failure. */
+  saveAndRun: () => Promise<PipelineRunResponse | null>;
 }
 
 export function createEditorState(): EditorState {
@@ -63,7 +63,6 @@ export function createEditorState(): EditorState {
   let running = $state(false);
   let error = $state<string | null>(null);
   let isDrawerOpen = $state(false);
-  let isEditing = $state(false);
 
   const MAX_HISTORY = 50;
 
@@ -155,6 +154,59 @@ export function createEditorState(): EditorState {
     pushHistory();
   }
 
+  async function save(
+    name: string,
+    description: string,
+  ): Promise<string | null> {
+    if (nodes.length === 0) {
+      error = "Add at least one config node before saving";
+      return null;
+    }
+    try {
+      saving = true;
+      error = null;
+      pipelineName = name;
+      pipelineDescription = description;
+      const payload = toPipelineSavePayload(name, description, nodes, edges);
+      const result = await savePipeline(payload);
+      pipelineId = result.id;
+      return result.id;
+    } catch (err) {
+      error = err instanceof Error ? err.message : "Failed to save pipeline";
+      return null;
+    } finally {
+      saving = false;
+    }
+  }
+
+  async function saveAndRun(): Promise<PipelineRunResponse | null> {
+    const name = pipelineName || `Pipeline ${Date.now()}`;
+    const description = pipelineDescription || "";
+
+    if (nodes.length === 0) {
+      error = "Add at least one config node before saving";
+      return null;
+    }
+    try {
+      saving = true;
+      error = null;
+      const payload = toPipelineSavePayload(name, description, nodes, edges);
+      const result = await savePipeline(payload);
+      pipelineId = result.id;
+
+      running = true;
+      const runResult = await runPipeline(result.id);
+      return runResult;
+    } catch (err) {
+      error =
+        err instanceof Error ? err.message : "Failed to save or run pipeline";
+      return null;
+    } finally {
+      saving = false;
+      running = false;
+    }
+  }
+
   return {
     get nodes() {
       return nodes;
@@ -198,9 +250,6 @@ export function createEditorState(): EditorState {
     get isDrawerOpen() {
       return isDrawerOpen;
     },
-    get isEditing() {
-      return isEditing;
-    },
     pushHistory,
     undo,
     redo,
@@ -217,23 +266,11 @@ export function createEditorState(): EditorState {
     setConfigs(value: ConfigItem[]) {
       configs = value;
     },
-    setPipelineName(value: string) {
-      pipelineName = value;
-    },
-    setPipelineDescription(value: string) {
-      pipelineDescription = value;
-    },
     setPipelineId(value: string | null) {
       pipelineId = value;
     },
     setLoading(value: boolean) {
       loading = value;
-    },
-    setSaving(value: boolean) {
-      saving = value;
-    },
-    setRunning(value: boolean) {
-      running = value;
     },
     setError(value: string | null) {
       error = value;
@@ -242,5 +279,7 @@ export function createEditorState(): EditorState {
     closeDrawer,
     clearPipeline,
     setPipelineFromLoad,
+    save,
+    saveAndRun,
   };
 }

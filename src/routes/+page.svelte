@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { base } from '$app/paths';
 	import './+page.css';
 </script>
 
@@ -13,7 +14,7 @@
 	</div>
 
 	<div class="home-cards">
-		<a href="/pipelines" class="home-card">
+		<a href="{base}/pipelines" class="home-card">
 			<div class="card-icon icon-teal">
 				<svg width="28" height="28" viewBox="0 0 20 20" fill="none">
 					<path d="M3 4h14v12H3z" stroke="currentColor" stroke-width="1.5" rx="1" />
@@ -26,7 +27,7 @@
 			<p class="card-desc">View, search and manage your migration pipelines</p>
 		</a>
 
-		<a href="/pipeline-editor" class="home-card">
+		<a href="{base}/pipeline-editor" class="home-card">
 			<div class="card-icon icon-purple">
 				<svg width="28" height="28" viewBox="0 0 20 20" fill="none">
 					<rect
@@ -55,7 +56,7 @@
 			<p class="card-desc">Design migration flows with drag-and-drop nodes</p>
 		</a>
 
-		<a href="/db-explorer" class="home-card">
+		<a href="{base}/db-explorer" class="home-card">
 			<div class="card-icon icon-blue">
 				<svg width="28" height="28" viewBox="0 0 20 20" fill="none">
 					<ellipse cx="10" cy="5" rx="7" ry="3" stroke="currentColor" stroke-width="1.5" />
@@ -67,7 +68,7 @@
 			<p class="card-desc">Browse tables and inspect schema definitions</p>
 		</a>
 
-		<a href="/migration-runner" class="home-card">
+		<a href="{base}/migration-runner" class="home-card">
 			<div class="card-icon icon-peach">
 				<svg width="28" height="28" viewBox="0 0 20 20" fill="none">
 					<path d="M4 16l3-4 3 2 4-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />

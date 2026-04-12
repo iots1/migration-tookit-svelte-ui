@@ -1,3 +1,28 @@
+import type {
+  ApiLinks,
+  ApiMeta,
+  ApiPagination,
+  ApiStatus,
+  BaseEdge,
+  BaseNode,
+  FlowDefinition,
+  HistoryEntry,
+} from "./common";
+
+// Re-export shared types so existing imports from this file continue to work.
+export type {
+  ApiLinks,
+  ApiMeta,
+  ApiPagination,
+  ApiStatus,
+  BaseEdge,
+  BaseNode,
+  FlowDefinition,
+  HistoryEntry,
+};
+
+// ─── Config Types ─────────────────────────────────────────────────────────────
+
 export interface ConfigMapping {
   source: string;
   target: string;
@@ -50,40 +75,12 @@ export interface ConfigItem {
 
 export interface ConfigsResponse {
   data: ConfigItem[];
-  links: Record<string, string>;
-  meta: {
-    timestamp: string;
-    pagination: {
-      page: number;
-      page_size: number;
-      total: number;
-      total_records: number;
-      total_pages: number;
-    };
-  };
-  status: { code: number; message: string };
+  links: ApiLinks;
+  meta: ApiMeta;
+  status: ApiStatus;
 }
 
-export interface BaseNode {
-  id: string;
-  type: "source" | "transform" | "target" | "config";
-  position: { x: number; y: number };
-  data: Record<string, unknown>;
-}
-
-export interface BaseEdge {
-  id: string;
-  source: string;
-  target: string;
-  sourceHandle?: string;
-  targetHandle?: string;
-}
-
-export interface FlowDefinition {
-  name?: string;
-  nodes: BaseNode[];
-  edges: BaseEdge[];
-}
+// ─── Pipeline Entity Types ────────────────────────────────────────────────────
 
 export interface PipelineSavePayload {
   name: string;
@@ -140,8 +137,10 @@ export interface PipelineApiEntity {
       }>;
     };
   };
-  status: { code: number; message: string };
+  status: ApiStatus;
 }
+
+// ─── Pipeline List Types ──────────────────────────────────────────────────────
 
 export interface PipelineListItem {
   id: string;
@@ -181,40 +180,22 @@ export interface PipelineApiResponseItem {
 export interface PipelineListResponse {
   data: PipelineListItem[];
   meta: {
-    pagination: {
-      page: number;
-      page_size: number;
-      total: number;
-      total_records: number;
-      total_pages: number;
-    };
+    pagination: ApiPagination;
   };
-  status: { code: number; message: string };
+  status: ApiStatus;
 }
 
 export interface PipelineApiListResponse {
   data: PipelineApiResponseItem[];
-  links: Record<string, string>;
-  meta: {
-    timestamp: string;
-    pagination: {
-      page: number;
-      page_size: number;
-      total: number;
-      total_records: number;
-      total_pages: number;
-    };
-  };
-  status: { code: number; message: string };
+  links: ApiLinks;
+  meta: ApiMeta;
+  status: ApiStatus;
 }
+
+// ─── Pipeline Run Types ───────────────────────────────────────────────────────
 
 export interface PipelineRunResponse {
   job_id: string;
   status: string;
   message: string;
-}
-
-export interface HistoryEntry {
-  nodes: BaseNode[];
-  edges: BaseEdge[];
 }

@@ -1,8 +1,7 @@
 import { api } from "$core/api/client";
 import { API_V1 } from "$core/api/endpoints";
+import type { BaseEdge, BaseNode } from "$core/types/common";
 import type {
-  BaseEdge,
-  BaseNode,
   ConfigItem,
   ConfigsResponse,
   PipelineApiEntity,
@@ -43,8 +42,8 @@ export async function listPipelines(params?: {
       id: item.id,
       name: item.attributes.name,
       description: item.attributes.description,
-      nodes_count: item.attributes.nodes?.length || 0,
-      edges_count: item.attributes.edges?.length || 0,
+      nodes_count: item.attributes.nodes?.length ?? 0,
+      edges_count: item.attributes.edges?.length ?? 0,
       created_at: item.attributes.created_at,
       updated_at: item.attributes.updated_at,
     })),
@@ -160,7 +159,7 @@ export async function reconstructPipelineFromEntity(
         sourceTable: config?.attributes.json_data.source.table || "",
         targetDb: config?.attributes.json_data.target.database || "",
         targetTable: config?.attributes.json_data.target.table || "",
-        mappingCount: config?.attributes.json_data.mappings.length || 0,
+        mappingCount: config?.attributes.json_data.mappings.length ?? 0,
         nodeDescription: node.description,
       },
     };

@@ -1,11 +1,16 @@
-const API_BASE = import.meta.env.PUBLIC_API_URL || 'http://localhost:3000/api/v1';
+const API_BASE: string =
+	(import.meta.env.PUBLIC_API_URL as string | undefined) ?? 'http://localhost:3000/api/v1';
 
 interface RequestOptions extends Omit<RequestInit, 'body'> {
 	body?: unknown;
 }
 
+interface ApiErrorBody {
+	message?: string;
+}
+
 class ApiClient {
-	private baseUrl: string;
+	private readonly baseUrl: string;
 
 	constructor(baseUrl: string) {
 		this.baseUrl = baseUrl;
@@ -22,15 +27,17 @@ class ApiClient {
 		const response = await fetch(`${this.baseUrl}${endpoint}`, {
 			...rest,
 			headers,
-			body: body ? JSON.stringify(body) : undefined
+			body: body !== undefined ? JSON.stringify(body) : undefined
 		});
 
 		if (!response.ok) {
-			const error = await response.json().catch(() => ({ message: response.statusText }));
-			throw new Error(error.message || `API Error: ${response.status}`);
+			const errorBody = await (response.json() as Promise<ApiErrorBody>).catch(() => ({
+				message: response.statusText
+			}));
+			throw new Error(errorBody.message ?? `API Error: ${response.status}`);
 		}
 
-		return response.json();
+		return (await response.json()) as T;
 	}
 
 	async get<T>(endpoint: string, options?: RequestOptions): Promise<T> {

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { base } from '$app/paths';
 	import { page } from '$app/state';
 
 	interface NavItem {
@@ -19,8 +20,9 @@
 	let { collapsed = $bindable(false), mobileOpen = $bindable(false) } = $props();
 
 	function isActive(href: string): boolean {
-		if (href === '/') return page.url.pathname === '/';
-		return page.url.pathname.startsWith(href);
+		const resolved = `${base}${href}`;
+		if (href === '/') return page.url.pathname === resolved;
+		return page.url.pathname.startsWith(resolved);
 	}
 
 	function handleNav() {
@@ -93,9 +95,9 @@
 	<div class="sidebar-divider"></div>
 
 	<nav class="sidebar-nav">
-		{#each navItems as item}
+		{#each navItems as item (item.href)}
 			<a
-				href={item.href}
+				href="{base}{item.href}"
 				class="nav-item"
 				class:active={isActive(item.href)}
 				title={collapsed ? item.label : undefined}

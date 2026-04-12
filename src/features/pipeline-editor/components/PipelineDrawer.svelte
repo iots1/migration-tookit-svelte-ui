@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { BaseNode } from "$core/types/pipeline";
+	import type { BaseNode } from "$core/types/common";
 
 	let {
 		open,
@@ -49,7 +49,6 @@
 {#if open}
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div class="drawer-overlay drawer-overlay-open" onclick={handleOverlayClick} onkeydown={handleKeydown}></div>
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div class="drawer drawer-open" role="dialog" aria-label="Pipeline Settings" tabindex="-1" onclick={handleDrawerClick} onkeydown={(e) => e.stopPropagation()}>
 		<div class="drawer-header">
 			<h3 class="drawer-title">Pipeline Settings</h3>

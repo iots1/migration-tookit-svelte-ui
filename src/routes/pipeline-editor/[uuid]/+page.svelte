@@ -3,17 +3,11 @@
 </svelte:head>
 
 <script lang="ts">
+	import { base } from "$app/paths";
 	import { goto } from "$app/navigation";
 	import { page } from "$app/state";
 	import type { ConfigItem } from "$core/types/pipeline";
-	import {
-		loadConfigs,
-		loadPipeline,
-		reconstructPipelineFromEntity,
-		runPipeline,
-		savePipeline,
-		toPipelineSavePayload
-	} from "$features/pipeline-editor/api";
+	import { loadConfigs, loadPipeline, reconstructPipelineFromEntity } from "$features/pipeline-editor/api";
 	import PipelineToolbar from "$features/pipeline-editor/components/controls/PipelineToolbar.svelte";
 	import PipelineDrawer from "$features/pipeline-editor/components/PipelineDrawer.svelte";
 	import "$features/pipeline-editor/pipeline-editor.css";
@@ -56,64 +50,25 @@
 	}
 
 	async function handleSave(name: string, description: string) {
-		if (state.nodes.length === 0) {
-			state.setError("Add at least one config node before saving");
-			return;
-		}
-
-		try {
-			state.setSaving(true);
-			state.setError(null);
-			state.setPipelineName(name);
-			state.setPipelineDescription(description);
-
-			const payload = toPipelineSavePayload(name, description, state.nodes, state.edges);
-			const result = await savePipeline(payload) as { id: string };
-			state.setPipelineId(result.id);
-
+		const id = await state.save(name, description);
+		if (id) {
 			if (!editUuid || editUuid === "new") {
 				await tick();
-				goto(`/pipeline-editor/${result.id}`, { replaceState: true });
+				goto(`${base}/pipeline-editor/${id}`, { replaceState: true });
 			}
-
 			state.closeDrawer();
-		} catch (err) {
-			state.setError(err instanceof Error ? err.message : "Failed to save pipeline");
-		} finally {
-			state.setSaving(false);
 		}
 	}
 
 	async function handleSaveRun() {
-		if (state.nodes.length === 0) {
-			state.setError("Add at least one config node before saving");
-			return;
-		}
-
-		const name = state.pipelineName || `Pipeline ${new Date().toISOString()}`;
-		const description = state.pipelineDescription || "";
-
-		try {
-			state.setSaving(true);
-			state.setError(null);
-
-			const payload = toPipelineSavePayload(name, description, state.nodes, state.edges);
-			const result = await savePipeline(payload) as { id: string };
-			state.setPipelineId(result.id);
-
-			if (!editUuid || editUuid === "new") {
+		const runResult = await state.saveAndRun();
+		if (runResult) {
+			const id = state.pipelineId;
+			if (id && (!editUuid || editUuid === "new")) {
 				await tick();
-				goto(`/pipeline-editor/${result.id}`, { replaceState: true });
+				goto(`${base}/pipeline-editor/${id}`, { replaceState: true });
 			}
-
-			state.setRunning(true);
-			const runResult = await runPipeline(result.id);
 			alert(`Job started: ${runResult.job_id} - ${runResult.message}`);
-		} catch (err) {
-			state.setError(err instanceof Error ? err.message : "Failed to save or run pipeline");
-		} finally {
-			state.setSaving(false);
-			state.setRunning(false);
 		}
 	}
 </script>

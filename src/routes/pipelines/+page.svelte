@@ -3,80 +3,29 @@
 </svelte:head>
 
 <script lang="ts">
+	import { base } from "$app/paths";
 	import { goto } from "$app/navigation";
-	import type { PipelineListItem } from "$core/types/pipeline";
-	import { deletePipeline, listPipelines } from "$features/pipeline-editor/api";
 	import "$features/pipeline-editor/pipeline-editor.css";
+	import { createPipelinesListState } from "$features/pipeline-editor/state/pipelines-list-state.svelte";
 	import { onMount } from "svelte";
 
-	let pipelines = $state<PipelineListItem[]>([]);
-	let loading = $state(false);
-	let error = $state<string | null>(null);
-	let currentPage = $state(1);
-	let pageSize = $state(10);
-	let totalPages = $state(1);
-	let totalRecords = $state(0);
-	let searchQuery = $state("");
-	let searchInput = $state("");
-
-	async function fetchPipelines() {
-		try {
-			loading = true;
-			error = null;
-			const response = await listPipelines({
-				page: currentPage,
-				limit: pageSize,
-				search: searchQuery || undefined
-			});
-			pipelines = response.data;
-			totalPages = response.meta.pagination.total_pages;
-			totalRecords = response.meta.pagination.total_records;
-		} catch (err) {
-			error = err instanceof Error ? err.message : "Failed to load pipelines";
-		} finally {
-			loading = false;
-		}
-	}
+	const state = createPipelinesListState();
 
 	onMount(() => {
-		fetchPipelines();
+		state.fetchPipelines();
 	});
 
-	function handleSearch() {
-		searchQuery = searchInput;
-		currentPage = 1;
-		fetchPipelines();
-	}
-
-	function handleClearSearch() {
-		searchInput = "";
-		searchQuery = "";
-		currentPage = 1;
-		fetchPipelines();
-	}
-
 	async function handleNewPipeline() {
-		await goto("/pipeline-editor");
+		await goto(`${base}/pipeline-editor`);
 	}
 
 	async function handleEdit(id: string) {
-		await goto(`/pipeline-editor/${id}`);
+		await goto(`${base}/pipeline-editor/${id}`);
 	}
 
 	async function handleDelete(id: string) {
 		if (!confirm("Are you sure you want to delete this pipeline?")) return;
-
-		try {
-			await deletePipeline(id);
-			await fetchPipelines();
-		} catch (err) {
-			error = err instanceof Error ? err.message : "Failed to delete pipeline";
-		}
-	}
-
-	function goToPage(page: number) {
-		currentPage = page;
-		fetchPipelines();
+		await state.deleteById(id);
 	}
 </script>
 
@@ -104,28 +53,29 @@
 				type="text"
 				class="search-input"
 				placeholder="Search pipelines..."
-				bind:value={searchInput}
-				onkeydown={(e) => e.key === "Enter" && handleSearch()}
+				value={state.searchInput}
+				oninput={(e) => state.setSearchInput((e.target as HTMLInputElement).value)}
+				onkeydown={(e) => e.key === "Enter" && state.search()}
 			/>
-			{#if searchInput}
-				<button class="search-clear" onclick={handleClearSearch} aria-label="Clear search">
+			{#if state.searchInput}
+				<button class="search-clear" onclick={state.clearSearch} aria-label="Clear search">
 					<svg width="14" height="14" viewBox="0 0 14 14" fill="none">
 						<path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
 					</svg>
 				</button>
 			{/if}
 		</div>
-		<button class="btn btn-secondary" onclick={handleSearch}>Search</button>
+		<button class="btn btn-secondary" onclick={state.search}>Search</button>
 	</div>
 
-	{#if error}
+	{#if state.error}
 		<div class="pipeline-error">
 			<svg width="16" height="16" viewBox="0 0 16 16" fill="none">
 				<circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5" />
 				<path d="M8 5v3.5M8 10.5v.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
 			</svg>
-			<span>{error}</span>
-			<button class="pipeline-error-close" onclick={() => (error = null)} aria-label="Dismiss error">
+			<span>{state.error}</span>
+			<button class="pipeline-error-close" onclick={state.dismissError} aria-label="Dismiss error">
 				<svg width="14" height="14" viewBox="0 0 14 14" fill="none">
 					<path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
 				</svg>
@@ -134,12 +84,12 @@
 	{/if}
 
 	<div class="pipeline-table-wrapper">
-		{#if loading}
+		{#if state.loading}
 		<div class="pipeline-list-loading">
 			<div class="pipeline-loading-spinner"></div>
 			<span>Loading...</span>
 		</div>
-		{:else if pipelines.length === 0}
+		{:else if state.pipelines.length === 0}
 		<div class="pipeline-list-empty">
 			<svg width="48" height="48" viewBox="0 0 48 48" fill="none" class="empty-icon">
 				<rect x="6" y="6" width="16" height="16" rx="4" stroke="currentColor" stroke-width="2" />
@@ -162,7 +112,7 @@
 				</tr>
 			</thead>
 			<tbody>
-				{#each pipelines as pipeline (pipeline.id)}
+				{#each state.pipelines as pipeline (pipeline.id)}
 					<tr>
 						<td class="td-name">
 							<span class="pipeline-name-cell">{pipeline.name}</span>
@@ -193,32 +143,32 @@
 	{/if}
 	</div>
 
-	{#if totalPages > 1}
+	{#if state.totalPages > 1}
 		<div class="pagination">
-		<button class="pagination-btn" disabled={currentPage <= 1} onclick={() => goToPage(currentPage - 1)} aria-label="Previous page">
+		<button class="pagination-btn" disabled={state.currentPage <= 1} onclick={() => state.goToPage(state.currentPage - 1)} aria-label="Previous page">
 			<svg width="14" height="14" viewBox="0 0 14 14" fill="none">
 				<path d="M9 3L4 7l5 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
 			</svg>
 		</button>
 
-		{#each Array.from({ length: totalPages }, (_, i) => i + 1) as page (page)}
+		{#each Array.from({ length: state.totalPages }, (_, i) => i + 1) as page (page)}
 			<button
 				class="pagination-btn pagination-btn-page"
-				class:pagination-btn-active={page === currentPage}
-				onclick={() => goToPage(page)}
+				class:pagination-btn-active={page === state.currentPage}
+				onclick={() => state.goToPage(page)}
 			>
 				{page}
 			</button>
 		{/each}
 
-		<button class="pagination-btn" disabled={currentPage >= totalPages} onclick={() => goToPage(currentPage + 1)} aria-label="Next page">
+		<button class="pagination-btn" disabled={state.currentPage >= state.totalPages} onclick={() => state.goToPage(state.currentPage + 1)} aria-label="Next page">
 			<svg width="14" height="14" viewBox="0 0 14 14" fill="none">
 				<path d="M5 3l5 4-5 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
 			</svg>
 		</button>
 
 		<span class="pagination-info">
-			{totalRecords} record{totalRecords !== 1 ? "s" : ""}
+			{state.totalRecords} record{state.totalRecords !== 1 ? "s" : ""}
 		</span>
 	</div>
 	{/if}

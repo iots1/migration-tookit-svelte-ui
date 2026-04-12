@@ -1,4 +1,4 @@
-import type { FlowDefinition } from '$core/types/pipeline';
+import type { FlowDefinition } from '$core/types/common';
 
 export interface MigrationMapping {
 	sourceTable: string;
