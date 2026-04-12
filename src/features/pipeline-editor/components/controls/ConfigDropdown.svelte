@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { ConfigItem } from "$core/types/pipeline";
+	import type { ConfigItem } from '$core/types/pipeline';
 
 	let {
 		configs = [],
@@ -10,7 +10,7 @@
 	} = $props();
 
 	let open = $state(false);
-	let searchQuery = $state("");
+	let searchQuery = $state('');
 
 	let filteredConfigs = $derived(
 		configs.filter(
@@ -23,12 +23,12 @@
 	function handleSelect(config: ConfigItem) {
 		onSelect(config);
 		open = false;
-		searchQuery = "";
+		searchQuery = '';
 	}
 
 	function handleClickOutside(e: MouseEvent) {
 		const target = e.target as HTMLElement;
-		if (!target.closest(".config-dropdown-wrapper")) {
+		if (!target.closest('.config-dropdown-wrapper')) {
 			open = false;
 		}
 	}

@@ -1,6 +1,6 @@
-import { api } from "$core/api/client";
-import { API_V1 } from "$core/api/endpoints";
-import type { BaseEdge, BaseNode } from "$core/types/common";
+import { api } from '$core/api/client';
+import { API_V1 } from '$core/api/endpoints';
+import type { BaseEdge, BaseNode } from '$core/types/common';
 import type {
   ConfigItem,
   ConfigsResponse,
@@ -10,15 +10,16 @@ import type {
   PipelineListResponse,
   PipelineRunResponse,
   PipelineSavePayload,
-} from "$core/types/pipeline";
+} from '$core/types/pipeline';
 
 export async function loadConfigs(): Promise<ConfigItem[]> {
-  const response = await api.get<ConfigsResponse>(API_V1.CONFIGS);
+  const response: ConfigsResponse = await api.get(API_V1.CONFIGS);
   return response.data;
 }
 
-export async function loadConfig(id: string) {
-  return api.get<ConfigsResponse>(API_V1.CONFIG_DETAIL(id));
+export async function loadConfig(id: string): Promise<ConfigsResponse> {
+  const response: ConfigsResponse = await api.get(API_V1.CONFIG_DETAIL(id));
+  return response;
 }
 
 export async function listPipelines(params?: {
@@ -27,15 +28,15 @@ export async function listPipelines(params?: {
   search?: string;
 }): Promise<PipelineListResponse> {
   const query = new URLSearchParams();
-  if (params?.page) query.set("page", String(params.page));
-  if (params?.limit) query.set("limit", String(params.limit));
+  if (params?.page) query.set('page', String(params.page));
+  if (params?.limit) query.set('limit', String(params.limit));
   if (params?.search) {
-    query.set("filter", `name||$cont||${params.search}`);
-    query.append("filter", `description||$cont||${params.search}`);
+    query.set('filter', `name||$cont||${params.search}`);
+    query.append('filter', `description||$cont||${params.search}`);
   }
   const qs = query.toString();
-  const response = await api.get<PipelineApiListResponse>(
-    `${API_V1.PIPELINES}${qs ? `?${qs}` : ""}`,
+  const response: PipelineApiListResponse = await api.get(
+    `${API_V1.PIPELINES}${qs ? `?${qs}` : ''}`,
   );
   return {
     data: response.data.map((item) => ({
@@ -52,12 +53,18 @@ export async function listPipelines(params?: {
   };
 }
 
-export async function savePipeline(pipeline: PipelineSavePayload) {
-  return api.post<{ id: string; message: string }>(API_V1.PIPELINES, pipeline);
+export async function savePipeline(
+  pipeline: PipelineSavePayload,
+): Promise<{ id: string; message: string }> {
+  const response: { id: string; message: string } = await api.post(
+    API_V1.PIPELINES,
+    pipeline,
+  );
+  return response;
 }
 
 export async function loadPipeline(id: string): Promise<PipelineEntity> {
-  const response = await api.get<PipelineApiEntity>(
+  const response: PipelineApiEntity = await api.get(
     `${API_V1.PIPELINES}/${id}`,
   );
   return {
@@ -80,12 +87,13 @@ export async function loadPipeline(id: string): Promise<PipelineEntity> {
   };
 }
 
-export async function deletePipeline(id: string) {
-  return api.delete(`${API_V1.PIPELINES}/${id}`);
+export async function deletePipeline(id: string): Promise<void> {
+  await api.delete(`${API_V1.PIPELINES}/${id}`);
 }
 
-export async function runPipeline(id: string) {
-  return api.post<PipelineRunResponse>(API_V1.PIPELINE_RUN(id));
+export async function runPipeline(id: string): Promise<PipelineRunResponse> {
+  const response: PipelineRunResponse = await api.post(API_V1.PIPELINE_RUN(id));
+  return response;
 }
 
 export function toPipelineSavePayload(
@@ -94,14 +102,17 @@ export function toPipelineSavePayload(
   nodes: BaseNode[],
   edges: BaseEdge[],
 ): PipelineSavePayload {
-  const nodeMap = new Map(nodes.map((n) => [n.id, n]));
+  const nodeMap = new Map<string, BaseNode>(nodes.map((n) => [n.id, n]));
 
   return {
     name,
     description,
     nodes: nodes.map((node, index) => ({
-      config_id: (node.data.configId as string) || node.id,
-      description: (node.data.nodeDescription as string) || undefined,
+      config_id: String(node.data.configId ?? node.id),
+      description:
+        node.data.nodeDescription !== undefined
+          ? String(node.data.nodeDescription)
+          : undefined,
       position_x: Math.round(node.position.x),
       position_y: Math.round(node.position.y),
       order_sort: index,
@@ -111,11 +122,11 @@ export function toPipelineSavePayload(
       const targetNode = nodeMap.get(edge.target);
       return {
         source_config_uuid:
-          (sourceNode?.data.configId as string) ||
+          String(sourceNode?.data.configId ?? '') ||
           sourceNode?.id ||
           edge.source,
         target_config_uuid:
-          (targetNode?.data.configId as string) ||
+          String(targetNode?.data.configId ?? '') ||
           targetNode?.id ||
           edge.target,
       };
@@ -134,8 +145,8 @@ export async function reconstructPipelineFromEntity(
   entity: PipelineEntity,
   configs: ConfigItem[],
 ): Promise<PipelineLoadResult> {
-  const configMap = new Map(configs.map((c) => [c.id, c]));
-  const nodeByUuid = new Map<string, string>(); // config_id -> node_id
+  const configMap = new Map<string, ConfigItem>(configs.map((c) => [c.id, c]));
+  const nodeByUuid = new Map<string, string>();
 
   const nodes: BaseNode[] = entity.nodes.map((node) => {
     const config = configMap.get(node.config_id);
@@ -145,20 +156,20 @@ export async function reconstructPipelineFromEntity(
 
     return {
       id: nodeId,
-      type: "config",
+      type: 'config',
       position: {
         x: node.position_x,
         y: node.position_y,
       },
       data: {
-        label: config?.attributes.config_name || "Unknown Config",
+        label: config?.attributes.config_name ?? 'Unknown Config',
         configId: node.config_id,
-        configType: config?.attributes.config_type || "std",
-        tableName: config?.attributes.table_name || "",
-        sourceDb: config?.attributes.json_data.source.database || "",
-        sourceTable: config?.attributes.json_data.source.table || "",
-        targetDb: config?.attributes.json_data.target.database || "",
-        targetTable: config?.attributes.json_data.target.table || "",
+        configType: config?.attributes.config_type ?? 'std',
+        tableName: config?.attributes.table_name ?? '',
+        sourceDb: config?.attributes.json_data.source.database ?? '',
+        sourceTable: config?.attributes.json_data.source.table ?? '',
+        targetDb: config?.attributes.json_data.target.database ?? '',
+        targetTable: config?.attributes.json_data.target.table ?? '',
         mappingCount: config?.attributes.json_data.mappings.length ?? 0,
         nodeDescription: node.description,
       },

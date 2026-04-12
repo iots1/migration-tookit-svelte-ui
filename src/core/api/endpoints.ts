@@ -1,12 +1,12 @@
 export const API_V1 = {
-  CONFIGS: "/configs",
+  CONFIGS: '/configs',
   CONFIG_DETAIL: (id: string) => `/configs/${id}`,
-  PIPELINES: "/pipelines",
+  PIPELINES: '/pipelines',
   PIPELINE_RUN: (id: string) => `/pipelines/${id}/run`,
   PIPELINE_VALIDATE: (id: string) => `/pipelines/${id}/validate`,
-  TABLES: "/schema/tables",
+  TABLES: '/schema/tables',
   COLUMNS: (table: string) => `/schema/tables/${table}/columns`,
-  MIGRATION_JOBS: "/jobs",
+  MIGRATION_JOBS: '/jobs',
   MIGRATION_JOB_STATUS: (id: string) => `/jobs/${id}/status`,
   MIGRATION_JOB_STOP: (id: string) => `/jobs/${id}/stop`,
 } as const;

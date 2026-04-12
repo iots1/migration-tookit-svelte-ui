@@ -7,7 +7,7 @@ import type {
   BaseNode,
   FlowDefinition,
   HistoryEntry,
-} from "./common";
+} from './common';
 
 // Re-export shared types so existing imports from this file continue to work.
 export type {

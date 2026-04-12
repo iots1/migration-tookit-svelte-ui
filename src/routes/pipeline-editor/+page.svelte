@@ -3,9 +3,9 @@
 </svelte:head>
 
 <script lang="ts">
-	import { base } from "$app/paths";
-	import { goto } from "$app/navigation";
-	import { onMount } from "svelte";
+	import { base } from '$app/paths';
+	import { goto } from '$app/navigation';
+	import { onMount } from 'svelte';
 
 	onMount(() => {
 		goto(`${base}/pipeline-editor/new`);

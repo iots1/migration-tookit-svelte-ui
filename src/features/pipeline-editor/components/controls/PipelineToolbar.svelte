@@ -1,9 +1,9 @@
 <script lang="ts">
-	import type { ConfigItem } from "$core/types/pipeline";
-	import ConfigDropdown from "./ConfigDropdown.svelte";
+	import type { ConfigItem } from '$core/types/pipeline';
+	import ConfigDropdown from './ConfigDropdown.svelte';
 
 	let {
-		pipelineName = "Untitled",
+		pipelineName = 'Untitled',
 		canUndo = false,
 		canRedo = false,
 		saving = false,
@@ -75,7 +75,7 @@
 					<path d="M14 8A6 6 0 112 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
 					<path d="M14 8A6 6 0 002 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.3" />
 				</svg>
-				<span>{saving ? "Saving..." : "Running..."}</span>
+				<span>{saving ? 'Saving...' : 'Running...'}</span>
 			{:else}
 				<svg width="16" height="16" viewBox="0 0 16 16" fill="none">
 					<path d="M4 2l8 6-8 6V2z" fill="currentColor" />

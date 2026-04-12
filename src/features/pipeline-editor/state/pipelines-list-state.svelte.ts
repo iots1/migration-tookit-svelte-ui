@@ -1,5 +1,5 @@
-import type { PipelineListItem } from "$core/types/pipeline";
-import { deletePipeline, listPipelines } from "$features/pipeline-editor/api";
+import type { PipelineListItem } from '$core/types/pipeline';
+import { deletePipeline, listPipelines } from '$features/pipeline-editor/api';
 
 export interface PipelinesListState {
   readonly pipelines: PipelineListItem[];
@@ -27,8 +27,8 @@ export function createPipelinesListState(): PipelinesListState {
   const pageSize = 10;
   let totalPages = $state(1);
   let totalRecords = $state(0);
-  let searchQuery = $state("");
-  let searchInput = $state("");
+  let searchQuery = $state('');
+  let searchInput = $state('');
 
   async function fetchPipelines() {
     try {
@@ -43,7 +43,7 @@ export function createPipelinesListState(): PipelinesListState {
       totalPages = response.meta.pagination.total_pages;
       totalRecords = response.meta.pagination.total_records;
     } catch (err) {
-      error = err instanceof Error ? err.message : "Failed to load pipelines";
+      error = err instanceof Error ? err.message : 'Failed to load pipelines';
     } finally {
       loading = false;
     }
@@ -56,8 +56,8 @@ export function createPipelinesListState(): PipelinesListState {
   }
 
   function clearSearch() {
-    searchInput = "";
-    searchQuery = "";
+    searchInput = '';
+    searchQuery = '';
     currentPage = 1;
     void fetchPipelines();
   }
@@ -68,7 +68,7 @@ export function createPipelinesListState(): PipelinesListState {
       await fetchPipelines();
       return true;
     } catch (err) {
-      error = err instanceof Error ? err.message : "Failed to delete pipeline";
+      error = err instanceof Error ? err.message : 'Failed to delete pipeline';
       return false;
     }
   }

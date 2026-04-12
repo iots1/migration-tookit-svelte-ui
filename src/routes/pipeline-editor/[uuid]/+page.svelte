@@ -3,19 +3,19 @@
 </svelte:head>
 
 <script lang="ts">
-	import { base } from "$app/paths";
-	import { goto } from "$app/navigation";
-	import { page } from "$app/state";
-	import type { ConfigItem } from "$core/types/pipeline";
-	import { loadConfigs, loadPipeline, reconstructPipelineFromEntity } from "$features/pipeline-editor/api";
-	import PipelineToolbar from "$features/pipeline-editor/components/controls/PipelineToolbar.svelte";
-	import PipelineDrawer from "$features/pipeline-editor/components/PipelineDrawer.svelte";
-	import "$features/pipeline-editor/pipeline-editor.css";
-	import PipelineCanvas from "$features/pipeline-editor/PipelineCanvas.svelte";
-	import { createEditorState } from "$features/pipeline-editor/state/editor-state.svelte";
-	import type { Edge, Node } from "@xyflow/svelte";
-	import { SvelteFlowProvider } from "@xyflow/svelte";
-	import { onMount, tick } from "svelte";
+	import { base } from '$app/paths';
+	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
+	import type { ConfigItem } from '$core/types/pipeline';
+	import { loadConfigs, loadPipeline, reconstructPipelineFromEntity } from '$features/pipeline-editor/api';
+	import PipelineToolbar from '$features/pipeline-editor/components/controls/PipelineToolbar.svelte';
+	import PipelineDrawer from '$features/pipeline-editor/components/PipelineDrawer.svelte';
+	import '$features/pipeline-editor/pipeline-editor.css';
+	import PipelineCanvas from '$features/pipeline-editor/PipelineCanvas.svelte';
+	import { createEditorState } from '$features/pipeline-editor/state/editor-state.svelte';
+	import type { Edge, Node } from '@xyflow/svelte';
+	import { SvelteFlowProvider } from '@xyflow/svelte';
+	import { onMount, tick } from 'svelte';
 
 	const state = createEditorState();
 
@@ -27,14 +27,14 @@
 			const configs = await loadConfigs();
 			state.setConfigs(configs);
 
-			if (editUuid && editUuid !== "new") {
+			if (editUuid && editUuid !== 'new') {
 				const entity = await loadPipeline(editUuid);
 				const result = await reconstructPipelineFromEntity(entity, configs);
 				state.setPipelineFromLoad(result.name, result.description, result.nodes, result.edges);
 				state.setPipelineId(editUuid);
 			}
 		} catch (err) {
-			state.setError(err instanceof Error ? err.message : "Failed to load data");
+			state.setError(err instanceof Error ? err.message : 'Failed to load data');
 		} finally {
 			state.setLoading(false);
 		}
@@ -52,7 +52,7 @@
 	async function handleSave(name: string, description: string) {
 		const id = await state.save(name, description);
 		if (id) {
-			if (!editUuid || editUuid === "new") {
+			if (!editUuid || editUuid === 'new') {
 				await tick();
 				goto(`${base}/pipeline-editor/${id}`, { replaceState: true });
 			}
@@ -64,7 +64,7 @@
 		const runResult = await state.saveAndRun();
 		if (runResult) {
 			const id = state.pipelineId;
-			if (id && (!editUuid || editUuid === "new")) {
+			if (id && (!editUuid || editUuid === 'new')) {
 				await tick();
 				goto(`${base}/pipeline-editor/${id}`, { replaceState: true });
 			}
@@ -90,7 +90,7 @@
 	{/if}
 
 	<PipelineToolbar
-		pipelineName={state.pipelineName || "Untitled"}
+		pipelineName={state.pipelineName || 'Untitled'}
 		canUndo={state.canUndo}
 		canRedo={state.canRedo}
 		saving={state.saving}

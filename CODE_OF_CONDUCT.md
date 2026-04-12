@@ -7,6 +7,7 @@ This document defines the mandatory coding standards for all contributors. Every
 ## 1. SOLID Principles
 
 ### S — Single Responsibility Principle
+
 Each file, module, or function must have **one reason to change**.
 
 - `.svelte` route files handle **rendering and navigation only** — no API calls, no business logic.
@@ -21,6 +22,7 @@ Each file, module, or function must have **one reason to change**.
 ```
 
 ### O — Open/Closed Principle
+
 Code should be open for extension and closed for modification.
 
 - Prefer adding new state functions over modifying existing ones.
@@ -28,12 +30,14 @@ Code should be open for extension and closed for modification.
 - Never extend a component by editing its internal logic — add a new variant or prop instead.
 
 ### L — Liskov Substitution Principle
+
 Concrete implementations must be substitutable for their interface contracts.
 
 - If a function returns `Promise<string | null>`, callers must handle both cases — never assume non-null.
 - State factory functions (e.g., `createEditorState()`) must fulfil the full declared interface.
 
 ### I — Interface Segregation Principle
+
 Prefer small, focused interfaces over large catch-all ones.
 
 - Split large interfaces by concern. A `PipelineListState` interface should not include editor-specific fields.
@@ -47,6 +51,7 @@ Prefer small, focused interfaces over large catch-all ones.
 ```
 
 ### D — Dependency Inversion Principle
+
 High-level modules must not depend on low-level modules. Both should depend on abstractions.
 
 - Route pages depend on **state interfaces**, not concrete implementations.
@@ -58,6 +63,7 @@ High-level modules must not depend on low-level modules. Both should depend on a
 ## 2. TypeScript Rules
 
 ### No `any`
+
 Using `any` is **strictly forbidden** in all TypeScript and Svelte files.
 
 ```typescript
@@ -73,6 +79,7 @@ function process(input: ConfigItem) { ... }
 Use `unknown` when the type is truly unknown, then narrow with type guards.
 
 ### No unsafe type assertions
+
 Double-casting (`as unknown as T`) is a code smell. Use it only when bridging third-party library types (e.g., `@xyflow/svelte`) and document why.
 
 ```typescript
@@ -84,22 +91,24 @@ nodes={state.nodes as unknown as Node[]}  // @xyflow/svelte Node extends BaseNod
 ```
 
 ### Strict TypeScript
+
 The project runs with `strict: true`. All compiler errors must be resolved — never use `// @ts-ignore` or `// @ts-expect-error` to silence errors.
 
 ---
 
 ## 3. File & Module Organization
 
-| Layer | Location | Allowed Imports |
-|---|---|---|
-| Types | `src/core/types/` | None |
-| API client | `src/core/api/` | Types only |
-| Feature API | `src/features/*/api/` | Core API, Types |
-| Feature state | `src/features/*/state/` | Feature API, Types |
-| Components | `src/features/*/components/` | Types only (no API, no state) |
-| Route pages | `src/routes/` | Feature state, Components, `$app/*` |
+| Layer         | Location                     | Allowed Imports                     |
+| ------------- | ---------------------------- | ----------------------------------- |
+| Types         | `src/core/types/`            | None                                |
+| API client    | `src/core/api/`              | Types only                          |
+| Feature API   | `src/features/*/api/`        | Core API, Types                     |
+| Feature state | `src/features/*/state/`      | Feature API, Types                  |
+| Components    | `src/features/*/components/` | Types only (no API, no state)       |
+| Route pages   | `src/routes/`                | Feature state, Components, `$app/*` |
 
 ### Shared vs Feature types
+
 - Types used across **two or more features** → `src/core/types/common.ts`
 - Types used within **one feature only** → inside the feature directory
 - Never put feature-specific types in `src/core/types/`
@@ -113,8 +122,8 @@ The project runs with `strict: true`. All compiler errors must be resolved — n
 - State reactive variables that are **never reassigned** must use `const`:
 
 ```typescript
-const pageSize = 10;           // ✅ plain const — not reactive, never changes
-let loading = $state(false);   // ✅ let — will be reassigned
+const pageSize = 10; // ✅ plain const — not reactive, never changes
+let loading = $state(false); // ✅ let — will be reassigned
 const isReadOnly = $state(true); // ✅ const $state — reactive but never reassigned
 ```
 
@@ -131,7 +140,7 @@ const isReadOnly = $state(true); // ✅ const $state — reactive but never reas
 ## 6. Commit Standards
 
 - One logical change per commit.
-- Commit messages must describe *why*, not just *what*:
+- Commit messages must describe _why_, not just _what_:
   ```
   ✅  feat: extract pipelines list logic into state module (SOLID-S)
   ❌  feat: update pipelines page

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { BaseNode } from "$core/types/common";
+	import type { BaseNode } from '$core/types/common';
 
 	let {
 		open,
@@ -40,7 +40,7 @@
 	}
 
 	function handleKeydown(e: KeyboardEvent) {
-		if (e.key === "Escape") {
+		if (e.key === 'Escape') {
 			onClose();
 		}
 	}

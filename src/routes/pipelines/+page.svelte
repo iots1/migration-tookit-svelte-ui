@@ -3,11 +3,11 @@
 </svelte:head>
 
 <script lang="ts">
-	import { base } from "$app/paths";
-	import { goto } from "$app/navigation";
-	import "$features/pipeline-editor/pipeline-editor.css";
-	import { createPipelinesListState } from "$features/pipeline-editor/state/pipelines-list-state.svelte";
-	import { onMount } from "svelte";
+	import { base } from '$app/paths';
+	import { goto } from '$app/navigation';
+	import '$features/pipeline-editor/pipeline-editor.css';
+	import { createPipelinesListState } from '$features/pipeline-editor/state/pipelines-list-state.svelte';
+	import { onMount } from 'svelte';
 
 	const state = createPipelinesListState();
 
@@ -24,7 +24,7 @@
 	}
 
 	async function handleDelete(id: string) {
-		if (!confirm("Are you sure you want to delete this pipeline?")) return;
+		if (!confirm('Are you sure you want to delete this pipeline?')) return;
 		await state.deleteById(id);
 	}
 </script>
@@ -55,7 +55,7 @@
 				placeholder="Search pipelines..."
 				value={state.searchInput}
 				oninput={(e) => state.setSearchInput((e.target as HTMLInputElement).value)}
-				onkeydown={(e) => e.key === "Enter" && state.search()}
+				onkeydown={(e) => e.key === 'Enter' && state.search()}
 			/>
 			{#if state.searchInput}
 				<button class="search-clear" onclick={state.clearSearch} aria-label="Clear search">
@@ -118,7 +118,7 @@
 							<span class="pipeline-name-cell">{pipeline.name}</span>
 						</td>
 						<td class="td-desc">
-							<span class="pipeline-desc-cell">{pipeline.description || "-"}</span>
+							<span class="pipeline-desc-cell">{pipeline.description || '-'}</span>
 						</td>
 						<td class="td-meta">{pipeline.nodes_count}</td>
 						<td class="td-meta">{pipeline.edges_count}</td>
@@ -168,7 +168,7 @@
 		</button>
 
 		<span class="pagination-info">
-			{state.totalRecords} record{state.totalRecords !== 1 ? "s" : ""}
+			{state.totalRecords} record{state.totalRecords !== 1 ? 's' : ''}
 		</span>
 	</div>
 	{/if}

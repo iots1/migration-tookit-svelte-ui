@@ -24,7 +24,7 @@ export interface ApiMeta {
 
 export interface BaseNode {
   id: string;
-  type: "source" | "transform" | "target" | "config";
+  type: 'source' | 'transform' | 'target' | 'config';
   position: { x: number; y: number };
   data: Record<string, unknown>;
 }

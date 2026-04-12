@@ -1,10 +1,10 @@
-import type { BaseEdge, BaseNode, HistoryEntry } from "$core/types/common";
-import type { ConfigItem, PipelineRunResponse } from "$core/types/pipeline";
+import type { BaseEdge, BaseNode, HistoryEntry } from '$core/types/common';
+import type { ConfigItem, PipelineRunResponse } from '$core/types/pipeline';
 import {
   runPipeline,
   savePipeline,
   toPipelineSavePayload,
-} from "$features/pipeline-editor/api";
+} from '$features/pipeline-editor/api';
 
 interface EditorState {
   readonly nodes: BaseNode[];
@@ -52,8 +52,8 @@ export function createEditorState(): EditorState {
   let edges = $state.raw<BaseEdge[]>([]);
   let selectedNodeId = $state<string | null>(null);
   let configs = $state.raw<ConfigItem[]>([]);
-  let pipelineName = $state("");
-  let pipelineDescription = $state("");
+  let pipelineName = $state('');
+  let pipelineDescription = $state('');
   let pipelineId = $state<string | null>(null);
 
   let history = $state.raw<HistoryEntry[]>([]);
@@ -102,7 +102,7 @@ export function createEditorState(): EditorState {
     const nodeId = `config-${config.id}-${Date.now()}`;
     const newNode: BaseNode = {
       id: nodeId,
-      type: "config",
+      type: 'config',
       position: {
         x: 100 + Math.random() * 300,
         y: 100 + Math.random() * 300,
@@ -134,8 +134,8 @@ export function createEditorState(): EditorState {
   function clearPipeline() {
     nodes = [];
     edges = [];
-    pipelineName = "";
-    pipelineDescription = "";
+    pipelineName = '';
+    pipelineDescription = '';
     pipelineId = null;
     history = [];
     historyIndex = -1;
@@ -159,7 +159,7 @@ export function createEditorState(): EditorState {
     description: string,
   ): Promise<string | null> {
     if (nodes.length === 0) {
-      error = "Add at least one config node before saving";
+      error = 'Add at least one config node before saving';
       return null;
     }
     try {
@@ -172,7 +172,7 @@ export function createEditorState(): EditorState {
       pipelineId = result.id;
       return result.id;
     } catch (err) {
-      error = err instanceof Error ? err.message : "Failed to save pipeline";
+      error = err instanceof Error ? err.message : 'Failed to save pipeline';
       return null;
     } finally {
       saving = false;
@@ -181,10 +181,10 @@ export function createEditorState(): EditorState {
 
   async function saveAndRun(): Promise<PipelineRunResponse | null> {
     const name = pipelineName || `Pipeline ${Date.now()}`;
-    const description = pipelineDescription || "";
+    const description = pipelineDescription || '';
 
     if (nodes.length === 0) {
-      error = "Add at least one config node before saving";
+      error = 'Add at least one config node before saving';
       return null;
     }
     try {
@@ -199,7 +199,7 @@ export function createEditorState(): EditorState {
       return runResult;
     } catch (err) {
       error =
-        err instanceof Error ? err.message : "Failed to save or run pipeline";
+        err instanceof Error ? err.message : 'Failed to save or run pipeline';
       return null;
     } finally {
       saving = false;
