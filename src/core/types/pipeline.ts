@@ -87,8 +87,56 @@ export interface FlowDefinition {
 
 export interface PipelineSavePayload {
   name: string;
-  nodes: BaseNode[];
-  edges: BaseEdge[];
+  description: string;
+  nodes: PipelineNode[];
+  edges: PipelineEdge[];
+}
+
+export interface PipelineNode {
+  uuid_config: string;
+  description?: string;
+  position_x: number;
+  position_y: number;
+  order_sort: number;
+}
+
+export interface PipelineEdge {
+  source_config_uuid: string;
+  target_config_uuid: string;
+}
+
+export interface PipelineEntity {
+  id: string;
+  name: string;
+  description: string;
+  nodes: PipelineNode[];
+  edges: PipelineEdge[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PipelineListItem {
+  id: string;
+  name: string;
+  description: string;
+  nodes_count: number;
+  edges_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PipelineListResponse {
+  data: PipelineListItem[];
+  meta: {
+    pagination: {
+      page: number;
+      page_size: number;
+      total: number;
+      total_records: number;
+      total_pages: number;
+    };
+  };
+  status: { code: number; message: string };
 }
 
 export interface PipelineRunResponse {

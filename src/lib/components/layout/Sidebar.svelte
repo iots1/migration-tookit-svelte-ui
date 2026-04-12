@@ -9,6 +9,7 @@
 
 	const navItems: NavItem[] = [
 		{ href: '/', label: 'Home', icon: 'home' },
+		{ href: '/pipelines', label: 'Pipelines', icon: 'pipelines' },
 		{ href: '/pipeline-editor', label: 'Pipeline Editor', icon: 'pipeline' },
 		{ href: '/db-explorer', label: 'DB Explorer', icon: 'database' },
 		{ href: '/migration-runner', label: 'Migration Runner', icon: 'runner' },
@@ -110,6 +111,13 @@
 								stroke-linecap="round"
 								stroke-linejoin="round"
 							/>
+						</svg>
+					{:else if item.icon === 'pipelines'}
+						<svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+							<path d="M3 4h14v12H3z" stroke="currentColor" stroke-width="1.5" rx="1" />
+							<path d="M3 8h14" stroke="currentColor" stroke-width="1.5" />
+							<path d="M7 12h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+							<path d="M7 15h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" opacity="0.5" />
 						</svg>
 					{:else if item.icon === 'pipeline'}
 						<svg width="20" height="20" viewBox="0 0 20 20" fill="none">

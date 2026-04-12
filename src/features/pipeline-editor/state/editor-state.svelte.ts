@@ -11,6 +11,7 @@ interface EditorState {
   readonly selectedNodeId: string | null;
   readonly configs: ConfigItem[];
   readonly pipelineName: string;
+  readonly pipelineDescription: string;
   readonly pipelineId: string | null;
   readonly loading: boolean;
   readonly saving: boolean;
@@ -18,6 +19,8 @@ interface EditorState {
   readonly error: string | null;
   readonly canUndo: boolean;
   readonly canRedo: boolean;
+  readonly isDrawerOpen: boolean;
+  readonly isEditing: boolean;
   pushHistory: () => void;
   undo: () => boolean;
   redo: () => boolean;
@@ -27,11 +30,21 @@ interface EditorState {
   selectNode: (id: string | null) => void;
   setConfigs: (value: ConfigItem[]) => void;
   setPipelineName: (value: string) => void;
+  setPipelineDescription: (value: string) => void;
   setPipelineId: (value: string | null) => void;
   setLoading: (value: boolean) => void;
   setSaving: (value: boolean) => void;
   setRunning: (value: boolean) => void;
   setError: (value: string | null) => void;
+  openDrawer: () => void;
+  closeDrawer: () => void;
+  clearPipeline: () => void;
+  setPipelineFromLoad: (
+    name: string,
+    description: string,
+    nodes: BaseNode[],
+    edges: BaseEdge[],
+  ) => void;
 }
 
 export function createEditorState(): EditorState {
@@ -40,6 +53,7 @@ export function createEditorState(): EditorState {
   let selectedNodeId = $state<string | null>(null);
   let configs = $state.raw<ConfigItem[]>([]);
   let pipelineName = $state("");
+  let pipelineDescription = $state("");
   let pipelineId = $state<string | null>(null);
 
   let history = $state.raw<HistoryEntry[]>([]);
@@ -48,6 +62,8 @@ export function createEditorState(): EditorState {
   let saving = $state(false);
   let running = $state(false);
   let error = $state<string | null>(null);
+  let isDrawerOpen = $state(false);
+  let isEditing = $state(false);
 
   const MAX_HISTORY = 50;
 
@@ -108,6 +124,37 @@ export function createEditorState(): EditorState {
     pushHistory();
   }
 
+  function openDrawer() {
+    isDrawerOpen = true;
+  }
+
+  function closeDrawer() {
+    isDrawerOpen = false;
+  }
+
+  function clearPipeline() {
+    nodes = [];
+    edges = [];
+    pipelineName = "";
+    pipelineDescription = "";
+    pipelineId = null;
+    history = [];
+    historyIndex = -1;
+  }
+
+  function setPipelineFromLoad(
+    name: string,
+    description: string,
+    newNodes: BaseNode[],
+    newEdges: BaseEdge[],
+  ) {
+    nodes = newNodes;
+    edges = newEdges;
+    pipelineName = name;
+    pipelineDescription = description;
+    pushHistory();
+  }
+
   return {
     get nodes() {
       return nodes;
@@ -123,6 +170,9 @@ export function createEditorState(): EditorState {
     },
     get pipelineName() {
       return pipelineName;
+    },
+    get pipelineDescription() {
+      return pipelineDescription;
     },
     get pipelineId() {
       return pipelineId;
@@ -145,6 +195,12 @@ export function createEditorState(): EditorState {
     get canRedo() {
       return historyIndex < history.length - 1;
     },
+    get isDrawerOpen() {
+      return isDrawerOpen;
+    },
+    get isEditing() {
+      return isEditing;
+    },
     pushHistory,
     undo,
     redo,
@@ -164,6 +220,9 @@ export function createEditorState(): EditorState {
     setPipelineName(value: string) {
       pipelineName = value;
     },
+    setPipelineDescription(value: string) {
+      pipelineDescription = value;
+    },
     setPipelineId(value: string | null) {
       pipelineId = value;
     },
@@ -179,5 +238,9 @@ export function createEditorState(): EditorState {
     setError(value: string | null) {
       error = value;
     },
+    openDrawer,
+    closeDrawer,
+    clearPipeline,
+    setPipelineFromLoad,
   };
 }

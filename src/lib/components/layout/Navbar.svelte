@@ -27,10 +27,4 @@
 		</button>
 		<h1 class="navbar-title">{getBreadcrumb()}</h1>
 	</div>
-	<div class="navbar-right">
-		<div class="navbar-status">
-			<span class="status-dot"></span>
-			<span class="status-text">Connected</span>
-		</div>
-	</div>
 </header>

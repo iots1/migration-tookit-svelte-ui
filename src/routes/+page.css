@@ -64,6 +64,11 @@
   margin-bottom: 18px;
 }
 
+.card-icon.icon-teal {
+  background: #f0fdfa;
+  color: #0d9488;
+}
+
 .card-icon.icon-purple {
   background: #f5f3ff;
   color: var(--accent);

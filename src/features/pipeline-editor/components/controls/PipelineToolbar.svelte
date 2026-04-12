@@ -1,104 +1,46 @@
 <script lang="ts">
-	import type { ConfigItem } from '$core/types/pipeline';
+	import ConfigDropdown from "./ConfigDropdown.svelte";
+	import type { ConfigItem } from "$core/types/pipeline";
 
 	let {
+		pipelineName = "Untitled",
 		canUndo = false,
 		canRedo = false,
 		saving = false,
 		running = false,
 		configs = [],
+		onOpenDrawer,
 		onAddConfig,
+		onSave,
 		onSaveRun,
 		onUndo,
 		onRedo
 	}: {
+		pipelineName?: string;
 		canUndo?: boolean;
 		canRedo?: boolean;
 		saving?: boolean;
 		running?: boolean;
 		configs?: ConfigItem[];
+		onOpenDrawer: () => void;
 		onAddConfig: (config: ConfigItem) => void;
+		onSave: () => void;
 		onSaveRun: () => void;
 		onUndo: () => void;
 		onRedo: () => void;
 	} = $props();
-
-	let showConfigMenu = $state(false);
-	let searchQuery = $state('');
-
-	let filteredConfigs = $derived(
-		configs.filter(
-			(c) =>
-				c.attributes.config_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-				c.attributes.table_name.toLowerCase().includes(searchQuery.toLowerCase())
-		)
-	);
-
-	function handleSelect(config: ConfigItem) {
-		onAddConfig(config);
-		showConfigMenu = false;
-		searchQuery = '';
-	}
-
-	function handleClickOutside(e: MouseEvent) {
-		const target = e.target as HTMLElement;
-		if (!target.closest('.config-dropdown-wrapper')) {
-			showConfigMenu = false;
-		}
-	}
 </script>
 
-<!-- svelte-ignore a11y_no_static_element_interactions -->
-<div class="pipeline-toolbar" onclick={handleClickOutside} onkeydown={() => {}}>
+<div class="pipeline-toolbar">
 	<div class="toolbar-left">
-		<div class="config-dropdown-wrapper">
-			<button class="toolbar-btn toolbar-btn-primary" onclick={() => (showConfigMenu = !showConfigMenu)}>
-				<svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-					<path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-				</svg>
-				<span>Add Config</span>
-				<svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-					<path d="M3 5l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-				</svg>
-			</button>
-
-			{#if showConfigMenu}
-				<div class="config-dropdown">
-					<div class="config-dropdown-search">
-						<svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-							<circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.5" />
-							<path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-						</svg>
-						<input
-							type="text"
-							placeholder="Search configs..."
-							bind:value={searchQuery}
-							class="config-search-input"
-						/>
-					</div>
-					<div class="config-dropdown-list">
-						{#if filteredConfigs.length === 0}
-							<div class="config-dropdown-empty">No configs found</div>
-						{:else}
-							{#each filteredConfigs as config (config.id)}
-								<button class="config-dropdown-item" onclick={() => handleSelect(config)}>
-									<div class="config-item-icon">
-										<svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-											<rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.5" />
-											<path d="M5 6h6M5 8h6M5 10h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
-										</svg>
-									</div>
-									<div class="config-item-info">
-										<span class="config-item-name">{config.attributes.config_name}</span>
-										<span class="config-item-type">{config.attributes.table_name}</span>
-									</div>
-								</button>
-							{/each}
-						{/if}
-					</div>
-				</div>
-			{/if}
-		</div>
+		<button class="toolbar-btn toolbar-btn-untitled" onclick={onOpenDrawer}>
+			<svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+				<rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.5" />
+				<path d="M5 6h6M5 8h6M5 10h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+			</svg>
+			<span>{pipelineName}</span>
+		</button>
+		<ConfigDropdown {configs} onSelect={onAddConfig} />
 	</div>
 
 	<div class="toolbar-center">
@@ -119,13 +61,21 @@
 	</div>
 
 	<div class="toolbar-right">
+		<button class="toolbar-btn" onclick={onSave} disabled={saving || running}>
+			<svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+				<path d="M3 3h10v10H3z" stroke="currentColor" stroke-width="1.5" />
+				<path d="M6 8l1.5 1.5L10 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+			</svg>
+			<span>Save</span>
+		</button>
+
 		<button class="toolbar-btn toolbar-btn-accent" onclick={onSaveRun} disabled={saving || running}>
 			{#if saving || running}
 				<svg width="16" height="16" viewBox="0 0 16 16" fill="none" class="spin">
 					<path d="M14 8A6 6 0 112 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
 					<path d="M14 8A6 6 0 002 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.3" />
 				</svg>
-				<span>{saving ? 'Saving...' : 'Running...'}</span>
+				<span>{saving ? "Saving..." : "Running..."}</span>
 			{:else}
 				<svg width="16" height="16" viewBox="0 0 16 16" fill="none">
 					<path d="M4 2l8 6-8 6V2z" fill="currentColor" />
