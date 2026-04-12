@@ -90,6 +90,7 @@ export interface PipelineSavePayload {
 }
 
 export interface PipelineNode {
+  id?: string;
   config_id: string;
   description?: string;
   position_x: number;
@@ -98,6 +99,7 @@ export interface PipelineNode {
 }
 
 export interface PipelineEdge {
+  id?: string;
   source_config_uuid: string;
   target_config_uuid: string;
 }

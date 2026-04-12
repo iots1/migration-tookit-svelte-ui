@@ -47,6 +47,11 @@
 	function handleEdgesChange(edges: Edge[]) {
 		state.setEdges(edges as unknown as typeof state.edges);
 		state.pushHistory();
+		state.scheduleAutoSave();
+	}
+
+	function handleNodeDragStop(node: Node) {
+		state.updateNodePosition(node.id, node.position);
 	}
 
 	async function handleSave(name: string, description: string) {
@@ -129,6 +134,7 @@
 					nodes={state.nodes as unknown as Node[]}
 					edges={state.edges as unknown as Edge[]}
 					onEdgesChange={handleEdgesChange}
+					onNodeDragStop={handleNodeDragStop}
 				/>
 			</SvelteFlowProvider>
 		{/if}

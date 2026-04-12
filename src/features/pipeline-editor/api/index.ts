@@ -72,6 +72,7 @@ export async function loadPipeline(id: string): Promise<PipelineEntity> {
     name: response.data.attributes.name,
     description: response.data.attributes.description,
     nodes: response.data.attributes.nodes.map((node) => ({
+      id: node.id,
       config_id: node.config_id,
       description: undefined,
       position_x: node.position_x,
@@ -79,12 +80,24 @@ export async function loadPipeline(id: string): Promise<PipelineEntity> {
       order_sort: node.order_sort,
     })),
     edges: response.data.attributes.edges.map((edge) => ({
+      id: edge.id,
       source_config_uuid: edge.source_config_uuid,
       target_config_uuid: edge.target_config_uuid,
     })),
     created_at: response.data.attributes.created_at,
     updated_at: response.data.attributes.updated_at,
   };
+}
+
+export async function updatePipeline(
+  id: string,
+  pipeline: PipelineSavePayload,
+): Promise<{ id: string; message: string }> {
+  const response: { id: string; message: string } = await api.put(
+    `${API_V1.PIPELINES}/${id}`,
+    pipeline,
+  );
+  return response;
 }
 
 export async function deletePipeline(id: string): Promise<void> {
@@ -108,6 +121,7 @@ export function toPipelineSavePayload(
     name,
     description,
     nodes: nodes.map((node, index) => ({
+      id: (node.data.pipelineNodeId as string | undefined) ?? undefined,
       config_id: String(node.data.configId ?? node.id),
       description:
         node.data.nodeDescription !== undefined
@@ -121,6 +135,9 @@ export function toPipelineSavePayload(
       const sourceNode = nodeMap.get(edge.source);
       const targetNode = nodeMap.get(edge.target);
       return {
+        id:
+          ((edge.data as Record<string, unknown> | undefined)
+            ?.pipelineEdgeId as string | undefined) ?? undefined,
         source_config_uuid:
           String(sourceNode?.data.configId ?? '') ||
           sourceNode?.id ||
@@ -164,6 +181,7 @@ export async function reconstructPipelineFromEntity(
       data: {
         label: config?.attributes.config_name ?? 'Unknown Config',
         configId: node.config_id,
+        pipelineNodeId: node.id,
         configType: config?.attributes.config_type ?? 'std',
         tableName: config?.attributes.table_name ?? '',
         sourceDb: config?.attributes.json_data.source.database ?? '',
@@ -186,11 +204,15 @@ export async function reconstructPipelineFromEntity(
         return null;
       }
 
-      return {
+      const baseEdge: BaseEdge = {
         id: `edge-${sourceNodeId}-${targetNodeId}`,
         source: sourceNodeId,
         target: targetNodeId,
+        data: {
+          pipelineEdgeId: edge.id,
+        },
       };
+      return baseEdge;
     })
     .filter((e): e is BaseEdge => e !== null);
 

@@ -8,11 +8,13 @@
 	let {
 		nodes,
 		edges,
-		onEdgesChange
+		onEdgesChange,
+		onNodeDragStop
 	}: {
 		nodes: Node[];
 		edges: Edge[];
 		onEdgesChange: (edges: Edge[]) => void;
+		onNodeDragStop: (node: Node) => void;
 	} = $props();
 
 	const nodeTypes = {
@@ -33,11 +35,12 @@
 </script>
 
 <div class="pipeline-canvas-wrapper">
-	<SvelteFlow
+		<SvelteFlow
 		{nodes}
 		{edges}
 		{nodeTypes}
 		onconnect={handleConnect}
+		onnodedragstop={(e) => { if (e.targetNode) onNodeDragStop(e.targetNode); }}
 		fitView
 		snapGrid={[15, 15]}
 		connectionLineStyle="stroke: var(--accent); stroke-width: 2;"

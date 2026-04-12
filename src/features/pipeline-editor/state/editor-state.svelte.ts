@@ -1,9 +1,12 @@
 import type { BaseEdge, BaseNode, HistoryEntry } from '$core/types/common';
 import type { ConfigItem, PipelineRunResponse } from '$core/types/pipeline';
 import {
+  loadPipeline,
+  reconstructPipelineFromEntity,
   runPipeline,
   savePipeline,
   toPipelineSavePayload,
+  updatePipeline,
 } from '$features/pipeline-editor/api';
 
 interface EditorState {
@@ -25,6 +28,10 @@ interface EditorState {
   undo: () => boolean;
   redo: () => boolean;
   addConfigNode: (config: ConfigItem) => void;
+  updateNodePosition: (
+    nodeId: string,
+    position: { x: number; y: number },
+  ) => void;
   setNodes: (value: BaseNode[]) => void;
   setEdges: (value: BaseEdge[]) => void;
   selectNode: (id: string | null) => void;
@@ -45,6 +52,8 @@ interface EditorState {
   save: (name: string, description: string) => Promise<string | null>;
   /** Saves then runs pipeline, returns run response or null on failure. */
   saveAndRun: () => Promise<PipelineRunResponse | null>;
+  /** Debounced auto-save for existing pipelines. */
+  scheduleAutoSave: () => void;
 }
 
 export function createEditorState(): EditorState {
@@ -121,6 +130,16 @@ export function createEditorState(): EditorState {
     };
     nodes = [...nodes, newNode];
     pushHistory();
+    scheduleAutoSave();
+  }
+
+  function updateNodePosition(
+    nodeId: string,
+    position: { x: number; y: number },
+  ) {
+    nodes = nodes.map((n) => (n.id === nodeId ? { ...n, position } : n));
+    pushHistory();
+    scheduleAutoSave();
   }
 
   function openDrawer() {
@@ -168,7 +187,9 @@ export function createEditorState(): EditorState {
       pipelineName = name;
       pipelineDescription = description;
       const payload = toPipelineSavePayload(name, description, nodes, edges);
-      const result = await savePipeline(payload);
+      const result = pipelineId
+        ? await updatePipeline(pipelineId, payload)
+        : await savePipeline(payload);
       pipelineId = result.id;
       return result.id;
     } catch (err) {
@@ -191,7 +212,9 @@ export function createEditorState(): EditorState {
       saving = true;
       error = null;
       const payload = toPipelineSavePayload(name, description, nodes, edges);
-      const result = await savePipeline(payload);
+      const result = pipelineId
+        ? await updatePipeline(pipelineId, payload)
+        : await savePipeline(payload);
       pipelineId = result.id;
 
       running = true;
@@ -204,6 +227,96 @@ export function createEditorState(): EditorState {
     } finally {
       saving = false;
       running = false;
+    }
+  }
+
+  let autoSaveTimer: ReturnType<typeof setTimeout> | null = null;
+  const AUTO_SAVE_DELAY = 1500;
+
+  function scheduleAutoSave() {
+    if (!pipelineId || nodes.length === 0) return;
+    if (autoSaveTimer) clearTimeout(autoSaveTimer);
+    autoSaveTimer = setTimeout(() => {
+      void autoSave();
+    }, AUTO_SAVE_DELAY);
+  }
+
+  async function autoSave() {
+    if (!pipelineId || nodes.length === 0) return;
+    try {
+      error = null;
+      const payload = toPipelineSavePayload(
+        pipelineName,
+        pipelineDescription,
+        nodes,
+        edges,
+      );
+      await updatePipeline(pipelineId, payload);
+      const hasNewItems =
+        nodes.some((n) => !n.data.pipelineNodeId) ||
+        edges.some((e) => !e.data?.pipelineEdgeId);
+      if (hasNewItems) {
+        await syncBackendIds();
+      }
+    } catch (err) {
+      error = err instanceof Error ? err.message : 'Auto-save failed';
+    }
+  }
+
+  async function syncBackendIds() {
+    if (!pipelineId) return;
+    try {
+      const entity = await loadPipeline(pipelineId);
+      const result = await reconstructPipelineFromEntity(entity, configs);
+      const loadedNodeIds: Record<string, string> = {};
+      for (const ln of result.nodes) {
+        const configId = ln.data.configId as string | undefined;
+        const backendId = ln.data.pipelineNodeId as string | undefined;
+        if (configId && backendId) {
+          loadedNodeIds[configId] = backendId;
+        }
+      }
+      const loadedEdgeIds: Record<string, string> = {};
+      for (const le of result.edges) {
+        const key = `${le.source}-${le.target}`;
+        const backendId = le.data?.pipelineEdgeId as string | undefined;
+        if (backendId) {
+          loadedEdgeIds[key] = backendId;
+        }
+      }
+      let nodesChanged = false;
+      const updatedNodes = nodes.map((n) => {
+        const configId = n.data.configId as string | undefined;
+        const existingId = n.data.pipelineNodeId as string | undefined;
+        if (configId && !existingId) {
+          const newId = loadedNodeIds[configId];
+          if (newId) {
+            nodesChanged = true;
+            return { ...n, data: { ...n.data, pipelineNodeId: newId } };
+          }
+        }
+        return n;
+      });
+      if (nodesChanged) nodes = updatedNodes;
+      let edgesChanged = false;
+      const updatedEdges = edges.map((e) => {
+        const key = `${e.source}-${e.target}`;
+        const existingId = e.data?.pipelineEdgeId as string | undefined;
+        if (!existingId) {
+          const newId = loadedEdgeIds[key];
+          if (newId) {
+            edgesChanged = true;
+            return {
+              ...e,
+              data: { ...(e.data ?? {}), pipelineEdgeId: newId },
+            };
+          }
+        }
+        return e;
+      });
+      if (edgesChanged) edges = updatedEdges;
+    } catch {
+      // silent — don't disrupt user flow
     }
   }
 
@@ -254,6 +367,7 @@ export function createEditorState(): EditorState {
     undo,
     redo,
     addConfigNode,
+    updateNodePosition,
     setNodes(value: BaseNode[]) {
       nodes = value;
     },
@@ -281,5 +395,6 @@ export function createEditorState(): EditorState {
     setPipelineFromLoad,
     save,
     saveAndRun,
+    scheduleAutoSave,
   };
 }

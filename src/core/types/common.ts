@@ -35,6 +35,7 @@ export interface BaseEdge {
   target: string;
   sourceHandle?: string;
   targetHandle?: string;
+  data?: Record<string, unknown>;
 }
 
 export interface FlowDefinition {
