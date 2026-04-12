@@ -4,10 +4,10 @@
 
 <script lang="ts">
 	import { goto } from "$app/navigation";
-	import { onMount } from "svelte";
-	import { listPipelines, deletePipeline } from "$features/pipeline-editor/api";
 	import type { PipelineListItem } from "$core/types/pipeline";
+	import { deletePipeline, listPipelines } from "$features/pipeline-editor/api";
 	import "$features/pipeline-editor/pipeline-editor.css";
+	import { onMount } from "svelte";
 
 	let pipelines = $state<PipelineListItem[]>([]);
 	let loading = $state(false);
@@ -55,12 +55,12 @@
 		fetchPipelines();
 	}
 
-	function handleNewPipeline() {
-		goto("/pipeline-editor");
+	async function handleNewPipeline() {
+		await goto("/pipeline-editor");
 	}
 
-	function handleEdit(id: string) {
-		goto(`/pipeline-editor/${id}`);
+	async function handleEdit(id: string) {
+		await goto(`/pipeline-editor/${id}`);
 	}
 
 	async function handleDelete(id: string) {
@@ -139,7 +139,7 @@
 			<div class="pipeline-loading-spinner"></div>
 			<span>Loading...</span>
 		</div>
-	{:else if pipelines.length === 0}
+		{:else if pipelines.length === 0}
 		<div class="pipeline-list-empty">
 			<svg width="48" height="48" viewBox="0 0 48 48" fill="none" class="empty-icon">
 				<rect x="6" y="6" width="16" height="16" rx="4" stroke="currentColor" stroke-width="2" />
@@ -201,7 +201,7 @@
 			</svg>
 		</button>
 
-		{#each Array.from({ length: totalPages }, (_, i) => i + 1) as page}
+		{#each Array.from({ length: totalPages }, (_, i) => i + 1) as page (page)}
 			<button
 				class="pagination-btn pagination-btn-page"
 				class:pagination-btn-active={page === currentPage}

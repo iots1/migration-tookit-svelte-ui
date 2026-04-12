@@ -1,6 +1,6 @@
 <script lang="ts">
-	import ConfigDropdown from "./ConfigDropdown.svelte";
 	import type { ConfigItem } from "$core/types/pipeline";
+	import ConfigDropdown from "./ConfigDropdown.svelte";
 
 	let {
 		pipelineName = "Untitled",

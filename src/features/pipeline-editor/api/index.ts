@@ -1,16 +1,16 @@
 import { api } from "$core/api/client";
 import { API_V1 } from "$core/api/endpoints";
 import type {
+  BaseEdge,
+  BaseNode,
   ConfigItem,
   ConfigsResponse,
-  BaseNode,
-  BaseEdge,
-  PipelineSavePayload,
-  PipelineNode,
-  PipelineEdge,
+  PipelineApiEntity,
+  PipelineApiListResponse,
   PipelineEntity,
   PipelineListResponse,
   PipelineRunResponse,
+  PipelineSavePayload,
 } from "$core/types/pipeline";
 
 export async function loadConfigs(): Promise<ConfigItem[]> {
@@ -35,9 +35,22 @@ export async function listPipelines(params?: {
     query.append("filter", `description||$cont||${params.search}`);
   }
   const qs = query.toString();
-  return api.get<PipelineListResponse>(
+  const response = await api.get<PipelineApiListResponse>(
     `${API_V1.PIPELINES}${qs ? `?${qs}` : ""}`,
   );
+  return {
+    data: response.data.map((item) => ({
+      id: item.id,
+      name: item.attributes.name,
+      description: item.attributes.description,
+      nodes_count: item.attributes.nodes?.length || 0,
+      edges_count: item.attributes.edges?.length || 0,
+      created_at: item.attributes.created_at,
+      updated_at: item.attributes.updated_at,
+    })),
+    meta: response.meta,
+    status: response.status,
+  };
 }
 
 export async function savePipeline(pipeline: PipelineSavePayload) {
@@ -45,7 +58,27 @@ export async function savePipeline(pipeline: PipelineSavePayload) {
 }
 
 export async function loadPipeline(id: string): Promise<PipelineEntity> {
-  return api.get<PipelineEntity>(`${API_V1.PIPELINES}/${id}`);
+  const response = await api.get<PipelineApiEntity>(
+    `${API_V1.PIPELINES}/${id}`,
+  );
+  return {
+    id: response.data.id,
+    name: response.data.attributes.name,
+    description: response.data.attributes.description,
+    nodes: response.data.attributes.nodes.map((node) => ({
+      config_id: node.config_id,
+      description: undefined,
+      position_x: node.position_x,
+      position_y: node.position_y,
+      order_sort: node.order_sort,
+    })),
+    edges: response.data.attributes.edges.map((edge) => ({
+      source_config_uuid: edge.source_config_uuid,
+      target_config_uuid: edge.target_config_uuid,
+    })),
+    created_at: response.data.attributes.created_at,
+    updated_at: response.data.attributes.updated_at,
+  };
 }
 
 export async function deletePipeline(id: string) {
@@ -68,7 +101,7 @@ export function toPipelineSavePayload(
     name,
     description,
     nodes: nodes.map((node, index) => ({
-      uuid_config: (node.data.configId as string) || node.id,
+      config_id: (node.data.configId as string) || node.id,
       description: (node.data.nodeDescription as string) || undefined,
       position_x: Math.round(node.position.x),
       position_y: Math.round(node.position.y),
@@ -103,13 +136,13 @@ export async function reconstructPipelineFromEntity(
   configs: ConfigItem[],
 ): Promise<PipelineLoadResult> {
   const configMap = new Map(configs.map((c) => [c.id, c]));
-  const nodeByUuid = new Map<string, string>(); // uuid_config -> node_id
+  const nodeByUuid = new Map<string, string>(); // config_id -> node_id
 
   const nodes: BaseNode[] = entity.nodes.map((node) => {
-    const config = configMap.get(node.uuid_config);
-    const nodeId = `config-${node.uuid_config}`;
+    const config = configMap.get(node.config_id);
+    const nodeId = `config-${node.config_id}`;
 
-    nodeByUuid.set(node.uuid_config, nodeId);
+    nodeByUuid.set(node.config_id, nodeId);
 
     return {
       id: nodeId,
@@ -120,7 +153,7 @@ export async function reconstructPipelineFromEntity(
       },
       data: {
         label: config?.attributes.config_name || "Unknown Config",
-        configId: node.uuid_config,
+        configId: node.config_id,
         configType: config?.attributes.config_type || "std",
         tableName: config?.attributes.table_name || "",
         sourceDb: config?.attributes.json_data.source.database || "",

@@ -93,7 +93,7 @@ export interface PipelineSavePayload {
 }
 
 export interface PipelineNode {
-  uuid_config: string;
+  config_id: string;
   description?: string;
   position_x: number;
   position_y: number;
@@ -115,6 +115,34 @@ export interface PipelineEntity {
   updated_at: string;
 }
 
+export interface PipelineApiEntity {
+  data: {
+    type: string;
+    id: string;
+    attributes: {
+      name: string;
+      description: string;
+      created_at: string;
+      updated_at: string;
+      nodes: Array<{
+        id: string;
+        pipeline_id: string;
+        config_id: string;
+        position_x: number;
+        position_y: number;
+        order_sort: number;
+      }>;
+      edges: Array<{
+        id: string;
+        pipeline_id: string;
+        source_config_uuid: string;
+        target_config_uuid: string;
+      }>;
+    };
+  };
+  status: { code: number; message: string };
+}
+
 export interface PipelineListItem {
   id: string;
   name: string;
@@ -125,9 +153,50 @@ export interface PipelineListItem {
   updated_at: string;
 }
 
+export interface PipelineApiResponseItem {
+  type: string;
+  id: string;
+  attributes: {
+    name: string;
+    description: string;
+    created_at: string;
+    updated_at: string;
+    nodes: Array<{
+      id: string;
+      pipeline_id: string;
+      config_id: string;
+      position_x: number;
+      position_y: number;
+      order_sort: number;
+    }>;
+    edges: Array<{
+      id: string;
+      pipeline_id: string;
+      source_config_uuid: string;
+      target_config_uuid: string;
+    }>;
+  };
+}
+
 export interface PipelineListResponse {
   data: PipelineListItem[];
   meta: {
+    pagination: {
+      page: number;
+      page_size: number;
+      total: number;
+      total_records: number;
+      total_pages: number;
+    };
+  };
+  status: { code: number; message: string };
+}
+
+export interface PipelineApiListResponse {
+  data: PipelineApiResponseItem[];
+  links: Record<string, string>;
+  meta: {
+    timestamp: string;
     pagination: {
       page: number;
       page_size: number;
