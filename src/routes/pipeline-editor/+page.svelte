@@ -1,20 +1,20 @@
-<svelte:head>
-	<title>New Pipeline - Migration Toolkit</title>
-</svelte:head>
-
 <script lang="ts">
-	import { base } from '$app/paths';
-	import { goto } from '$app/navigation';
-	import { onMount } from 'svelte';
+  import { onMount } from 'svelte';
+  import { goto } from '$app/navigation';
+  import { base } from '$app/paths';
 
-	onMount(() => {
-		goto(`${base}/pipeline-editor/new`);
-	});
+  onMount(() => {
+    goto(`${base}/pipeline-editor/new`);
+  });
 </script>
 
+<svelte:head>
+  <title>New Pipeline - Migration Toolkit</title>
+</svelte:head>
+
 <div class="pipeline-page">
-	<div class="pipeline-loading">
-		<div class="pipeline-loading-spinner"></div>
-		<span>Redirecting...</span>
-	</div>
+  <div class="pipeline-loading">
+    <div class="pipeline-loading-spinner"></div>
+    <span>Redirecting...</span>
+  </div>
 </div>

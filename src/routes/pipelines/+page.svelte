@@ -1,27 +1,28 @@
 <script lang="ts">
-  import { goto } from '$app/navigation'
-  import { base } from '$app/paths'
-  import '$features/pipeline-editor/pipeline-editor.css'
-  import { createPipelinesListState } from '$features/pipeline-editor/state/pipelines-list-state.svelte'
-  import { onMount } from 'svelte'
+  import { onMount } from 'svelte';
+  import { goto } from '$app/navigation';
+  import { base } from '$app/paths';
 
-  const state = createPipelinesListState()
+  import '$features/pipeline-editor/pipeline-editor.css';
+  import { createPipelinesListState } from '$features/pipeline-editor/state/pipelines-list-state.svelte';
+
+  const state = createPipelinesListState();
 
   onMount(() => {
-    state.fetchPipelines()
-  })
+    state.fetchPipelines();
+  });
 
   async function handleNewPipeline() {
-    await goto(`${base}/pipeline-editor`)
+    await goto(`${base}/pipeline-editor`);
   }
 
   async function handleEdit(id: string) {
-    await goto(`${base}/pipeline-editor/${id}`)
+    await goto(`${base}/pipeline-editor/${id}`);
   }
 
   async function handleDelete(id: string) {
-    if (!confirm('Are you sure you want to delete this pipeline?')) return
-    await state.deleteById(id)
+    if (!confirm('Are you sure you want to delete this pipeline?')) return;
+    await state.deleteById(id);
   }
 </script>
 

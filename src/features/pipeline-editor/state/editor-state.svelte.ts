@@ -30,7 +30,7 @@ interface EditorState {
   addConfigNode: (config: ConfigItem) => void;
   updateNodePosition: (
     nodeId: string,
-    position: { x: number; y: number },
+    position: { x: number; y: number }
   ) => void;
   setNodes: (value: BaseNode[]) => void;
   setEdges: (value: BaseEdge[]) => void;
@@ -45,7 +45,7 @@ interface EditorState {
     name: string,
     description: string,
     nodes: BaseNode[],
-    edges: BaseEdge[],
+    edges: BaseEdge[]
   ) => void;
   setPipelineId: (value: string | null) => void;
   /** Saves pipeline and returns its ID, or null on failure. */
@@ -135,7 +135,7 @@ export function createEditorState(): EditorState {
 
   function updateNodePosition(
     nodeId: string,
-    position: { x: number; y: number },
+    position: { x: number; y: number }
   ) {
     nodes = nodes.map((n) => (n.id === nodeId ? { ...n, position } : n));
     pushHistory();
@@ -164,7 +164,7 @@ export function createEditorState(): EditorState {
     name: string,
     description: string,
     newNodes: BaseNode[],
-    newEdges: BaseEdge[],
+    newEdges: BaseEdge[]
   ) {
     nodes = newNodes;
     edges = newEdges;
@@ -175,7 +175,7 @@ export function createEditorState(): EditorState {
 
   async function save(
     name: string,
-    description: string,
+    description: string
   ): Promise<string | null> {
     if (nodes.length === 0) {
       error = 'Add at least one config node before saving';
@@ -249,7 +249,7 @@ export function createEditorState(): EditorState {
         pipelineName,
         pipelineDescription,
         nodes,
-        edges,
+        edges
       );
       await updatePipeline(pipelineId, payload);
       const hasNewItems =

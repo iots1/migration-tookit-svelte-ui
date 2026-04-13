@@ -8,7 +8,7 @@ export function createRunnerState() {
 
   function startPolling(
     jobId: string,
-    fetchStatus: (id: string) => Promise<JobStatus>,
+    fetchStatus: (id: string) => Promise<JobStatus>
   ) {
     stopPolling();
     currentJobId = jobId;

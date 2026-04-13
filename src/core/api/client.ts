@@ -19,7 +19,7 @@ class ApiClient {
 
   private async request<T>(
     endpoint: string,
-    options: RequestOptions = {},
+    options: RequestOptions = {}
   ): Promise<T> {
     const { body, headers: customHeaders, ...rest } = options;
 
@@ -38,7 +38,7 @@ class ApiClient {
       const errorBody = await (response.json() as Promise<ApiErrorBody>).catch(
         () => ({
           message: response.statusText,
-        }),
+        })
       );
       throw new Error(errorBody.message ?? `API Error: ${response.status}`);
     }
@@ -53,7 +53,7 @@ class ApiClient {
   async post<T>(
     endpoint: string,
     body?: unknown,
-    options?: RequestOptions,
+    options?: RequestOptions
   ): Promise<T> {
     return this.request<T>(endpoint, { ...options, method: 'POST', body });
   }
@@ -61,7 +61,7 @@ class ApiClient {
   async put<T>(
     endpoint: string,
     body?: unknown,
-    options?: RequestOptions,
+    options?: RequestOptions
   ): Promise<T> {
     return this.request<T>(endpoint, { ...options, method: 'PUT', body });
   }

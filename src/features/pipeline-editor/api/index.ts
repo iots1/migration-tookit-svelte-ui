@@ -36,7 +36,7 @@ export async function listPipelines(params?: {
   }
   const qs = query.toString();
   const response: PipelineApiListResponse = await api.get(
-    `${API_V1.PIPELINES}${qs ? `?${qs}` : ''}`,
+    `${API_V1.PIPELINES}${qs ? `?${qs}` : ''}`
   );
   return {
     data: response.data.map((item) => ({
@@ -54,18 +54,18 @@ export async function listPipelines(params?: {
 }
 
 export async function savePipeline(
-  pipeline: PipelineSavePayload,
+  pipeline: PipelineSavePayload
 ): Promise<{ id: string; message: string }> {
   const response: { id: string; message: string } = await api.post(
     API_V1.PIPELINES,
-    pipeline,
+    pipeline
   );
   return response;
 }
 
 export async function loadPipeline(id: string): Promise<PipelineEntity> {
   const response: PipelineApiEntity = await api.get(
-    `${API_V1.PIPELINES}/${id}`,
+    `${API_V1.PIPELINES}/${id}`
   );
   return {
     id: response.data.id,
@@ -91,11 +91,11 @@ export async function loadPipeline(id: string): Promise<PipelineEntity> {
 
 export async function updatePipeline(
   id: string,
-  pipeline: PipelineSavePayload,
+  pipeline: PipelineSavePayload
 ): Promise<{ id: string; message: string }> {
   const response: { id: string; message: string } = await api.put(
     `${API_V1.PIPELINES}/${id}`,
-    pipeline,
+    pipeline
   );
   return response;
 }
@@ -113,7 +113,7 @@ export function toPipelineSavePayload(
   name: string,
   description: string,
   nodes: BaseNode[],
-  edges: BaseEdge[],
+  edges: BaseEdge[]
 ): PipelineSavePayload {
   const nodeMap = new Map<string, BaseNode>(nodes.map((n) => [n.id, n]));
 
@@ -160,7 +160,7 @@ export interface PipelineLoadResult {
 
 export async function reconstructPipelineFromEntity(
   entity: PipelineEntity,
-  configs: ConfigItem[],
+  configs: ConfigItem[]
 ): Promise<PipelineLoadResult> {
   const configMap = new Map<string, ConfigItem>(configs.map((c) => [c.id, c]));
   const nodeByUuid = new Map<string, string>();
