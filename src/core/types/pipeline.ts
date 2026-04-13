@@ -201,3 +201,41 @@ export interface PipelineRunResponse {
   status: string;
   message: string;
 }
+
+// ─── Job Types ────────────────────────────────────────────────────────────
+
+export interface CreateJobPayload {
+  pipeline_id: string;
+}
+
+export interface CreateJobResponse {
+  job_id: string;
+  run_id: string;
+  status: string;
+}
+
+export interface JobBatchEvent {
+  run_id: string;
+  job_id: string;
+  pipeline_id: string;
+  step: string;
+  batch_num: number;
+  rows_processed: number;
+}
+
+export interface JobErrorEvent {
+  run_id: string;
+  job_id: string;
+  pipeline_id: string;
+  step: string;
+  batch_num: number;
+  error_message: string;
+}
+
+export interface JobCompletedEvent {
+  run_id: string;
+  job_id: string;
+  pipeline_id: string;
+  status: string;
+  total_rows: number;
+}

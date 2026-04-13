@@ -4,6 +4,8 @@ import type { BaseEdge, BaseNode } from '$core/types/common';
 import type {
   ConfigItem,
   ConfigsResponse,
+  CreateJobPayload,
+  CreateJobResponse,
   PipelineApiEntity,
   PipelineApiListResponse,
   PipelineEntity,
@@ -220,4 +222,14 @@ export async function reconstructPipelineFromEntity(
     nodes,
     edges,
   };
+}
+
+export async function createJob(
+  payload: CreateJobPayload
+): Promise<CreateJobResponse> {
+  const response: CreateJobResponse = await api.post(
+    API_V1.MIGRATION_JOBS,
+    payload
+  );
+  return response;
 }

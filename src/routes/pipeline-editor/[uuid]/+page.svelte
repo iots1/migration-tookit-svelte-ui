@@ -7,64 +7,70 @@
 
   import type { ConfigItem } from '$core/types/pipeline';
   import {
+    createJob,
     loadConfigs,
     loadPipeline,
     reconstructPipelineFromEntity,
   } from '$features/pipeline-editor/api';
   import PipelineToolbar from '$features/pipeline-editor/components/controls/PipelineToolbar.svelte';
+  import JobProgress from '$features/pipeline-editor/components/JobProgress.svelte';
   import PipelineDrawer from '$features/pipeline-editor/components/PipelineDrawer.svelte';
 
   import '$features/pipeline-editor/pipeline-editor.scss';
 
   import PipelineCanvas from '$features/pipeline-editor/PipelineCanvas.svelte';
   import { createEditorState } from '$features/pipeline-editor/state/editor-state.svelte';
+  import { createJobState } from '$features/pipeline-editor/state/job-state.svelte';
 
-  const state = createEditorState();
+  const editor = createEditorState();
+  const jobState = createJobState();
+
+  let isJobDrawerOpen = $state(false);
 
   let editUuid = $derived(page.params.uuid);
 
   onMount(async () => {
     try {
-      state.setLoading(true);
+      editor.setLoading(true);
       const configs = await loadConfigs();
-      state.setConfigs(configs);
+      editor.setConfigs(configs);
 
       if (editUuid && editUuid !== 'new') {
         const entity = await loadPipeline(editUuid);
         const result = await reconstructPipelineFromEntity(entity, configs);
-        state.setPipelineFromLoad(
+        editor.setPipelineFromLoad(
           result.name,
           result.description,
           result.nodes,
           result.edges
         );
-        state.setPipelineId(editUuid);
+        editor.setPipelineId(editUuid);
       }
     } catch (err) {
-      state.setError(
+      editor.setError(
         err instanceof Error ? err.message : 'Failed to load data'
       );
     } finally {
-      state.setLoading(false);
+      editor.setLoading(false);
     }
   });
 
   function handleAddConfig(config: ConfigItem) {
-    state.addConfigNode(config);
+    editor.addConfigNode(config);
   }
 
   function handleEdgesChange(edges: Edge[]) {
-    state.setEdges(edges as unknown as typeof state.edges);
-    state.pushHistory();
-    state.scheduleAutoSave();
+    editor.setEdges(edges as unknown as typeof editor.edges);
+    editor.pushHistory();
+    editor.scheduleAutoSave();
   }
 
   function handleNodeDragStop(node: Node) {
-    state.updateNodePosition(node.id, node.position);
+    editor.updateNodePosition(node.id, node.position);
   }
 
   async function handleSave(name: string, description: string) {
-    const id = await state.save(name, description);
+    const id = await editor.save(name, description);
     if (id) {
       if (!editUuid || editUuid === 'new') {
         await tick();
@@ -72,22 +78,44 @@
           replaceState: true,
         });
       }
-      state.closeDrawer();
+      editor.closeDrawer();
     }
   }
 
   async function handleSaveRun() {
-    const runResult = await state.saveAndRun();
-    if (runResult) {
-      const id = state.pipelineId;
-      if (id && (!editUuid || editUuid === 'new')) {
+    const name = editor.pipelineName || `Pipeline ${Date.now()}`;
+    const description = editor.pipelineDescription || '';
+
+    if (editor.nodes.length === 0) {
+      editor.setError('Add at least one config node before running');
+      return;
+    }
+
+    try {
+      const id = await editor.save(name, description);
+      if (!id) return;
+
+      if (!editUuid || editUuid === 'new') {
         await tick();
         await goto(resolve('/pipeline-editor/[uuid]', { uuid: id }), {
           replaceState: true,
         });
       }
-      alert(`Job started: ${runResult.job_id} - ${runResult.message}`);
+      editor.closeDrawer();
+
+      const jobResponse = await createJob({ pipeline_id: id });
+      jobState.connect(jobResponse.job_id, jobResponse.run_id);
+      isJobDrawerOpen = true;
+    } catch (err) {
+      editor.setError(
+        err instanceof Error ? err.message : 'Failed to start job'
+      );
     }
+  }
+
+  function handleCloseJobProgress() {
+    isJobDrawerOpen = false;
+    jobState.disconnect();
   }
 </script>
 
@@ -96,7 +124,7 @@
 </svelte:head>
 
 <div class="pipeline-page">
-  {#if state.error}
+  {#if editor.error}
     <div class="pipeline-error">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
         <circle
@@ -113,10 +141,10 @@
           stroke-linecap="round"
         />
       </svg>
-      <span>{state.error}</span>
+      <span>{editor.error}</span>
       <button
         class="pipeline-error-close"
-        onclick={() => state.setError(null)}
+        onclick={() => editor.setError(null)}
         aria-label="Dismiss error"
       >
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -132,27 +160,27 @@
   {/if}
 
   <PipelineToolbar
-    pipelineName={state.pipelineName || 'Untitled'}
-    canUndo={state.canUndo}
-    canRedo={state.canRedo}
-    saving={state.saving}
-    running={state.running}
-    configs={state.configs}
-    onOpenDrawer={() => state.openDrawer()}
+    pipelineName={editor.pipelineName || 'Untitled'}
+    canUndo={editor.canUndo}
+    canRedo={editor.canRedo}
+    saving={editor.saving}
+    running={jobState.active}
+    configs={editor.configs}
+    onOpenDrawer={() => editor.openDrawer()}
     onAddConfig={handleAddConfig}
-    onSave={() => handleSave(state.pipelineName, state.pipelineDescription)}
+    onSave={() => handleSave(editor.pipelineName, editor.pipelineDescription)}
     onSaveRun={handleSaveRun}
-    onUndo={() => state.undo()}
-    onRedo={() => state.redo()}
+    onUndo={() => editor.undo()}
+    onRedo={() => editor.redo()}
   />
 
   <div class="pipeline-canvas-area">
-    {#if state.loading}
+    {#if editor.loading}
       <div class="pipeline-loading">
         <div class="pipeline-loading-spinner"></div>
         <span>Loading...</span>
       </div>
-    {:else if state.nodes.length === 0}
+    {:else if editor.nodes.length === 0}
       <div class="pipeline-empty">
         <div class="pipeline-empty-icon">
           <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
@@ -198,8 +226,8 @@
     {:else}
       <SvelteFlowProvider>
         <PipelineCanvas
-          nodes={state.nodes as unknown as Node[]}
-          edges={state.edges as unknown as Edge[]}
+          nodes={editor.nodes as unknown as Node[]}
+          edges={editor.edges as unknown as Edge[]}
           onEdgesChange={handleEdgesChange}
           onNodeDragStop={handleNodeDragStop}
         />
@@ -208,12 +236,25 @@
   </div>
 
   <PipelineDrawer
-    open={state.isDrawerOpen}
-    name={state.pipelineName}
-    description={state.pipelineDescription}
-    nodes={state.nodes}
-    edges={state.edges}
-    onClose={() => state.closeDrawer()}
+    open={editor.isDrawerOpen}
+    name={editor.pipelineName}
+    description={editor.pipelineDescription}
+    nodes={editor.nodes}
+    edges={editor.edges}
+    onClose={() => editor.closeDrawer()}
     onSave={handleSave}
+  />
+
+  <JobProgress
+    open={isJobDrawerOpen}
+    active={jobState.active}
+    status={jobState.status}
+    jobId={jobState.jobId}
+    runId={jobState.runId}
+    currentStep={jobState.currentStep}
+    totalRows={jobState.totalRows}
+    batches={jobState.batches}
+    errorMessage={jobState.errorMessage}
+    onClose={handleCloseJobProgress}
   />
 </div>

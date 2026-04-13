@@ -187,11 +187,13 @@ export function createEditorState(): EditorState {
       pipelineName = name;
       pipelineDescription = description;
       const payload = toPipelineSavePayload(name, description, nodes, edges);
-      const result = pipelineId
-        ? await updatePipeline(pipelineId, payload)
-        : await savePipeline(payload);
-      pipelineId = result.id;
-      return result.id;
+      if (pipelineId) {
+        await updatePipeline(pipelineId, payload);
+      } else {
+        const result = await savePipeline(payload);
+        pipelineId = result.id;
+      }
+      return pipelineId;
     } catch (err) {
       error = err instanceof Error ? err.message : 'Failed to save pipeline';
       return null;
@@ -212,10 +214,12 @@ export function createEditorState(): EditorState {
       saving = true;
       error = null;
       const payload = toPipelineSavePayload(name, description, nodes, edges);
-      const result = pipelineId
-        ? await updatePipeline(pipelineId, payload)
-        : await savePipeline(payload);
-      pipelineId = result.id;
+      if (pipelineId) {
+        await updatePipeline(pipelineId, payload);
+      } else {
+        const result = await savePipeline(payload);
+        pipelineId = result.id;
+      }
 
       running = true;
       const runResult = await runPipeline(result.id);

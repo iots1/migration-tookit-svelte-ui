@@ -39,6 +39,18 @@
     };
     onEdgesChange([...edges, newEdge]);
   }
+
+  function handleDelete({
+    edges: deletedEdges,
+  }: {
+    nodes: Node[];
+    edges: Edge[];
+  }) {
+    if (deletedEdges.length > 0) {
+      const deletedIds = new Set(deletedEdges.map((e) => e.id));
+      onEdgesChange(edges.filter((e) => !deletedIds.has(e.id)));
+    }
+  }
 </script>
 
 <div class="pipeline-canvas-wrapper">
@@ -47,6 +59,7 @@
     {edges}
     {nodeTypes}
     onconnect={handleConnect}
+    ondelete={handleDelete}
     onnodedragstop={(e) => {
       if (e.targetNode) onNodeDragStop(e.targetNode);
     }}
