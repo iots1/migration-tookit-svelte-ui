@@ -50,8 +50,6 @@ export default defineConfig(
       'no-implicit-coercion': 'error',
       // Require braces for multi-line blocks to prevent dangling-else bugs
       curly: ['error', 'multi-line'],
-      // Always use single quotes; escape single quotes inside strings
-      quotes: ['error', 'single', { avoidEscape: false }],
     },
   },
 
@@ -82,9 +80,6 @@ export default defineConfig(
       // Forbid non-null assertion (!) — handle null/undefined explicitly
       '@typescript-eslint/no-non-null-assertion': 'error',
 
-      // Prefer ?. over manual null checks
-      '@typescript-eslint/prefer-optional-chain': 'warn',
-
       // Prefer T[] over Array<T> for simple types; Array<T> for complex
       '@typescript-eslint/array-type': ['error', { default: 'array-simple' }],
 
@@ -102,7 +97,7 @@ export default defineConfig(
   // ─── 4. Type-aware TypeScript rules (requires full type information) ──────
   //      Applied to .ts and .svelte.ts files only.
   {
-    files: ['**/*.ts', '**/*.svelte.ts'],
+    files: ['**/*.ts', '**/*.svelte.ts', '**/*.svelte'],
     languageOptions: {
       parserOptions: {
         projectService: true,
@@ -133,10 +128,13 @@ export default defineConfig(
       // Remove type assertions that are already satisfied by the inferred type
       '@typescript-eslint/no-unnecessary-type-assertion': 'error',
 
+      // Prefer ?. over manual null checks
+      '@typescript-eslint/prefer-optional-chain': 'error',
+
       // Prefer ?? over || for nullability checks (avoids falsy pitfalls)
       // ignorePrimitives: strings use || '' intentionally in many patterns
       '@typescript-eslint/prefer-nullish-coalescing': [
-        'warn',
+        'error',
         { ignorePrimitives: { string: true, boolean: true } },
       ],
     },
@@ -157,6 +155,8 @@ export default defineConfig(
       // Svelte 5 runes semantically require `let` for $props() and $derived()
       // so that the compiler can create reactive bindings. const breaks reactivity.
       'prefer-const': 'off',
+      // Enforce lang="ts" on all script blocks
+      'svelte/block-lang': ['error', { script: ['ts'] }],
     },
   },
 

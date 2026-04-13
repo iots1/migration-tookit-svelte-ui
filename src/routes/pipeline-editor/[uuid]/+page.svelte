@@ -2,7 +2,7 @@
   import { SvelteFlowProvider, type Edge, type Node } from '@xyflow/svelte';
   import { onMount, tick } from 'svelte';
   import { goto } from '$app/navigation';
-  import { base } from '$app/paths';
+  import { resolve } from '$app/paths';
   import { page } from '$app/state';
 
   import type { ConfigItem } from '$core/types/pipeline';
@@ -19,7 +19,7 @@
 
   const state = createEditorState();
 
-  let editUuid = $derived(page.params.uuid as string | undefined);
+  let editUuid = $derived(page.params.uuid);
 
   onMount(async () => {
     try {
@@ -66,7 +66,9 @@
     if (id) {
       if (!editUuid || editUuid === 'new') {
         await tick();
-        goto(`${base}/pipeline-editor/${id}`, { replaceState: true });
+        await goto(resolve('/pipeline-editor/[uuid]', { uuid: id }), {
+          replaceState: true,
+        });
       }
       state.closeDrawer();
     }
@@ -78,7 +80,9 @@
       const id = state.pipelineId;
       if (id && (!editUuid || editUuid === 'new')) {
         await tick();
-        goto(`${base}/pipeline-editor/${id}`, { replaceState: true });
+        await goto(resolve('/pipeline-editor/[uuid]', { uuid: id }), {
+          replaceState: true,
+        });
       }
       alert(`Job started: ${runResult.job_id} - ${runResult.message}`);
     }

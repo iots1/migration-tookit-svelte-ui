@@ -135,9 +135,7 @@ export function toPipelineSavePayload(
       const sourceNode = nodeMap.get(edge.source);
       const targetNode = nodeMap.get(edge.target);
       return {
-        id:
-          ((edge.data as Record<string, unknown> | undefined)
-            ?.pipelineEdgeId as string | undefined) ?? undefined,
+        id: edge.data?.pipelineEdgeId as string | undefined,
         source_config_uuid:
           String(sourceNode?.data.configId ?? '') ||
           sourceNode?.id ||

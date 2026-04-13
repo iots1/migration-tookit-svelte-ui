@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { base } from '$app/paths';
+  import { resolve } from '$app/paths';
   import { page } from '$app/state';
 
   interface NavItem {
@@ -21,7 +21,7 @@
     $props();
 
   function isActive(href: string): boolean {
-    const resolved = `${base}${href}`;
+    const resolved = resolve(href);
     if (href === '/') return page.url.pathname === resolved;
     return page.url.pathname.startsWith(resolved);
   }
@@ -106,7 +106,7 @@
   <nav class="sidebar-nav">
     {#each navItems as item (item.href)}
       <a
-        href="{base}{item.href}"
+        href={resolve(item.href)}
         class="nav-item"
         class:active={isActive(item.href)}
         title={collapsed ? item.label : undefined}

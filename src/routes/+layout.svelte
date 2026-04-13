@@ -1,11 +1,13 @@
 <script lang="ts">
+  import type { Snippet } from 'svelte';
+
   import Footer from '$lib/components/layout/Footer.svelte';
   import Navbar from '$lib/components/layout/Navbar.svelte';
   import Sidebar from '$lib/components/layout/Sidebar.svelte';
 
   import '../app.css';
 
-  const { children } = $props();
+  const { children }: { children: Snippet } = $props();
 
   let collapsed = $state(false);
   let mobileOpen = $state(false);

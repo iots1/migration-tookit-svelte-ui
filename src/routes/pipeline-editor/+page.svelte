@@ -1,10 +1,10 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
-  import { base } from '$app/paths';
+  import { resolve } from '$app/paths';
 
   onMount(() => {
-    goto(`${base}/pipeline-editor/new`);
+    void goto(resolve('/pipeline-editor/[uuid]', { uuid: 'new' }));
   });
 </script>
 

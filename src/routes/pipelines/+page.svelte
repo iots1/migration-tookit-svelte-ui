@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
-  import { base } from '$app/paths';
+  import { resolve } from '$app/paths';
 
   import '$features/pipeline-editor/pipeline-editor.css';
   import { createPipelinesListState } from '$features/pipeline-editor/state/pipelines-list-state.svelte';
@@ -9,15 +9,15 @@
   const state = createPipelinesListState();
 
   onMount(() => {
-    state.fetchPipelines();
+    void state.fetchPipelines();
   });
 
   async function handleNewPipeline() {
-    await goto(`${base}/pipeline-editor`);
+    await goto(resolve('/pipeline-editor'));
   }
 
   async function handleEdit(id: string) {
-    await goto(`${base}/pipeline-editor/${id}`);
+    await goto(resolve('/pipeline-editor/[uuid]', { uuid: id }));
   }
 
   async function handleDelete(id: string) {

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { base } from '$app/paths';
+  import { resolve } from '$app/paths';
 
   import './+page.css';
 </script>
@@ -15,7 +15,7 @@
   </div>
 
   <div class="home-cards">
-    <a href="{base}/pipelines" class="home-card">
+    <a href={resolve('/pipelines')} class="home-card">
       <div class="card-icon icon-teal">
         <svg width="28" height="28" viewBox="0 0 20 20" fill="none">
           <path
@@ -44,7 +44,7 @@
       <p class="card-desc">View, search and manage your migration pipelines</p>
     </a>
 
-    <a href="{base}/pipeline-editor" class="home-card">
+    <a href={resolve('/pipeline-editor')} class="home-card">
       <div class="card-icon icon-purple">
         <svg width="28" height="28" viewBox="0 0 20 20" fill="none">
           <rect
@@ -84,7 +84,7 @@
       <p class="card-desc">Design migration flows with drag-and-drop nodes</p>
     </a>
 
-    <a href="{base}/db-explorer" class="home-card">
+    <a href={resolve('/db-explorer')} class="home-card">
       <div class="card-icon icon-blue">
         <svg width="28" height="28" viewBox="0 0 20 20" fill="none">
           <ellipse
@@ -111,7 +111,7 @@
       <p class="card-desc">Browse tables and inspect schema definitions</p>
     </a>
 
-    <a href="{base}/migration-runner" class="home-card">
+    <a href={resolve('/migration-runner')} class="home-card">
       <div class="card-icon icon-peach">
         <svg width="28" height="28" viewBox="0 0 20 20" fill="none">
           <path
