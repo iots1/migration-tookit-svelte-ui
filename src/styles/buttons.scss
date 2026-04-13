@@ -1,0 +1,113 @@
+/* ========== Buttons ========== */
+
+/* Base Button */
+.btn {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+
+  padding: 8px 16px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+
+  &:hover:not(:disabled) {
+    border-color: var(--accent-light);
+
+    background: var(--bg-sidebar-hover);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  &.btn-secondary {
+    background: var(--bg-sidebar-hover);
+
+    &:hover:not(:disabled) {
+      background: #e0d6f3;
+    }
+  }
+
+  &.btn-primary {
+    border-color: var(--accent);
+
+    background: var(--accent);
+    color: white;
+
+    &:hover:not(:disabled) {
+      border-color: var(--accent-hover);
+
+      background: var(--accent-hover);
+    }
+  }
+
+  &.btn-success {
+    border-color: #bbf7d0;
+
+    background: #ecfdf5;
+    color: var(--green-text);
+
+    &:hover:not(:disabled) {
+      border-color: var(--green);
+
+      background: #d1fae5;
+    }
+  }
+}
+
+/* Action Buttons */
+.action-btn {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: var(--radius-sm);
+
+  background: transparent;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+
+  &.action-btn-edit {
+    background-color: var(--blue-bg);
+    color: var(--blue-text);
+
+    &:hover {
+      background-color: var(--blue-text);
+      color: white;
+      box-shadow: 0 4px 12px rgba(29, 78, 216, 0.2);
+      transform: translateY(-2px);
+    }
+  }
+
+  &.action-btn-delete {
+    background-color: #fef2f2;
+    color: #ef4444;
+
+    &:hover {
+      background-color: #ef4444;
+      color: white;
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+      transform: translateY(-2px);
+    }
+  }
+}

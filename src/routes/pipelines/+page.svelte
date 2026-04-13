@@ -3,7 +3,8 @@
   import { goto } from '$app/navigation';
   import { resolve } from '$app/paths';
 
-  import '$features/pipeline-editor/pipeline-editor.css';
+  import '$features/pipeline-editor/pipeline-editor.scss';
+
   import { createPipelinesListState } from '$features/pipeline-editor/state/pipelines-list-state.svelte';
 
   const state = createPipelinesListState();

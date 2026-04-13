@@ -13,7 +13,9 @@
   } from '$features/pipeline-editor/api';
   import PipelineToolbar from '$features/pipeline-editor/components/controls/PipelineToolbar.svelte';
   import PipelineDrawer from '$features/pipeline-editor/components/PipelineDrawer.svelte';
-  import '$features/pipeline-editor/pipeline-editor.css';
+
+  import '$features/pipeline-editor/pipeline-editor.scss';
+
   import PipelineCanvas from '$features/pipeline-editor/PipelineCanvas.svelte';
   import { createEditorState } from '$features/pipeline-editor/state/editor-state.svelte';
 

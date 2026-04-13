@@ -5,7 +5,7 @@
   import Navbar from '$lib/components/layout/Navbar.svelte';
   import Sidebar from '$lib/components/layout/Sidebar.svelte';
 
-  import '../app.css';
+  import '../app.scss';
 
   const { children }: { children: Snippet } = $props();
 

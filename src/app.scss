@@ -1,0 +1,18 @@
+/* ========== Main Application Styles ========== */
+
+/* All @use rules must come first */
+@use 'tailwindcss';
+@use './styles/theme.scss';
+@use './styles/base.scss';
+@use './styles/layout.scss';
+@use './styles/buttons.scss';
+@use './styles/forms.scss';
+@use './styles/tables.scss';
+@use './styles/drawer.scss';
+@use './styles/animations.scss';
+
+@theme {
+  --font-sans:
+    'Roboto', ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
+    'Helvetica Neue', Arial, 'Apple Color Emoji', 'Segoe UI Emoji';
+}

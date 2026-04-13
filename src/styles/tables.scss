@@ -1,0 +1,52 @@
+/* ========== Tables ========== */
+
+.table-wrapper {
+  overflow: hidden;
+
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+
+  background: var(--bg-primary);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+
+  thead tr {
+    background: var(--bg-sidebar-hover);
+  }
+
+  th {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-color);
+
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-align: left;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-light);
+
+    color: var(--text-primary);
+    font-size: 14px;
+    vertical-align: middle;
+  }
+
+  tbody {
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover {
+      background: var(--accent-bg);
+    }
+  }
+}

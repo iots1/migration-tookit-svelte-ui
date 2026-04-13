@@ -1,7 +1,7 @@
 <script lang="ts">
   import { resolve } from '$app/paths';
 
-  import './+page.css';
+  import './+page.scss';
 </script>
 
 <svelte:head>

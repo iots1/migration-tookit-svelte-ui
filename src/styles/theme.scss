@@ -1,0 +1,82 @@
+/* ========== Theme Variables ========== */
+:root {
+  /* Typography */
+  --font-sans: 'Roboto', ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
+    'Helvetica Neue', Arial, sans-serif;
+
+  /* Layout */
+  --sidebar-width: 260px;
+  --sidebar-collapsed-width: 72px;
+  --navbar-height: 60px;
+  --footer-height: 44px;
+
+  /* Backgrounds */
+  --bg-base: #f5f3ff;
+  --bg-primary: #ffffff;
+  --bg-sidebar: #ffffff;
+  --bg-sidebar-hover: #ede9fe;
+  --bg-sidebar-active: #e8dff5;
+  --bg-card: #ffffff;
+
+  /* Text */
+  --text-primary: #1e1b4b;
+  --text-secondary: #6b7280;
+  --text-sidebar: #6b7280;
+  --text-sidebar-active: #7c3aed;
+  --text-muted: #9ca3af;
+
+  /* Borders */
+  --border-color: #ede9fe;
+  --border-light: #f3f0ff;
+
+  /* Accent */
+  --accent: #8b5cf6;
+  --accent-light: #c4b5fd;
+  --accent-bg: #f5f3ff;
+  --accent-hover: #7c3aed;
+
+  /* Semantic Colors */
+  --peach: #fbbf80;
+  --peach-bg: #fff7ed;
+  --peach-text: #c2410c;
+
+  --blue: #93c5fd;
+  --blue-bg: #eff6ff;
+  --blue-text: #1d4ed8;
+
+  --teal-bg: #f0fdfa;
+  --teal-text: #0d9488;
+
+  --green: #86efac;
+  --green-text: #16a34a;
+  --green-bg: #ecfdf5;
+  --green-border: #bbf7d0;
+  --green-bg-hover: #d1fae5;
+
+  /* Error */
+  --error-text: #dc2626;
+  --error-bg: #fef2f2;
+  --error-border: #fecaca;
+
+  /* Danger (destructive actions) */
+  --danger-bg: #fee2e2;
+  --danger-text: #ef4444;
+
+  /* Accent Extended */
+  --accent-xlight: #ddd6fe;
+
+  /* Table */
+  --bg-table-header: #f8fafc;
+  --bg-table-hover: #fafbff;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(124, 58, 237, 0.04);
+  --shadow-md: 0 4px 12px rgba(124, 58, 237, 0.08);
+  --shadow-lg: 0 8px 24px rgba(124, 58, 237, 0.12);
+
+  /* Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+}

@@ -5,4 +5,11 @@ import { defineConfig } from 'vite';
 export default defineConfig({
   envPrefix: 'PUBLIC_',
   plugins: [tailwindcss(), sveltekit()],
+  css: {
+    preprocessorOptions: {
+      scss: {
+        api: 'modern-compiler',
+      },
+    },
+  },
 });
