@@ -181,7 +181,7 @@
         <div class="job-batches">
           <span class="job-batches-title">Batch Log</span>
           <div class="job-batches-list" bind:this={batchLogRef}>
-            {#each batches as batch (`${batch.step}-${batch.batchNum}`)}
+            {#each batches as batch, index (`${batch.step}-${batch.batchNum}-${index}`)}
               <div
                 class="job-batch-item"
                 class:job-batch-item-error={batch.rowsProcessed === 0 &&
