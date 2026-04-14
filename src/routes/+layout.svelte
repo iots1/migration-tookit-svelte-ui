@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
 
+  import ConfirmDialog from '$lib/components/ConfirmDialog.svelte';
   import Footer from '$lib/components/layout/Footer.svelte';
   import Navbar from '$lib/components/layout/Navbar.svelte';
   import Sidebar from '$lib/components/layout/Sidebar.svelte';
@@ -20,6 +21,8 @@
     }
   }
 </script>
+
+<ConfirmDialog />
 
 <div class="app-shell">
   <Sidebar bind:collapsed bind:mobileOpen />

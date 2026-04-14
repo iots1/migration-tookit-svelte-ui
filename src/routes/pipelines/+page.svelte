@@ -3,6 +3,8 @@
   import { goto } from '$app/navigation';
   import { resolve } from '$app/paths';
 
+  import { confirmDialog } from '$lib/confirm-dialog.svelte';
+
   import '$features/pipeline-editor/pipeline-editor.scss';
 
   import { createPipelinesListState } from '$features/pipeline-editor/state/pipelines-list-state.svelte';
@@ -22,7 +24,12 @@
   }
 
   async function handleDelete(id: string) {
-    if (!confirm('Are you sure you want to delete this pipeline?')) return;
+    const confirmed = await confirmDialog({
+      title: 'Delete Pipeline',
+      description:
+        'Are you sure you want to delete this pipeline? This action cannot be undone.',
+    });
+    if (!confirmed) return;
     await state.deleteById(id);
   }
 </script>

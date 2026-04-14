@@ -1,0 +1,149 @@
+/* ========== Confirm Dialog ========== */
+
+.dialog-overlay {
+  position: fixed;
+  z-index: 200;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background: rgba(0, 0, 0, 0.45);
+
+  animation: fadeIn 0.15s ease;
+  backdrop-filter: blur(2px);
+  inset: 0;
+}
+
+.dialog {
+  position: relative;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+
+  width: 100%;
+  max-width: 400px;
+  margin: 16px;
+  padding: 32px 28px 24px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+
+  background: var(--bg-primary);
+  text-align: center;
+  box-shadow: var(--shadow-lg);
+
+  animation: dialogSlideIn 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.dialog-icon-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  width: 52px;
+  height: 52px;
+
+  margin-bottom: 4px;
+  border-radius: 50%;
+
+  &.dialog-icon-wrap--danger {
+    background: #fef2f2;
+    color: #ef4444;
+  }
+
+  &.dialog-icon-wrap--success {
+    background: #ecfdf5;
+    color: var(--green-text);
+  }
+}
+
+.dialog-title {
+  margin: 0;
+
+  color: var(--text-primary);
+
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.dialog-description {
+  margin: 0;
+
+  color: var(--text-secondary);
+
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.dialog-actions {
+  display: flex;
+  gap: 10px;
+
+  width: 100%;
+  margin-top: 8px;
+
+  & .btn {
+    flex: 1;
+  }
+
+  & .btn-secondary {
+    border-color: var(--border-color);
+
+    background: white;
+    color: var(--text-primary);
+
+    &:hover:not(:disabled) {
+      border-color: #d1d5db;
+
+      background: #fafbfc;
+    }
+  }
+
+  & .btn-danger {
+    border-color: #ef4444;
+
+    background: #ef4444;
+    color: white;
+
+    &:hover:not(:disabled) {
+      border-color: #dc2626;
+
+      background: #dc2626;
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+  }
+}
+
+/* ========== Danger / Success button variants ========== */
+
+.btn-danger {
+  border-color: #fca5a5;
+
+  background: #fef2f2;
+  color: #ef4444;
+
+  &:hover:not(:disabled) {
+    border-color: #ef4444;
+
+    background: #ef4444;
+    color: white;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+  }
+}
+
+/* ========== Dialog entrance animation ========== */
+
+@keyframes dialogSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.92) translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
