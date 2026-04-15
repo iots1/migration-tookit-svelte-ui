@@ -10,16 +10,17 @@
   import BadgeList from '$lib/components/BadgeList.svelte';
   import ItemSelectorDrawer from '$lib/components/ItemSelectorDrawer.svelte';
   import SqlHighlighter from '$lib/components/SqlHighlighter.svelte';
+  import { showToast } from '$lib/toast.svelte';
 
   import '$features/schema-mapper/schema-mapper.scss';
 
   const rawId = $derived(page.url.pathname.split('/').pop() ?? 'new');
-  const isCreate = $derived(rawId === 'new');
 
-  const fm = createFieldMappingState(
-    isCreate ? 'create' : 'edit',
-    isCreate ? null : rawId
-  );
+  const fm = $derived.by(() => {
+    const mode = rawId === 'new' ? 'create' : 'edit';
+    const configId = rawId === 'new' ? null : rawId;
+    return createFieldMappingState(mode, configId);
+  });
 
   let datasources = $state<DatasourceItem[]>([]);
 
@@ -35,7 +36,7 @@
     } catch {
       console.error('Failed to load datasources');
     }
-    if (!isCreate && rawId) {
+    if (rawId !== 'new') {
       await fm.loadConfig(rawId);
     }
     // Load transformers and validators options
@@ -44,8 +45,14 @@
 
   async function handleSave() {
     const savedId = await fm.save();
-    if (savedId && isCreate) {
-      await goto(resolve('/configs/[id]', { id: savedId }));
+    if (savedId) {
+      // cspell:disable-next-line
+      showToast('บันทึกสำเร็จ');
+      if (rawId === 'new') {
+        await goto(resolve('/configs/[id]', { id: savedId }), {
+          replaceState: true,
+        });
+      }
     }
   }
 
@@ -92,7 +99,8 @@
 </script>
 
 <svelte:head>
-  <title>{isCreate ? 'New Config' : 'Edit Config'} - Schema Mapper</title>
+  <title>{rawId === 'new' ? 'New Config' : 'Edit Config'} - Schema Mapper</title
+  >
 </svelte:head>
 
 {#if fm.loading}
@@ -121,7 +129,7 @@
         <h2
           style="color: var(--text-primary); font-size: 18px; font-weight: 700; margin: 0;"
         >
-          {isCreate ? 'New Config' : fm.configName || 'Edit Config'}
+          {rawId === 'new' ? 'New Config' : fm.configName || 'Edit Config'}
         </h2>
       </div>
       <button
@@ -211,8 +219,9 @@
         </div>
         <div class="sm-card-body">
           <div class="form-group">
-            <label class="form-label">Config Name</label>
+            <label class="form-label" for="config-name">Config Name</label>
             <input
+              id="config-name"
               type="text"
               class="form-input"
               placeholder="e.g. patients_mapping"
@@ -222,49 +231,52 @@
             />
           </div>
 
-          <label class="form-label">Type</label>
-          <div class="sm-type-group">
-            <label
-              class="sm-type-option sm-type-option--active={fm.configType ===
-                'std'}"
-            >
-              <input
-                type="radio"
-                name="configType"
-                class="sm-type-radio"
-                checked={fm.configType === 'std'}
-                onchange={() => fm.setConfigType('std')}
-              />
-              <div>
-                <div class="sm-type-label">Standard (std)</div>
-                <div class="sm-type-desc">
-                  Map source columns to target columns with field mapping table
+          <fieldset class="form-group">
+            <legend class="form-label">Type</legend>
+            <div class="sm-type-group">
+              <label
+                class="sm-type-option sm-type-option--active={fm.configType ===
+                  'std'}"
+              >
+                <input
+                  type="radio"
+                  name="configType"
+                  class="sm-type-radio"
+                  checked={fm.configType === 'std'}
+                  onchange={() => fm.setConfigType('std')}
+                />
+                <div>
+                  <div class="sm-type-label">Standard (std)</div>
+                  <div class="sm-type-desc">
+                    Map source columns to target columns with field mapping
+                    table
+                  </div>
                 </div>
-              </div>
-            </label>
-            <label
-              class="sm-type-option sm-type-option--active={fm.configType ===
-                'custom'}"
-            >
-              <input
-                type="radio"
-                name="configType"
-                class="sm-type-radio"
-                checked={fm.configType === 'custom'}
-                onchange={() => fm.setConfigType('custom')}
-              />
-              <div>
-                <div class="sm-type-label">Custom</div>
-                <div class="sm-type-desc">
-                  Write your own SQL script directly
+              </label>
+              <label
+                class="sm-type-option sm-type-option--active={fm.configType ===
+                  'custom'}"
+              >
+                <input
+                  type="radio"
+                  name="configType"
+                  class="sm-type-radio"
+                  checked={fm.configType === 'custom'}
+                  onchange={() => fm.setConfigType('custom')}
+                />
+                <div>
+                  <div class="sm-type-label">Custom</div>
+                  <div class="sm-type-desc">
+                    Write your own SQL script directly
+                  </div>
                 </div>
-              </div>
-            </label>
-          </div>
+              </label>
+            </div>
+          </fieldset>
 
           {#if fm.configType === 'custom'}
             <div class="form-group">
-              <label class="form-label">SQL Script</label>
+              <div class="form-label">SQL Script</div>
               <SqlHighlighter
                 value={fm.script}
                 placeholder="Write your custom SQL here..."
@@ -314,11 +326,12 @@
                 onchange={(e) => {
                   const val = (e.target as HTMLSelectElement).value;
                   const ds = datasources.find((d) => d.id === val);
-                  void fm.setSourceDatasource(
-                    val || null,
-                    ds?.name ?? null,
-                    ds?.dbname ?? null
-                  );
+                  // cspell:disable-next-line
+                  void fm.setSourceDatasource({
+                    id: val || null,
+                    name: ds?.name ?? null,
+                    dbname: ds?.dbname ?? null,
+                  });
                 }}
               >
                 <option value="" disabled selected={!fm.sourceDatasourceId}>
@@ -378,9 +391,9 @@
           </div>
           {#if fm.sourceColumns.length > 0}
             <div style="margin-top: 16px;">
-              <label class="form-label">
+              <div class="form-label" role="heading" aria-level="3">
                 Source Columns ({fm.sourceColumns.length})
-              </label>
+              </div>
               <div class="sm-table-select" style="max-height: 200px;">
                 {#each fm.sourceColumns as col (col.name)}
                   <div class="sm-table-item" style="cursor: default;">
@@ -437,11 +450,12 @@
                 onchange={(e) => {
                   const val = (e.target as HTMLSelectElement).value;
                   const ds = datasources.find((d) => d.id === val);
-                  void fm.setTargetDatasource(
-                    val || null,
-                    ds?.name ?? null,
-                    ds?.dbname ?? null
-                  );
+                  // cspell:disable-next-line
+                  void fm.setTargetDatasource({
+                    id: val || null,
+                    name: ds?.name ?? null,
+                    dbname: ds?.dbname ?? null,
+                  });
                 }}
               >
                 <option value="" disabled selected={!fm.targetDatasourceId}>
@@ -501,9 +515,9 @@
           </div>
           {#if fm.targetColumns.length > 0}
             <div style="margin-top: 16px;">
-              <label class="form-label">
+              <div class="form-label" role="heading" aria-level="3">
                 Target Columns ({fm.targetColumns.length})
-              </label>
+              </div>
               <div class="sm-table-select" style="max-height: 200px;">
                 {#each fm.targetColumns as col (col.name)}
                   <div class="sm-table-item" style="cursor: default;">

@@ -55,6 +55,7 @@
 
   {#if hasOverflow}
     <div
+      role="group"
       style="position: relative; display: inline-block;"
       onmouseenter={handleMouseEnter}
       onmouseleave={handleMouseLeave}

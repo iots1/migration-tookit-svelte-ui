@@ -5,6 +5,7 @@
   import Footer from '$lib/components/layout/Footer.svelte';
   import Navbar from '$lib/components/layout/Navbar.svelte';
   import Sidebar from '$lib/components/layout/Sidebar.svelte';
+  import Toast from '$lib/components/Toast.svelte';
 
   import '../app.scss';
 
@@ -23,6 +24,7 @@
 </script>
 
 <ConfirmDialog />
+<Toast />
 
 <div class="app-shell">
   <Sidebar bind:collapsed bind:mobileOpen />

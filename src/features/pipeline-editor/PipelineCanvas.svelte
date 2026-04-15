@@ -17,12 +17,23 @@
     edges,
     onEdgesChange,
     onNodeDragStop,
+    onNodeEdit,
   }: {
     nodes: Node[];
     edges: Edge[];
     onEdgesChange: (edges: Edge[]) => void;
     onNodeDragStop: (node: Node) => void;
+    onNodeEdit?: (configId: string) => void;
   } = $props();
+
+  let nodesWithHandler = $derived(
+    onNodeEdit
+      ? nodes.map((n) => ({
+          ...n,
+          data: { ...n.data, onEdit: onNodeEdit },
+        }))
+      : nodes
+  );
 
   const nodeTypes = {
     config: ConfigNode,
@@ -55,7 +66,7 @@
 
 <div class="pipeline-canvas-wrapper">
   <SvelteFlow
-    {nodes}
+    nodes={nodesWithHandler}
     {edges}
     {nodeTypes}
     onconnect={handleConnect}

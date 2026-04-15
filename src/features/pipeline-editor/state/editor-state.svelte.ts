@@ -109,6 +109,14 @@ export function createEditorState(): EditorState {
 
   function addConfigNode(config: ConfigItem) {
     const nodeId = `config-${config.id}-${Date.now()}`;
+    const jsonData = (config.attributes.json_data ?? {}) as unknown as Record<
+      string,
+      unknown
+    >;
+    const source = (jsonData.source ?? {}) as Record<string, unknown>;
+    const target = (jsonData.target ?? {}) as Record<string, unknown>;
+    const mappings = (jsonData.mappings ?? []) as unknown[];
+
     const newNode: BaseNode = {
       id: nodeId,
       type: 'config',
@@ -121,11 +129,11 @@ export function createEditorState(): EditorState {
         configId: config.id,
         configType: config.attributes.config_type,
         tableName: config.attributes.table_name,
-        sourceDb: config.attributes.json_data.source.database,
-        sourceTable: config.attributes.json_data.source.table,
-        targetDb: config.attributes.json_data.target.database,
-        targetTable: config.attributes.json_data.target.table,
-        mappingCount: config.attributes.json_data.mappings.length,
+        sourceDb: (source.database as string) ?? '',
+        sourceTable: (source.table as string) ?? '',
+        targetDb: (target.database as string) ?? '',
+        targetTable: (target.table as string) ?? '',
+        mappingCount: mappings.length,
       },
     };
     nodes = [...nodes, newNode];
@@ -222,7 +230,7 @@ export function createEditorState(): EditorState {
       }
 
       running = true;
-      const runResult = await runPipeline(result.id);
+      const runResult = await runPipeline(pipelineId);
       return runResult;
     } catch (err) {
       error =

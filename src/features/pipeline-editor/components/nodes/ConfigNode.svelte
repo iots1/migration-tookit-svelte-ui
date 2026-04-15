@@ -19,6 +19,28 @@
   >
     <div class="config-node-type-badge">{configType}</div>
     <span class="config-node-title">{label}</span>
+    <button
+      class="config-node-edit-btn"
+      onclick={(e) => {
+        e.stopPropagation();
+        const onEdit = data.onEdit as ((id: string) => void) | undefined;
+        if (onEdit) {
+          onEdit(data.configId as string);
+        }
+      }}
+      aria-label="Edit config"
+      title="Edit"
+    >
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path
+          d="M11.333 2L14 4.667L4.5 14.167H1.833V11.5L11.333 2Z"
+          stroke="currentColor"
+          stroke-width="1.2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+    </button>
   </div>
   <div class="config-node-body">
     <div class="config-node-row">

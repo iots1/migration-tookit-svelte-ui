@@ -13,8 +13,10 @@
     reconstructPipelineFromEntity,
   } from '$features/pipeline-editor/api';
   import PipelineToolbar from '$features/pipeline-editor/components/controls/PipelineToolbar.svelte';
+  import EditConfigDrawer from '$features/pipeline-editor/components/EditConfigDrawer.svelte';
   import JobProgress from '$features/pipeline-editor/components/JobProgress.svelte';
   import PipelineDrawer from '$features/pipeline-editor/components/PipelineDrawer.svelte';
+  import { showToast } from '$lib/toast.svelte';
 
   import '$features/pipeline-editor/pipeline-editor.scss';
 
@@ -26,8 +28,48 @@
   const jobState = createJobState();
 
   let isJobDrawerOpen = $state(false);
+  let editingConfigId = $state<string | null>(null);
 
   let editUuid = $derived(page.params.uuid);
+
+  function handleEditConfig(configId: string) {
+    editingConfigId = configId;
+  }
+
+  async function handleConfigSaved(configId: string) {
+    const configs = await loadConfigs();
+    editor.setConfigs(configs);
+    const updated = configs.find((c) => c.id === configId);
+    if (updated) {
+      const jsonData = updated.attributes.json_data as unknown as Record<
+        string,
+        unknown
+      >;
+      const source = (jsonData.source ?? {}) as Record<string, unknown>;
+      const target = (jsonData.target ?? {}) as Record<string, unknown>;
+      const mappings = (jsonData.mappings ?? []) as unknown[];
+
+      editor.setNodes(
+        editor.nodes.map((n) =>
+          (n.data.configId as string) === configId
+            ? {
+                ...n,
+                data: {
+                  ...n.data,
+                  label: updated.attributes.config_name,
+                  configType: updated.attributes.config_type,
+                  tableName: updated.attributes.table_name,
+                  sourceTable: (source.table as string) ?? '',
+                  targetTable: (target.table as string) ?? '',
+                  mappingCount: mappings.length,
+                },
+              }
+            : n
+        )
+      );
+    }
+    editingConfigId = null;
+  }
 
   onMount(async () => {
     try {
@@ -72,6 +114,7 @@
   async function handleSave(name: string, description: string) {
     const id = await editor.save(name, description);
     if (id) {
+      showToast('บันทึกสำเร็จ');
       if (!editUuid || editUuid === 'new') {
         await tick();
         await goto(resolve('/pipeline-editor/[uuid]', { uuid: id }), {
@@ -230,6 +273,7 @@
           edges={editor.edges as unknown as Edge[]}
           onEdgesChange={handleEdgesChange}
           onNodeDragStop={handleNodeDragStop}
+          onNodeEdit={handleEditConfig}
         />
       </SvelteFlowProvider>
     {/if}
@@ -256,5 +300,12 @@
     batches={jobState.batches}
     errorMessage={jobState.errorMessage}
     onClose={handleCloseJobProgress}
+  />
+
+  <EditConfigDrawer
+    open={editingConfigId !== null}
+    configId={editingConfigId}
+    onClose={() => (editingConfigId = null)}
+    onSaved={handleConfigSaved}
   />
 </div>

@@ -50,17 +50,17 @@ export interface FieldMappingState {
   setConfigType: (type: 'std' | 'custom') => void;
   setConfigName: (name: string) => void;
   setScript: (script: string) => void;
-  setSourceDatasource: (
-    id: string | null,
-    name?: string | null,
-    dbname?: string | null
-  ) => Promise<void>;
+  setSourceDatasource: (opts: {
+    id: string | null;
+    name?: string | null;
+    dbname?: string | null;
+  }) => Promise<void>;
   setSourceTable: (table: string | null) => Promise<void>;
-  setTargetDatasource: (
-    id: string | null,
-    name?: string | null,
-    dbname?: string | null
-  ) => Promise<void>;
+  setTargetDatasource: (opts: {
+    id: string | null;
+    name?: string | null;
+    dbname?: string | null;
+  }) => Promise<void>;
   setTargetTable: (table: string | null) => Promise<void>;
   updateMapping: (index: number, updates: Partial<MappingRow>) => void;
   setGenerateSql: (sql: string) => void;
@@ -182,10 +182,25 @@ export function createFieldMappingState(
 
       let jsonData: FieldMappingConfigData;
       try {
-        jsonData =
+        const parsed =
           typeof detail.json_data === 'string'
             ? JSON.parse(detail.json_data)
-            : (detail.json_data as unknown as FieldMappingConfigData);
+            : (detail.json_data as unknown);
+
+        // Ensure required structure exists (for custom configs with empty json_data)
+        jsonData = {
+          name: (parsed as Record<string, unknown>).name ?? detail.config_name,
+          module: (parsed as Record<string, unknown>).module ?? '',
+          source: (parsed as Record<string, unknown>).source ?? {
+            database: '',
+            table: '',
+          },
+          target: (parsed as Record<string, unknown>).target ?? {
+            database: '',
+            table: '',
+          },
+          mappings: (parsed as Record<string, unknown>).mappings ?? [],
+        } as FieldMappingConfigData;
       } catch {
         jsonData = {
           name: detail.config_name,
@@ -196,12 +211,12 @@ export function createFieldMappingState(
         };
       }
 
-      sourceTableName = jsonData.source.table ?? null;
-      sourceDatasourceName = jsonData.source.datasource_name ?? null;
-      sourceDatabaseName = jsonData.source.database ?? null;
-      targetTableName = jsonData.target.table ?? null;
-      targetDatasourceName = jsonData.target.datasource_name ?? null;
-      targetDatabaseName = jsonData.target.database ?? null;
+      sourceTableName = jsonData.source?.table ?? null;
+      sourceDatasourceName = jsonData.source?.datasource_name ?? null;
+      sourceDatabaseName = jsonData.source?.database ?? null;
+      targetTableName = jsonData.target?.table ?? null;
+      targetDatasourceName = jsonData.target?.datasource_name ?? null;
+      targetDatabaseName = jsonData.target?.database ?? null;
 
       if (sourceDatasourceId) {
         try {
@@ -264,22 +279,22 @@ export function createFieldMappingState(
     }
   }
 
-  async function setSourceDatasource(
-    id: string | null,
-    name?: string | null,
-    dbname?: string | null
-  ) {
-    sourceDatasourceId = id;
-    sourceDatasourceName = name ?? null;
-    sourceDatabaseName = dbname ?? null;
+  async function setSourceDatasource(opts: {
+    id: string | null;
+    name?: string | null;
+    dbname?: string | null;
+  }) {
+    sourceDatasourceId = opts.id;
+    sourceDatasourceName = opts.name ?? null;
+    sourceDatabaseName = opts.dbname ?? null;
     sourceTables = [];
     sourceTableName = null;
     sourceColumns = [];
     mappings = [];
-    if (!id) return;
+    if (!opts.id) return;
     loadingTables = true;
     try {
-      const tables = await getDatasourceTables(id);
+      const tables = await getDatasourceTables(opts.id);
       sourceTables = tables;
     } catch (err) {
       error =
@@ -307,22 +322,22 @@ export function createFieldMappingState(
     }
   }
 
-  async function setTargetDatasource(
-    id: string | null,
-    name?: string | null,
-    dbname?: string | null
-  ) {
-    targetDatasourceId = id;
-    targetDatasourceName = name ?? null;
-    targetDatabaseName = dbname ?? null;
+  async function setTargetDatasource(opts: {
+    id: string | null;
+    name?: string | null;
+    dbname?: string | null;
+  }) {
+    targetDatasourceId = opts.id;
+    targetDatasourceName = opts.name ?? null;
+    targetDatabaseName = opts.dbname ?? null;
     targetTables = [];
     targetTableName = null;
     targetColumns = [];
     refreshTargetExists();
-    if (!id) return;
+    if (!opts.id) return;
     loadingTables = true;
     try {
-      const tables = await getDatasourceTables(id);
+      const tables = await getDatasourceTables(opts.id);
       targetTables = tables;
     } catch (err) {
       error =
@@ -609,9 +624,21 @@ export function createFieldMappingState(
     setScript(s: string) {
       script = s;
     },
-    setSourceDatasource,
+    setSourceDatasource(opts: {
+      id: string | null;
+      name?: string | null;
+      dbname?: string | null;
+    }) {
+      return setSourceDatasource(opts);
+    },
     setSourceTable,
-    setTargetDatasource,
+    setTargetDatasource(opts: {
+      id: string | null;
+      name?: string | null;
+      dbname?: string | null;
+    }) {
+      return setTargetDatasource(opts);
+    },
     setTargetTable,
     updateMapping,
     setGenerateSql(sql: string) {
