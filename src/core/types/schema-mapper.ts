@@ -138,6 +138,7 @@ export interface MappingRow {
   validators: string[];
   defaultValue: string;
   ignore: boolean;
+  isManual?: boolean;
 }
 
 export interface FieldMappingConfigData {

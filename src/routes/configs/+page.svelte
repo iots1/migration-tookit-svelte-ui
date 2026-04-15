@@ -19,18 +19,18 @@
     await goto(resolve('/configs/new'));
   }
 
-  async function handleEdit(id: string) {
-    await goto(resolve('/configs/[id]', { id }));
+  async function handleEdit(uuid: string) {
+    await goto(`/configs/${uuid}`);
   }
 
-  async function handleDelete(id: string) {
+  async function handleDelete(uuid: string) {
     const confirmed = await confirmDialog({
       title: 'Delete Config',
       description:
         'Are you sure you want to delete this config? This action cannot be undone.',
     });
     if (!confirmed) return;
-    await state.deleteById(id);
+    await state.deleteById(uuid);
   }
 
   function formatDate(iso: string): string {

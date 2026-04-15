@@ -63,6 +63,8 @@ export interface FieldMappingState {
   }) => Promise<void>;
   setTargetTable: (table: string | null) => Promise<void>;
   updateMapping: (index: number, updates: Partial<MappingRow>) => void;
+  addMapping: (row?: Partial<MappingRow>) => void;
+  removeMapping: (index: number) => void;
   setGenerateSql: (sql: string) => void;
   autoGenerateSql: () => void;
   goToStep: (step: number) => void;
@@ -385,6 +387,27 @@ export function createFieldMappingState(
     }
   }
 
+  function addMapping(row?: Partial<MappingRow>) {
+    const newRow: MappingRow = {
+      sourceColumn: row?.sourceColumn ?? '',
+      sourceType: row?.sourceType ?? '',
+      targetColumn: row?.targetColumn ?? '',
+      targetExists: row?.targetColumn
+        ? targetColumns.some((c) => c.name === row.targetColumn)
+        : false,
+      transformers: row?.transformers ?? [],
+      validators: row?.validators ?? [],
+      defaultValue: row?.defaultValue ?? '',
+      ignore: row?.ignore ?? true,
+      isManual: row?.isManual ?? true,
+    };
+    mappings = [...mappings, newRow];
+  }
+
+  function removeMapping(index: number) {
+    mappings = mappings.filter((_, i) => i !== index);
+  }
+
   function updateMapping(index: number, updates: Partial<MappingRow>) {
     const updated = [...mappings];
     const current = updated[index];
@@ -641,6 +664,8 @@ export function createFieldMappingState(
     },
     setTargetTable,
     updateMapping,
+    addMapping,
+    removeMapping,
     setGenerateSql(sql: string) {
       generateSql = sql;
     },

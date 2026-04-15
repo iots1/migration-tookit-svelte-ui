@@ -7,7 +7,6 @@
   import Sidebar from '$lib/components/layout/Sidebar.svelte';
   import Toast from '$lib/components/Toast.svelte';
 
-  import 'tailwindcss';
   import '../app.scss';
 
   const { children }: { children: Snippet } = $props();

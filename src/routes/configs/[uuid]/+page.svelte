@@ -49,7 +49,7 @@
       // cspell:disable-next-line
       showToast('บันทึกสำเร็จ');
       if (rawId === 'new') {
-        await goto(resolve('/configs/[id]', { id: savedId }), {
+        await goto(`/configs/${savedId}`, {
           replaceState: true,
         });
       }
@@ -205,7 +205,7 @@
           </span>
           <span class="sm-step-label">{label}</span>
         </button>
-        {#if i < 3}
+        {#if i < stepLabels.length - 1}
           <div class="sm-step-connector {connectorClass(step)}"></div>
         {/if}
       {/each}
@@ -587,6 +587,7 @@
                     <th style="width: 130px;">Transformers</th>
                     <th style="width: 120px;">Validators</th>
                     <th style="width: 100px;">Default</th>
+                    <th style="width: 40px;"></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -615,9 +616,39 @@
                             fm.updateMapping(i, { ignore: !mapping.ignore })}
                         />
                       </td>
-                      <td class="sm-mapping-col">{mapping.sourceColumn}</td>
+                      <td class="sm-mapping-col">
+                        {#if mapping.isManual}
+                          <input
+                            type="text"
+                            class="sm-mapping-input"
+                            placeholder="column name"
+                            value={mapping.sourceColumn}
+                            oninput={(e) =>
+                              fm.updateMapping(i, {
+                                sourceColumn: (e.target as HTMLInputElement)
+                                  .value,
+                              })}
+                          />
+                        {:else}
+                          {mapping.sourceColumn}
+                        {/if}
+                      </td>
                       <td class="sm-mapping-type" title={mapping.sourceType}>
-                        {mapping.sourceType}
+                        {#if mapping.isManual}
+                          <input
+                            type="text"
+                            class="sm-mapping-input"
+                            placeholder="type"
+                            value={mapping.sourceType}
+                            oninput={(e) =>
+                              fm.updateMapping(i, {
+                                sourceType: (e.target as HTMLInputElement)
+                                  .value,
+                              })}
+                          />
+                        {:else}
+                          {mapping.sourceType}
+                        {/if}
                       </td>
                       <td>
                         <select
@@ -712,10 +743,57 @@
                             })}
                         />
                       </td>
+                      <td style="text-align: center;">
+                        {#if mapping.isManual}
+                          <button
+                            class="action-btn action-btn-delete"
+                            onclick={() => fm.removeMapping(i)}
+                            title="Remove row"
+                            aria-label="Remove row"
+                          >
+                            <svg
+                              width="12"
+                              height="12"
+                              viewBox="0 0 12 12"
+                              fill="none"
+                            >
+                              <path
+                                d="M2 2l8 8M10 2l-8 8"
+                                stroke="currentColor"
+                                stroke-width="1.5"
+                                stroke-linecap="round"
+                              />
+                            </svg>
+                          </button>
+                        {/if}
+                      </td>
                     </tr>
                   {/each}
                 </tbody>
               </table>
+            </div>
+            <div style="padding: 8px 12px;">
+              <button
+                class="btn btn-secondary"
+                onclick={() => fm.addMapping()}
+                style="font-size: 12px; padding: 4px 10px;"
+              >
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 12 12"
+                  fill="none"
+                  style="margin-right: 4px;"
+                >
+                  <path
+                    d="M6 2v8M2 6h8"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                  />
+                </svg>
+                Add Row
+              </button>
             </div>
           {/if}
         </div>
