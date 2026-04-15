@@ -12,4 +12,9 @@ export const API_V1 = {
   DATASOURCES: '/datasources',
   DATASOURCE_DETAIL: (id: string) => `/datasources/${id}`,
   DB_EXPLORERS: '/db-explorers',
+  DATASOURCE_TABLES: (id: string) => `/datasources/${id}/tables`,
+  DATASOURCE_TABLE_COLUMNS: (id: string, table: string) =>
+    `/datasources/${id}/tables/${table}/columns`,
+  TRANSFORMERS: '/transformers',
+  VALIDATORS: '/validators',
 } as const;

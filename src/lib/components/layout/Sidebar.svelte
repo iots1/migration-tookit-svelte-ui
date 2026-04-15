@@ -11,6 +11,7 @@
   const navItems: NavItem[] = [
     { href: '/', label: 'Home', icon: 'home' },
     { href: '/pipelines', label: 'Pipelines', icon: 'pipelines' },
+    { href: '/configs', label: 'Schema Mapper', icon: 'schema' },
     { href: '/pipeline-editor', label: 'Pipeline Editor', icon: 'pipeline' },
     { href: '/db-explorer', label: 'DB Explorer', icon: 'database' },
     { href: '/migration-runner', label: 'Migration Runner', icon: 'runner' },
@@ -144,6 +145,46 @@
                 stroke-width="1.2"
                 stroke-linecap="round"
                 opacity="0.5"
+              />
+            </svg>
+          {:else if item.icon === 'schema'}
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <rect
+                x="1.5"
+                y="1.5"
+                width="7"
+                height="7"
+                rx="2"
+                stroke="currentColor"
+                stroke-width="1.5"
+              />
+              <rect
+                x="11.5"
+                y="11.5"
+                width="7"
+                height="7"
+                rx="2"
+                stroke="currentColor"
+                stroke-width="1.5"
+              />
+              <path
+                d="M8.5 5h3l4.5 4.5v3"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+              />
+              <circle
+                cx="11"
+                cy="9"
+                r="1.5"
+                stroke="currentColor"
+                stroke-width="1.5"
+              />
+              <path
+                d="M4 13h2l2-2"
+                stroke="currentColor"
+                stroke-width="1.2"
+                stroke-linecap="round"
               />
             </svg>
           {:else if item.icon === 'pipeline'}

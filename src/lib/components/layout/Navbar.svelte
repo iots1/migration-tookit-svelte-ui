@@ -5,6 +5,7 @@
 
   const routeName: Record<string, string> = {
     '/': 'Home',
+    '/configs': 'Schema Mapper',
     '/pipeline-editor': 'Pipeline Editor',
     '/db-explorer': 'DB Explorer',
     '/migration-runner': 'Migration Runner',
@@ -12,7 +13,11 @@
   };
 
   function getBreadcrumb(): string {
-    return routeName[page.url.pathname] || 'Migration Toolkit';
+    const pathname = page.url.pathname;
+    if (routeName[pathname]) return routeName[pathname];
+    if (pathname.startsWith('/configs/')) return 'Schema Mapper';
+    if (pathname.startsWith('/pipeline-editor/')) return 'Pipeline Editor';
+    return 'Migration Toolkit';
   }
 </script>
 
