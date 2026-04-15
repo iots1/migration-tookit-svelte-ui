@@ -11,6 +11,14 @@
 
   const state = createConfigsListState();
 
+  let searchDebounce: ReturnType<typeof setTimeout>;
+
+  function handleSearchInput(value: string) {
+    state.setSearchInput(value);
+    clearTimeout(searchDebounce);
+    searchDebounce = setTimeout(() => state.search(), 300);
+  }
+
   onMount(() => {
     void state.fetchConfigs();
   });
@@ -98,9 +106,13 @@
         class="search-input"
         placeholder="Search configs..."
         value={state.searchInput}
-        oninput={(e) =>
-          state.setSearchInput((e.target as HTMLInputElement).value)}
-        onkeydown={(e) => e.key === 'Enter' && state.search()}
+        oninput={(e) => handleSearchInput((e.target as HTMLInputElement).value)}
+        onkeydown={(e) => {
+          if (e.key === 'Enter') {
+            clearTimeout(searchDebounce);
+            state.search();
+          }
+        }}
       />
       {#if state.searchInput}
         <button
@@ -227,7 +239,13 @@
               </td>
               <td>
                 <span class="sm-flow-text">
-                  <span>{config.source_table || '-'}</span>
+                  <span>
+                    {#if config.source_datasource}
+                      <span style="color: var(--text-muted);"
+                        >{config.source_datasource}.</span
+                      >
+                    {/if}{config.source_table || '-'}
+                  </span>
                   <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                     <path
                       d="M3 7h8M9 4l3 3-3 3"
@@ -237,7 +255,13 @@
                       stroke-linejoin="round"
                     />
                   </svg>
-                  <span>{config.target_table || '-'}</span>
+                  <span>
+                    {#if config.target_datasource}
+                      <span style="color: var(--text-muted);"
+                        >{config.target_datasource}.</span
+                      >
+                    {/if}{config.target_table || '-'}
+                  </span>
                 </span>
               </td>
               <td>

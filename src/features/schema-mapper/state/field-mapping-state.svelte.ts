@@ -47,6 +47,8 @@ export interface FieldMappingState {
   readonly loadingColumns: boolean;
   readonly loadingOptions: boolean;
   readonly error: string | null;
+  readonly isDirty: boolean;
+  clearError: () => void;
   setConfigType: (type: 'std' | 'custom') => void;
   setConfigName: (name: string) => void;
   setScript: (script: string) => void;
@@ -159,6 +161,7 @@ export function createFieldMappingState(
   let loadingColumns = $state(false);
   let loadingOptions = $state(false);
   let error = $state<string | null>(null);
+  let isDirty = $state(false);
 
   function refreshTargetExists() {
     const targetColumnNames = targetColumns.map((c) => c.name);
@@ -220,46 +223,56 @@ export function createFieldMappingState(
       targetDatasourceName = jsonData.target?.datasource_name ?? null;
       targetDatabaseName = jsonData.target?.database ?? null;
 
+      const loadWarnings: string[] = [];
+
       if (sourceDatasourceId) {
         try {
-          const tables = await getDatasourceTables(sourceDatasourceId);
-          sourceTables = tables;
+          sourceTables = await getDatasourceTables(sourceDatasourceId);
         } catch {
           sourceTables = [];
+          loadWarnings.push('Could not load source tables');
         }
       }
 
       if (sourceDatasourceId && sourceTableName) {
         try {
-          const cols = await getDatasourceTableColumns(
+          sourceColumns = await getDatasourceTableColumns(
             sourceDatasourceId,
             sourceTableName
           );
-          sourceColumns = cols;
         } catch {
           sourceColumns = [];
+          loadWarnings.push(
+            `Could not load columns for source table "${sourceTableName}"`
+          );
         }
       }
 
       if (targetDatasourceId) {
         try {
-          const tables = await getDatasourceTables(targetDatasourceId);
-          targetTables = tables;
+          targetTables = await getDatasourceTables(targetDatasourceId);
         } catch {
           targetTables = [];
+          loadWarnings.push('Could not load target tables');
         }
       }
 
       if (targetDatasourceId && targetTableName) {
         try {
-          const cols = await getDatasourceTableColumns(
+          targetColumns = await getDatasourceTableColumns(
             targetDatasourceId,
             targetTableName
           );
-          targetColumns = cols;
         } catch {
           targetColumns = [];
+          loadWarnings.push(
+            `Could not load columns for target table "${targetTableName}"`
+          );
         }
+      }
+
+      if (loadWarnings.length > 0) {
+        error = loadWarnings.join(' · ');
       }
 
       if (jsonData.mappings && jsonData.mappings.length > 0) {
@@ -274,6 +287,7 @@ export function createFieldMappingState(
 
       maxReachedStep = 4;
       currentStep = configType === 'custom' ? 1 : 4;
+      isDirty = false;
     } catch (err) {
       error = err instanceof Error ? err.message : 'Failed to load config';
     } finally {
@@ -402,10 +416,12 @@ export function createFieldMappingState(
       isManual: row?.isManual ?? true,
     };
     mappings = [...mappings, newRow];
+    isDirty = true;
   }
 
   function removeMapping(index: number) {
     mappings = mappings.filter((_, i) => i !== index);
+    isDirty = true;
   }
 
   function updateMapping(index: number, updates: Partial<MappingRow>) {
@@ -443,6 +459,7 @@ export function createFieldMappingState(
     };
 
     mappings = updated;
+    isDirty = true;
   }
 
   function autoGenerateSql() {
@@ -512,13 +529,16 @@ export function createFieldMappingState(
         generate_sql: configType === 'std' ? generateSql.trim() || null : null,
       };
 
+      let savedId: string;
       if (mode === 'edit' && configId) {
         await updateConfig(configId, payload);
-        return configId;
+        savedId = configId;
       } else {
         const result = await createConfig(payload);
-        return result.id;
+        savedId = result.id;
       }
+      isDirty = false;
+      return savedId;
     } catch (err) {
       error = err instanceof Error ? err.message : 'Failed to save config';
       return null;
@@ -634,8 +654,15 @@ export function createFieldMappingState(
     get error() {
       return error;
     },
+    get isDirty() {
+      return isDirty;
+    },
+    clearError() {
+      error = null;
+    },
     setConfigType(type: 'std' | 'custom') {
       configType = type;
+      isDirty = true;
       if (type === 'custom') {
         maxReachedStep = 1;
         currentStep = 1;
@@ -643,9 +670,11 @@ export function createFieldMappingState(
     },
     setConfigName(name: string) {
       configName = name;
+      isDirty = true;
     },
     setScript(s: string) {
       script = s;
+      isDirty = true;
     },
     setSourceDatasource(opts: {
       id: string | null;
@@ -668,6 +697,7 @@ export function createFieldMappingState(
     removeMapping,
     setGenerateSql(sql: string) {
       generateSql = sql;
+      isDirty = true;
     },
     autoGenerateSql,
     goToStep,

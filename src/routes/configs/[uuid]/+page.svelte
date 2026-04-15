@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onDestroy, onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import { resolve } from '$app/paths';
   import { page } from '$app/state';
@@ -29,7 +29,18 @@
   let showValidatorDrawer = $state(false);
   let currentMappingIndex = $state(-1);
 
+  let activeMappings = $derived(
+    fm.mappings.filter((m) => !m.ignore && m.targetColumn).length
+  );
+
+  function handleBeforeUnload(e: BeforeUnloadEvent) {
+    if (fm.isDirty) {
+      e.preventDefault();
+    }
+  }
+
   onMount(async () => {
+    window.addEventListener('beforeunload', handleBeforeUnload);
     try {
       const items = await listDatasources();
       datasources = items;
@@ -41,6 +52,10 @@
     }
     // Load transformers and validators options
     await fm.loadOptions();
+  });
+
+  onDestroy(() => {
+    window.removeEventListener('beforeunload', handleBeforeUnload);
   });
 
   async function handleSave() {
@@ -57,6 +72,9 @@
   }
 
   function handleBack() {
+    if (fm.isDirty && !confirm('You have unsaved changes. Leave anyway?')) {
+      return;
+    }
     void goto(resolve('/configs'));
   }
 
@@ -167,7 +185,11 @@
           />
         </svg>
         <span>{fm.error}</span>
-        <button class="sm-error-close" onclick={() => {}} aria-label="Dismiss">
+        <button
+          class="sm-error-close"
+          onclick={() => fm.clearError()}
+          aria-label="Dismiss"
+        >
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
             <path
               d="M3 3l8 8M11 3l-8 8"
@@ -183,30 +205,32 @@
     <div class="sm-wizard-steps">
       {#each stepLabels as label, i (i)}
         {@const step = i + 1}
-        <button
-          class="sm-step {stepClass(step)}"
-          onclick={() => fm.goToStep(step)}
-          disabled={step > fm.maxReachedStep}
-        >
-          <span class="sm-step-number">
-            {#if step < fm.currentStep}
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                <path
-                  d="M2 6l3 3 5-5"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-            {:else}
-              {step}
-            {/if}
-          </span>
-          <span class="sm-step-label">{label}</span>
-        </button>
-        {#if i < stepLabels.length - 1}
-          <div class="sm-step-connector {connectorClass(step)}"></div>
+        {#if fm.configType === 'std' || step === 1}
+          <button
+            class="sm-step {stepClass(step)}"
+            onclick={() => fm.goToStep(step)}
+            disabled={step > fm.maxReachedStep}
+          >
+            <span class="sm-step-number">
+              {#if step < fm.currentStep}
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <path
+                    d="M2 6l3 3 5-5"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              {:else}
+                {step}
+              {/if}
+            </span>
+            <span class="sm-step-label">{label}</span>
+          </button>
+          {#if i < stepLabels.length - 1 && fm.configType === 'std'}
+            <div class="sm-step-connector {connectorClass(step)}"></div>
+          {/if}
         {/if}
       {/each}
     </div>
@@ -552,8 +576,11 @@
         <div class="sm-card-header">
           <span class="sm-card-title">Field Mapping</span>
           <div
-            style="display: flex; gap: 8px; font-size: 12px; color: var(--text-secondary);"
+            style="display: flex; align-items: center; gap: 12px; font-size: 12px; color: var(--text-secondary);"
           >
+            <span class="sm-mapping-count"
+              >{activeMappings} / {fm.mappings.length} mapped</span
+            >
             <span>Source: <strong>{fm.sourceTableName}</strong></span>
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
               <path
@@ -579,7 +606,7 @@
                   <tr>
                     <th style="width: 40px;">Status</th>
                     <th style="width: 36px;">
-                      <span title="Ignore">Ign</span>
+                      <span title="Skip this field (do not migrate)">Skip</span>
                     </th>
                     <th>Source Column</th>
                     <th style="width: 120px;">Type</th>
@@ -596,14 +623,17 @@
                       <td style="text-align: center;">
                         {#if mapping.targetColumn}
                           <span
-                            class="sm-status-dot sm-status-dot--ok={mapping.targetExists}"
+                            class="sm-status-dot"
+                            class:sm-status-dot--ok={mapping.targetExists}
                             class:sm-status-dot--missing={!mapping.targetExists}
                             title={mapping.targetExists
                               ? 'Column exists'
-                              : 'Column not found'}
+                              : 'Column not found in target'}
                           ></span>
                         {:else}
-                          <span class="sm-status-dot sm-status-dot--missing"
+                          <span
+                            class="sm-status-dot sm-status-dot--missing"
+                            title="No target column selected"
                           ></span>
                         {/if}
                       </td>

@@ -42,7 +42,9 @@ export interface ConfigListItem {
   id: string;
   config_name: string;
   table_name: string;
+  source_datasource: string;
   source_table: string;
+  target_datasource: string;
   target_table: string;
   config_type: string;
   mapping_count: number;
@@ -56,8 +58,8 @@ interface ConfigListApiResponseItem {
     config_name: string;
     table_name: string;
     json_data: {
-      source: { table: string };
-      target: { table: string };
+      source: { table: string; datasource_name?: string };
+      target: { table: string; datasource_name?: string };
       mappings: ConfigMapping[];
     };
     config_type: string;
