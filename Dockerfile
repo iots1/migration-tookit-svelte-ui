@@ -24,8 +24,8 @@ COPY --from=builder /app/pnpm-lock.yaml ./pnpm-lock.yaml
 RUN pnpm install --prod --frozen-lockfile
 
 ENV NODE_ENV=production
-ENV PORT=3000
+ENV PORT=5173
 
-EXPOSE 3000
+EXPOSE 5173
 
 CMD ["node", "build"]
