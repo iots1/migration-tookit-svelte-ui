@@ -1,5 +1,5 @@
 services:
-  svelte-app:
+  migration-toolkit-svelte-ui:
     build:
       context: .
       dockerfile: Dockerfile
