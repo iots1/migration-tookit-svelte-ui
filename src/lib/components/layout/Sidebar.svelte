@@ -22,7 +22,8 @@
     $props();
 
   function isActive(href: string): boolean {
-    const resolved = resolve(href);
+    const resolved = resolve(href as '/');
+
     if (href === '/') return page.url.pathname === resolved;
     return page.url.pathname.startsWith(resolved);
   }
@@ -107,7 +108,7 @@
   <nav class="sidebar-nav">
     {#each navItems as item (item.href)}
       <a
-        href={resolve(item.href)}
+        href={resolve(item.href as '/')}
         class="nav-item"
         class:active={isActive(item.href)}
         title={collapsed ? item.label : undefined}

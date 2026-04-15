@@ -20,7 +20,7 @@
     $props();
 
   let searchQuery = $state('');
-  const localSelected = new SvelteSet(selected);
+  let localSelected = new SvelteSet<string>();
   let currentCategory = $state<string | null>(null);
 
   $effect(() => {
@@ -85,7 +85,11 @@
 </script>
 
 {#if open}
-  <div class="drawer-overlay drawer-overlay-open" onclick={handleCancel}></div>
+  <div
+    class="drawer-overlay drawer-overlay-open"
+    role="presentation"
+    onclick={handleCancel}
+  ></div>
   <div class="drawer drawer-open">
     <div class="drawer-header">
       <h3 class="drawer-title">{title}</h3>
@@ -140,6 +144,7 @@
       <!-- Category Filter for Transformers -->
       {#if type === 'transformers' && categories}
         <div class="form-group" style="margin-bottom: 16px;">
+          <!-- svelte-ignore a11y_label_has_associated_control -->
           <label class="form-label">Category</label>
           <div class="category-pills">
             <button
@@ -215,7 +220,16 @@
             <div
               class="item-row"
               class:item-row--selected={localSelected.has(itemName)}
+              role="option"
+              aria-selected={localSelected.has(itemName)}
+              tabindex="0"
               onclick={() => toggleItem(itemName)}
+              onkeydown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  toggleItem(itemName);
+                }
+              }}
             >
               <div class="item-checkbox">
                 <input

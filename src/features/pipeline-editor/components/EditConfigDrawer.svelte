@@ -33,26 +33,30 @@
   let originalDatasourceTargetId = $state<string | null>(null);
   let originalGenerateSql = $state<string | null>(null);
 
-  $effect(async () => {
+  async function loadConfig(id: string) {
+    loading = true;
+    error = null;
+    try {
+      const loaded = await getConfig(id);
+      config = loaded;
+      configName = loaded.config_name;
+      tableName = loaded.table_name;
+      script = loaded.script ?? '';
+      configType = loaded.config_type;
+      originalJsonData = loaded.json_data;
+      originalDatasourceSourceId = loaded.datasource_source_id;
+      originalDatasourceTargetId = loaded.datasource_target_id;
+      originalGenerateSql = loaded.generate_sql;
+    } catch (err) {
+      error = err instanceof Error ? err.message : 'Failed to load config';
+    } finally {
+      loading = false;
+    }
+  }
+
+  $effect(() => {
     if (open && configId) {
-      loading = true;
-      error = null;
-      try {
-        const loaded = await getConfig(configId);
-        config = loaded;
-        configName = loaded.config_name;
-        tableName = loaded.table_name;
-        script = loaded.script ?? '';
-        configType = loaded.config_type;
-        originalJsonData = loaded.json_data;
-        originalDatasourceSourceId = loaded.datasource_source_id;
-        originalDatasourceTargetId = loaded.datasource_target_id;
-        originalGenerateSql = loaded.generate_sql;
-      } catch (err) {
-        error = err instanceof Error ? err.message : 'Failed to load config';
-      } finally {
-        loading = false;
-      }
+      void loadConfig(configId);
     }
   });
 

@@ -9,8 +9,11 @@
 <svelte:window onkeydown={handleKeydown} />
 
 {#if dialog.open}
-  <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-  <div class="dialog-overlay" onclick={() => resolveDialog(false)}>
+  <div
+    class="dialog-overlay"
+    role="presentation"
+    onclick={() => resolveDialog(false)}
+  >
     <div
       class="dialog"
       class:dialog--danger={dialog.type === 'danger'}
@@ -18,7 +21,9 @@
       role="dialog"
       aria-modal="true"
       aria-labelledby="dialog-title"
+      tabindex="-1"
       onclick={(e) => e.stopPropagation()}
+      onkeydown={(e) => e.stopPropagation()}
     >
       <div class="dialog-icon-wrap dialog-icon-wrap--{dialog.type}">
         {#if dialog.type === 'danger'}
