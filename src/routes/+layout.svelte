@@ -9,6 +9,8 @@
 
   import '../app.scss';
 
+  import './../../app.css';
+
   const { children }: { children: Snippet } = $props();
 
   let collapsed = $state(false);
