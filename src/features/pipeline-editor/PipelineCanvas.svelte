@@ -15,25 +15,29 @@
   let {
     nodes,
     edges,
+    onNodesChange,
     onEdgesChange,
     onNodeDragStop,
     onNodeEdit,
   }: {
     nodes: Node[];
     edges: Edge[];
+    onNodesChange: (nodes: Node[]) => void;
     onEdgesChange: (edges: Edge[]) => void;
     onNodeDragStop: (node: Node) => void;
     onNodeEdit?: (configId: string) => void;
   } = $props();
 
-  let nodesWithHandler = $derived(
-    onNodeEdit
+  let nodesWithHandler = $state.raw<Node[]>([]);
+
+  $effect(() => {
+    nodesWithHandler = onNodeEdit
       ? nodes.map((n) => ({
           ...n,
           data: { ...n.data, onEdit: onNodeEdit },
         }))
-      : nodes
-  );
+      : nodes;
+  });
 
   const nodeTypes = {
     config: ConfigNode,
@@ -52,14 +56,19 @@
   }
 
   function handleDelete({
+    nodes: deletedNodes,
     edges: deletedEdges,
   }: {
     nodes: Node[];
     edges: Edge[];
   }) {
+    if (deletedNodes.length > 0) {
+      const deletedNodeIds = new Set(deletedNodes.map((n) => n.id));
+      onNodesChange(nodes.filter((n) => !deletedNodeIds.has(n.id)));
+    }
     if (deletedEdges.length > 0) {
-      const deletedIds = new Set(deletedEdges.map((e) => e.id));
-      onEdgesChange(edges.filter((e) => !deletedIds.has(e.id)));
+      const deletedEdgeIds = new Set(deletedEdges.map((e) => e.id));
+      onEdgesChange(edges.filter((e) => !deletedEdgeIds.has(e.id)));
     }
   }
 </script>

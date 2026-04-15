@@ -1,6 +1,6 @@
-const API_BASE: string =
-  (import.meta.env.PUBLIC_API_URL as string | undefined) ??
-  'http://localhost:3000/api/v1';
+import { env } from '$env/dynamic/public';
+
+const API_BASE: string = env?.PUBLIC_API_URL ?? 'http://localhost:8000/api/v1';
 
 interface RequestOptions extends Omit<RequestInit, 'body'> {
   body?: unknown;

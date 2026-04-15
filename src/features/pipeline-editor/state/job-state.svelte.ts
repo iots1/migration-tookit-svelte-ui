@@ -4,6 +4,7 @@ import type {
   JobErrorEvent,
 } from '$core/types/pipeline';
 
+import { env } from '$env/dynamic/public';
 import { io } from 'socket.io-client';
 
 interface JobBatchLog {
@@ -51,12 +52,14 @@ export function createJobState(): JobState {
     batches = [];
     errorMessage = null;
 
-    const wsUrl =
-      (import.meta.env.PUBLIC_WS_URL as string | undefined) ??
-      (import.meta.env.PUBLIC_API_URL as string | undefined)
-        ?.replace(/\/api\/v1$/, '')
-        ?.replace(/^http/, 'ws') ??
-      'ws://localhost:3000';
+    const baseEnvUrl =
+      env?.PUBLIC_WS_URL ??
+      env?.PUBLIC_API_URL ??
+      'http://localhost:8000/api/v1';
+
+    const wsUrl = baseEnvUrl
+      .replace(/\/api\/v1\/?$/, '')
+      .replace(/^http/, 'ws');
 
     socket = io(wsUrl, {
       path: '/ws/socket.io/',

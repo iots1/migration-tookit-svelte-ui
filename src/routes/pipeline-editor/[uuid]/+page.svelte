@@ -101,6 +101,12 @@
     editor.addConfigNode(config);
   }
 
+  function handleNodesChange(updatedNodes: Node[]) {
+    editor.setNodes(updatedNodes as unknown as typeof editor.nodes);
+    editor.pushHistory();
+    editor.scheduleAutoSave();
+  }
+
   function handleEdgesChange(edges: Edge[]) {
     editor.setEdges(edges as unknown as typeof editor.edges);
     editor.pushHistory();
@@ -271,6 +277,7 @@
         <PipelineCanvas
           nodes={editor.nodes as unknown as Node[]}
           edges={editor.edges as unknown as Edge[]}
+          onNodesChange={handleNodesChange}
           onEdgesChange={handleEdgesChange}
           onNodeDragStop={handleNodeDragStop}
           onNodeEdit={handleEditConfig}
