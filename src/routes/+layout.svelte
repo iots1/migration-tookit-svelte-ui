@@ -7,9 +7,8 @@
   import Sidebar from '$lib/components/layout/Sidebar.svelte';
   import Toast from '$lib/components/Toast.svelte';
 
-  import '../app.scss';
-
-  import './../../app.css';
+  import '$src/app.css';
+  import '$src/app.scss';
 
   const { children }: { children: Snippet } = $props();
 

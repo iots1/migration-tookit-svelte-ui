@@ -15,6 +15,9 @@ const config = {
     alias: {
       $core: path.resolve('./src/core'),
       $features: path.resolve('./src/features'),
+      $src: path.resolve('./src'),
+      $lib: path.resolve('./src/lib'),
+      $routes: path.resolve('./src/routes'),
     },
   },
 };

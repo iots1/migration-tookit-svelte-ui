@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onDestroy, onMount } from 'svelte';
+  import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import { resolve } from '$app/paths';
   import { page } from '$app/state';
@@ -39,8 +39,14 @@
     }
   }
 
-  onMount(async () => {
+  onMount(() => {
     window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  });
+
+  onMount(async () => {
     try {
       const items = await listDatasources();
       datasources = items;
@@ -50,12 +56,7 @@
     if (rawId !== 'new') {
       await fm.loadConfig(rawId);
     }
-    // Load transformers and validators options
     await fm.loadOptions();
-  });
-
-  onDestroy(() => {
-    window.removeEventListener('beforeunload', handleBeforeUnload);
   });
 
   async function handleSave() {
