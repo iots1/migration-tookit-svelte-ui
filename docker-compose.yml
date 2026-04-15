@@ -6,6 +6,7 @@ services:
     container_name: migration-toolkit-svelte-ui
     restart: unless-stopped
     environment:
+      - PUBLIC_API_URL=http://localhost:8000/api/v1
       - NODE_ENV=production
       - PORT=3000
 
