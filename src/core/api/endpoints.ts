@@ -9,4 +9,7 @@ export const API_V1 = {
   MIGRATION_JOBS: '/jobs',
   MIGRATION_JOB_STATUS: (id: string) => `/jobs/${id}/status`,
   MIGRATION_JOB_STOP: (id: string) => `/jobs/${id}/stop`,
+  DATASOURCES: '/datasources',
+  DATASOURCE_DETAIL: (id: string) => `/datasources/${id}`,
+  DB_EXPLORERS: '/db-explorers',
 } as const;
