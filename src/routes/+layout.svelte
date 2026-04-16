@@ -8,6 +8,7 @@
   import Toast from '$lib/components/Toast.svelte';
 
   import '$src/app.css';
+
   import '$src/app.scss';
 
   const { children }: { children: Snippet } = $props();

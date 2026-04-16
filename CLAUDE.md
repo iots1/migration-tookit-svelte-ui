@@ -102,6 +102,9 @@ src/features/pipeline-editor/
 
 **SCSS rules:**
 
+- **No `<style>` blocks in `.svelte` files** — styles must live in SCSS files only
+  - Feature-specific styles → `src/features/<feature_name>/<feature_name>.scss`
+  - Shared/global component styles → `src/styles/<component>.scss` (imported in `app.scss`)
 - Use `@use` instead of `@import` (deprecated in Dart Sass 3.0.0)
 - Use `&` for nesting pseudo-classes and child selectors
 - All global component styles (buttons, forms, tables, drawer) go in `src/styles/`

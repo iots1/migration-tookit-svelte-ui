@@ -9,6 +9,7 @@
   import { createFieldMappingState } from '$features/schema-mapper/state/field-mapping-state.svelte';
   import BadgeList from '$lib/components/BadgeList.svelte';
   import ItemSelectorDrawer from '$lib/components/ItemSelectorDrawer.svelte';
+  import SqlGuideModal from '$lib/components/SqlGuideModal.svelte';
   import SqlHighlighter from '$lib/components/SqlHighlighter.svelte';
   import { showToast } from '$lib/toast.svelte';
 
@@ -27,6 +28,7 @@
   // Drawer state
   let showTransformerDrawer = $state(false);
   let showValidatorDrawer = $state(false);
+  let showSqlGuide = $state(false);
   let currentMappingIndex = $state(-1);
 
   let activeMappings = $derived(
@@ -301,7 +303,59 @@
 
           {#if fm.configType === 'custom'}
             <div class="form-group">
-              <div class="form-label">SQL Script</div>
+              <label class="form-label" for="custom-target-ds"
+                >Target Datasource</label
+              >
+              <select
+                id="custom-target-ds"
+                class="form-input"
+                disabled={fm.loadingTables}
+                onchange={(e) => {
+                  const val = (e.target as HTMLSelectElement).value;
+                  const ds = datasources.find((d) => d.id === val);
+                  void fm.setTargetDatasource({
+                    id: val || null,
+                    name: ds?.name ?? null,
+                    dbname: ds?.dbname ?? null,
+                  });
+                }}
+              >
+                <option value="" disabled selected={!fm.targetDatasourceId}>
+                  {fm.loadingTables ? 'Loading...' : 'Select datasource'}
+                </option>
+                {#each datasources as ds (ds.id)}
+                  <option
+                    value={ds.id}
+                    selected={ds.id === fm.targetDatasourceId}
+                  >
+                    {ds.name} ({ds.db_type})
+                  </option>
+                {/each}
+              </select>
+            </div>
+            <div class="form-group">
+              <div
+                style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;"
+              >
+                <div class="form-label" style="margin: 0;">SQL Script</div>
+                <button
+                  class="btn btn-secondary"
+                  onclick={() => (showSqlGuide = true)}
+                  style="padding: 4px 12px; font-size: 12px; display: flex; align-items: center; gap: 6px;"
+                  title="View SQL Script Guide"
+                >
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                    <path
+                      d="M7 2.5v9M3 6.5l-1.5 1.5 1.5 1.5M11 6.5l1.5 1.5-1.5 1.5"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                  Guide
+                </button>
+              </div>
               <SqlHighlighter
                 value={fm.script}
                 placeholder="Write your custom SQL here..."
@@ -897,4 +951,7 @@
     onClose={() => (showValidatorDrawer = false)}
     onApply={handleValidatorApply}
   />
+
+  <!-- SQL Guide Modal -->
+  <SqlGuideModal open={showSqlGuide} onClose={() => (showSqlGuide = false)} />
 {/if}

@@ -108,13 +108,13 @@
     <div class="drawer-body">
       <!-- Search -->
       <div class="form-group" style="margin-bottom: 16px;">
-        <div class="search-input-wrapper">
+        <div class="item-selector-search-wrapper">
           <svg
             width="16"
             height="16"
             viewBox="0 0 16 16"
             fill="none"
-            class="search-icon"
+            class="item-selector-search-icon"
           >
             <circle
               cx="7"
@@ -188,7 +188,7 @@
       <!-- Items List -->
       <div class="items-list">
         {#if filteredItems.length === 0}
-          <div class="empty-state">
+          <div class="item-selector-empty">
             <svg
               width="32"
               height="32"
@@ -265,127 +265,3 @@
     </div>
   </div>
 {/if}
-
-<style>
-  .search-input-wrapper {
-    position: relative;
-  }
-
-  .search-icon {
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--text-muted);
-    pointer-events: none;
-  }
-
-  .search-input-wrapper input {
-    padding-left: 36px;
-  }
-
-  .category-pills {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-  }
-
-  .category-pill {
-    padding: 6px 12px;
-    background-color: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    border-radius: 16px;
-    font-size: 12px;
-    color: var(--text-secondary);
-    cursor: pointer;
-    transition: all 0.15s ease;
-  }
-
-  .category-pill:hover {
-    background-color: var(--bg-tertiary);
-  }
-
-  .category-pill--active {
-    background-color: var(--blue-bg);
-    border-color: var(--blue-border);
-    color: var(--blue-text);
-  }
-
-  .items-list {
-    max-height: 400px;
-    overflow-y: auto;
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-  }
-
-  .empty-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 40px 20px;
-  }
-
-  .item-row {
-    display: flex;
-    gap: 12px;
-    padding: 12px;
-    border-bottom: 1px solid var(--border-color);
-    cursor: pointer;
-    transition: background-color 0.15s ease;
-  }
-
-  .item-row:hover {
-    background-color: var(--bg-secondary);
-  }
-
-  .item-row--selected {
-    background-color: var(--blue-bg);
-  }
-
-  .item-checkbox {
-    display: flex;
-    align-items: flex-start;
-    padding-top: 2px;
-  }
-
-  .item-content {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .item-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 4px;
-  }
-
-  .item-name {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text-primary);
-  }
-
-  .param-badge {
-    padding: 2px 6px;
-    background-color: var(--orange-bg);
-    color: var(--orange-text);
-    border-radius: 4px;
-    font-size: 10px;
-    font-weight: 600;
-  }
-
-  .item-description {
-    font-size: 12px;
-    color: var(--text-secondary);
-    margin-bottom: 4px;
-    line-height: 1.4;
-  }
-
-  .item-code {
-    font-size: 11px;
-    color: var(--text-muted);
-    font-family: 'Monaco', 'Menlo', monospace;
-  }
-</style>

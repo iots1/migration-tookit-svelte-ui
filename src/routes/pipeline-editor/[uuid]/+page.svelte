@@ -2,7 +2,6 @@
   import { SvelteFlowProvider, type Edge, type Node } from '@xyflow/svelte';
   import { onMount, tick } from 'svelte';
   import { goto } from '$app/navigation';
-  import { resolve } from '$app/paths';
   import { page } from '$app/state';
 
   import type { ConfigItem } from '$core/types/pipeline';
@@ -122,10 +121,7 @@
     if (id) {
       showToast('บันทึกสำเร็จ');
       if (!editUuid || editUuid === 'new') {
-        await tick();
-        await goto(resolve('/pipeline-editor/[uuid]', { uuid: id }), {
-          replaceState: true,
-        });
+        await goto(`/pipeline-editor/${id}`);
       }
       editor.closeDrawer();
     }
@@ -145,10 +141,7 @@
       if (!id) return;
 
       if (!editUuid || editUuid === 'new') {
-        await tick();
-        await goto(resolve('/pipeline-editor/[uuid]', { uuid: id }), {
-          replaceState: true,
-        });
+        await goto(`/pipeline-editor/${id}`);
       }
       editor.closeDrawer();
 

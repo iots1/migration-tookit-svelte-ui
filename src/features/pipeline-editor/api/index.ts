@@ -58,11 +58,15 @@ export async function listPipelines(params?: {
 export async function savePipeline(
   pipeline: PipelineSavePayload
 ): Promise<{ id: string; message: string }> {
-  const response: { id: string; message: string } = await api.post(
-    API_V1.PIPELINES,
-    pipeline
-  );
-  return response;
+  const raw = (await api.post(API_V1.PIPELINES, pipeline)) as Record<
+    string,
+    unknown
+  >;
+  const data = raw.data as Record<string, unknown>;
+  return {
+    id: (data?.id as string) ?? '',
+    message: (raw.message as string) ?? 'Created',
+  };
 }
 
 export async function loadPipeline(id: string): Promise<PipelineEntity> {
@@ -95,11 +99,15 @@ export async function updatePipeline(
   id: string,
   pipeline: PipelineSavePayload
 ): Promise<{ id: string; message: string }> {
-  const response: { id: string; message: string } = await api.put(
-    `${API_V1.PIPELINES}/${id}`,
-    pipeline
-  );
-  return response;
+  const raw = (await api.put(`${API_V1.PIPELINES}/${id}`, pipeline)) as Record<
+    string,
+    unknown
+  >;
+  const data = raw.data as Record<string, unknown>;
+  return {
+    id: (data?.id as string) ?? id,
+    message: (raw.message as string) ?? 'Updated',
+  };
 }
 
 export async function deletePipeline(id: string): Promise<void> {

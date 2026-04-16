@@ -1255,3 +1255,63 @@
     color: var(--error-text);
   }
 }
+
+/* ========== Edit Config Drawer ========== */
+
+.edit-config-spinner {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+
+  padding: 40px 20px;
+
+  color: var(--text-secondary);
+}
+
+.spinner-circle {
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--border);
+  border-radius: 50%;
+
+  animation: spin 1s linear infinite;
+  border-top-color: var(--accent);
+}
+
+.spinner-inline {
+  display: inline-block;
+
+  width: 14px;
+  height: 14px;
+  margin-right: 6px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+
+  animation: spin 0.8s linear infinite;
+  border-top-color: transparent;
+}
+
+.edit-config-error {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+
+  padding: 40px 20px;
+
+  color: var(--error);
+  text-align: center;
+}
+
+.config-type-display {
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  font-size: 14px;
+}

@@ -523,7 +523,7 @@ export function createFieldMappingState(
         table_name: sourceTableName ?? '',
         json_data: jsonDataStr,
         datasource_source_id: configType === 'std' ? sourceDatasourceId : null,
-        datasource_target_id: configType === 'std' ? targetDatasourceId : null,
+        datasource_target_id: targetDatasourceId,
         config_type: configType,
         script: configType === 'custom' ? script || null : null,
         generate_sql: configType === 'std' ? generateSql.trim() || null : null,

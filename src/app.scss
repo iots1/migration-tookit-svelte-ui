@@ -7,6 +7,11 @@
 @use './styles/drawer.scss';
 @use './styles/dialog.scss';
 @use './styles/animations.scss';
+@use './styles/toast.scss';
+@use './styles/badge-list.scss';
+@use './styles/sql-highlighter.scss';
+@use './styles/item-selector-drawer.scss';
+@use './styles/sql-guide-modal.scss';
 
 :root {
   --font-sans:
