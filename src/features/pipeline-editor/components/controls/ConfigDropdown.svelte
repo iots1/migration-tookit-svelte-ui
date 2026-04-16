@@ -30,20 +30,23 @@
     searchQuery = '';
   }
 
-  function handleClickOutside(e: MouseEvent) {
-    const target = e.target as HTMLElement;
-    if (!target.closest('.config-dropdown-wrapper')) {
-      open = false;
+  $effect(() => {
+    if (!open) return;
+
+    function handleDocumentClick(e: MouseEvent) {
+      const target = e.target as HTMLElement;
+      if (!target.closest('.config-dropdown-wrapper')) {
+        open = false;
+        searchQuery = '';
+      }
     }
-  }
+
+    document.addEventListener('click', handleDocumentClick);
+    return () => document.removeEventListener('click', handleDocumentClick);
+  });
 </script>
 
-<!-- svelte-ignore a11y_no_static_element_interactions -->
-<div
-  class="config-dropdown-wrapper"
-  onclick={handleClickOutside}
-  onkeydown={() => {}}
->
+<div class="config-dropdown-wrapper">
   <button
     class="toolbar-btn toolbar-btn-add-config"
     onclick={() => (open = !open)}
