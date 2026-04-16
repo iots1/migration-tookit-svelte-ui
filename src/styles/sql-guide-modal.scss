@@ -78,6 +78,8 @@
   min-height: calc(90vh - 120px);
   max-height: calc(90vh - 120px);
   padding-bottom: 120px;
+
+  overscroll-behavior: contain;
 }
 
 .sql-guide-section {
