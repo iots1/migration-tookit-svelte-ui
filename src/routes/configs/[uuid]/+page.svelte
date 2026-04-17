@@ -5,12 +5,14 @@
   import { page } from '$app/state';
 
   import type { DatasourceItem } from '$core/types/db-explorer';
+  import type { ValueMapParams } from '$core/types/schema-mapper';
   import { listDatasources } from '$features/db-explorer/api';
   import { createFieldMappingState } from '$features/schema-mapper/state/field-mapping-state.svelte';
   import BadgeList from '$lib/components/BadgeList.svelte';
   import ItemSelectorDrawer from '$lib/components/ItemSelectorDrawer.svelte';
   import SqlGuideModal from '$lib/components/SqlGuideModal.svelte';
   import SqlHighlighter from '$lib/components/SqlHighlighter.svelte';
+  import ValueMapParamsDrawer from '$lib/components/ValueMapParamsDrawer.svelte';
   import { showToast } from '$lib/toast.svelte';
 
   import '$features/schema-mapper/schema-mapper.scss';
@@ -24,10 +26,12 @@
   });
 
   let datasources = $state<DatasourceItem[]>([]);
+  const emptyValueMapParams: ValueMapParams = { rules: [], default: null };
 
   // Drawer state
   let showTransformerDrawer = $state(false);
   let showValidatorDrawer = $state(false);
+  let showValueMapDrawer = $state(false);
   let showSqlGuide = $state(false);
   let currentMappingIndex = $state(-1);
 
@@ -115,6 +119,25 @@
   function handleValidatorApply(selected: string[]) {
     if (currentMappingIndex >= 0) {
       fm.updateMapping(currentMappingIndex, { validators: selected });
+    }
+  }
+
+  function openValueMapDrawer(index: number) {
+    currentMappingIndex = index;
+    showValueMapDrawer = true;
+  }
+
+  function handleValueMapSave(params: ValueMapParams) {
+    if (currentMappingIndex >= 0) {
+      const mapping = fm.mappings[currentMappingIndex];
+      if (mapping) {
+        fm.updateMapping(currentMappingIndex, {
+          transformerParams: {
+            ...mapping.transformerParams,
+            VALUE_MAP: params,
+          },
+        });
+      }
     }
   }
 </script>
@@ -762,6 +785,35 @@
                               color="purple"
                             />
                           {/if}
+                          {#if mapping.transformers.includes('VALUE_MAP')}
+                            <button
+                              class="vm-configure-btn"
+                              onclick={() => openValueMapDrawer(i)}
+                              title="Configure VALUE_MAP"
+                            >
+                              <svg
+                                width="14"
+                                height="14"
+                                viewBox="0 0 14 14"
+                                fill="none"
+                              >
+                                <path
+                                  d="M5.5 1.5l-.5 2a4.5 4.5 0 00-1.5 1L1.5 4l-1 2 1.5 1.5a4.5 4.5 0 000 2L1 11l1 2 2-.5a4.5 4.5 0 002 0l.5 2 2-1 1.5-1.5a4.5 4.5 0 002 0l2 .5 1-2-1.5-1.5a4.5 4.5 0 000-2L13 6l-1-2-2 .5a4.5 4.5 0 00-1.5-1l-.5-2h-2z"
+                                  stroke="currentColor"
+                                  stroke-width="1"
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                />
+                                <circle
+                                  cx="7"
+                                  cy="7"
+                                  r="2"
+                                  stroke="currentColor"
+                                  stroke-width="1"
+                                />
+                              </svg>
+                            </button>
+                          {/if}
                           <button
                             class="sm-add-btn"
                             onclick={() => openTransformerDrawer(i)}
@@ -951,6 +1003,18 @@
     onClose={() => (showValidatorDrawer = false)}
     onApply={handleValidatorApply}
   />
+
+  <!-- VALUE_MAP Params Drawer -->
+  {#if currentMappingIndex >= 0}
+    <ValueMapParamsDrawer
+      open={showValueMapDrawer}
+      sourceColumns={fm.sourceColumns.map((c) => c.name)}
+      params={(fm.mappings[currentMappingIndex]?.transformerParams
+        ?.VALUE_MAP as ValueMapParams) ?? emptyValueMapParams}
+      onClose={() => (showValueMapDrawer = false)}
+      onSave={handleValueMapSave}
+    />
+  {/if}
 
   <!-- SQL Guide Modal -->
   <SqlGuideModal open={showSqlGuide} onClose={() => (showSqlGuide = false)} />

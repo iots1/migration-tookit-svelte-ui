@@ -16,7 +16,7 @@
   });
 
   async function handleNewPipeline() {
-    await goto(resolve('/pipeline-editor'));
+    await goto(resolve('/pipeline-editor/[uuid]', { uuid: 'new' }));
   }
 
   async function handleEdit(id: string) {

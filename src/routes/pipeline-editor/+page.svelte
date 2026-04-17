@@ -4,7 +4,9 @@
   import { resolve } from '$app/paths';
 
   onMount(() => {
-    void goto(resolve('/pipeline-editor/[uuid]', { uuid: 'new' }));
+    void goto(resolve('/pipeline-editor/[uuid]', { uuid: 'new' }), {
+      replaceState: true,
+    });
   });
 </script>
 

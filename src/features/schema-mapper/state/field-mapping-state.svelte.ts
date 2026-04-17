@@ -92,6 +92,7 @@ function buildMappingRows(
     targetExists: m.target ? targetColumnNames.has(m.target) : false,
     transformers: m.transformers ?? [],
     validators: m.validators ?? [],
+    transformerParams: m.transformer_params ?? {},
     defaultValue:
       m.default_value !== undefined && m.default_value !== null
         ? String(m.default_value)
@@ -111,6 +112,7 @@ function buildInitialMappings(
     targetExists: false,
     transformers: [],
     validators: [],
+    transformerParams: {},
     defaultValue: '',
     ignore: true,
   }));
@@ -411,6 +413,7 @@ export function createFieldMappingState(
         : false,
       transformers: row?.transformers ?? [],
       validators: row?.validators ?? [],
+      transformerParams: row?.transformerParams ?? {},
       defaultValue: row?.defaultValue ?? '',
       ignore: row?.ignore ?? true,
       isManual: row?.isManual ?? true,
@@ -511,6 +514,9 @@ export function createFieldMappingState(
             }
             if (m.defaultValue) {
               mapping.default_value = m.defaultValue;
+            }
+            if (Object.keys(m.transformerParams).length > 0) {
+              mapping.transformer_params = m.transformerParams;
             }
             return mapping;
           }),

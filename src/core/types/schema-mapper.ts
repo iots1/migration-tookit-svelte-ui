@@ -129,6 +129,18 @@ export interface ConfigSavePayload {
   generate_sql: string | null;
 }
 
+// ─── VALUE_MAP Transformer Types ──────────────────────────────────────────────
+
+export interface ValueMapRule {
+  when: Record<string, string>;
+  then: string;
+}
+
+export interface ValueMapParams {
+  rules: ValueMapRule[];
+  default: string | null;
+}
+
 // ─── Field Mapping Types ──────────────────────────────────────────────────────
 
 export interface MappingRow {
@@ -138,6 +150,7 @@ export interface MappingRow {
   targetExists: boolean;
   transformers: string[];
   validators: string[];
+  transformerParams: Record<string, unknown>;
   defaultValue: string;
   ignore: boolean;
   isManual?: boolean;

@@ -1,0 +1,211 @@
+/* ========== Value Map Params Drawer ========== */
+
+.drawer--wide {
+  width: 520px;
+}
+
+.vm-header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.vm-header-hint {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.vm-rules {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.vm-rule {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--bg-secondary);
+  overflow: hidden;
+}
+
+.vm-rule-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-table-header);
+}
+
+.vm-rule-label {
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.vm-rule-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.vm-btn-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: 4px;
+
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+
+  &:hover {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+  }
+
+  &--danger {
+    &:hover {
+      background: var(--danger-bg);
+      color: var(--danger-text);
+    }
+  }
+}
+
+.vm-rule-body {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.vm-conditions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.vm-conditions-label {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 3px;
+
+  background: var(--blue-bg);
+  color: var(--blue-text);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.vm-condition-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.vm-select {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  padding: 6px 8px;
+}
+
+.vm-input {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  padding: 6px 8px;
+}
+
+.vm-then {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-top: 6px;
+  border-top: 1px dashed var(--border-color);
+}
+
+.vm-then-label {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 3px;
+
+  background: var(--green-bg);
+  color: var(--green-text);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.vm-add-rule {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px dashed var(--border-color);
+  border-radius: var(--radius-sm);
+
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
+
+  &:hover {
+    background: var(--bg-secondary);
+    border-color: var(--accent-light);
+    color: var(--accent);
+  }
+}
+
+.vm-default {
+  margin-top: 16px;
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+}
+
+.vm-default-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.vm-default-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+
+  input[type='checkbox'] {
+    accent-color: var(--accent);
+  }
+}
+
+.vm-default-hint {
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.vm-default input[type='text'] {
+  margin-top: 8px;
+}
