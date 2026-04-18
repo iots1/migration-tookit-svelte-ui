@@ -1,7 +1,5 @@
 import { tick } from 'svelte';
 
-import { generateUuid } from '$core/utils/uuid';
-
 import type {
   ColumnItem,
   DatasourceItem,
@@ -9,6 +7,7 @@ import type {
   QueryTab,
   TableItem,
 } from '$core/types/db-explorer';
+import { generateUuid } from '$core/utils/uuid';
 import {
   executeQuery,
   listColumns,

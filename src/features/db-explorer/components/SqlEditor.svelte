@@ -4,7 +4,7 @@
 
   import type { Completion } from '@codemirror/autocomplete';
   import { sql } from '@codemirror/lang-sql';
-  import { Compartment, EditorState } from '@codemirror/state';
+  import { Compartment, EditorState, Prec } from '@codemirror/state';
   import { keymap } from '@codemirror/view';
   import { basicSetup, EditorView } from 'codemirror';
   import { format, type SqlLanguage } from 'sql-formatter';
@@ -63,15 +63,17 @@
         extensions: [
           basicSetup,
           schemaCompartment.of(sql()),
-          keymap.of([
-            {
-              key: 'Mod-Enter',
-              run: () => {
-                onrun?.();
-                return true;
+          Prec.highest(
+            keymap.of([
+              {
+                key: 'Mod-Enter',
+                run: () => {
+                  onrun?.();
+                  return true;
+                },
               },
-            },
-          ]),
+            ])
+          ),
           EditorView.updateListener.of((update) => {
             if (update.docChanged) {
               onchange?.(update.state.doc.toString());

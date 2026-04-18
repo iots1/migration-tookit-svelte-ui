@@ -52,6 +52,7 @@ interface QueryResultAttributes {
   columns: string[];
   rows: QueryResultRow[];
   row_count: number;
+  total_row: number;
   limit: number;
   truncated: boolean;
 }
@@ -73,6 +74,7 @@ export interface QueryResult {
   columns: string[];
   rows: QueryResultRow[];
   rowCount: number;
+  totalRow: number;
   limit: number;
   truncated: boolean;
 }

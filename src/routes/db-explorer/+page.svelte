@@ -581,7 +581,7 @@
               </span>
               <div class="db-explorer__results-meta">
                 <span class="db-explorer__results-meta-item">
-                  {result.rowCount} rows
+                  {result.rowCount} of {result.totalRow} rows
                 </span>
                 <span class="db-explorer__results-meta-item">
                   {result.columns.length} columns

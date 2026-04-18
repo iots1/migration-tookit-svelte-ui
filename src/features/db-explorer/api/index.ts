@@ -38,6 +38,7 @@ export async function executeQuery(
     columns: response.data.attributes.columns,
     rows: response.data.attributes.rows,
     rowCount: response.data.attributes.row_count,
+    totalRow: response.data.attributes.total_row,
     limit: response.data.attributes.limit,
     truncated: response.data.attributes.truncated,
   };
