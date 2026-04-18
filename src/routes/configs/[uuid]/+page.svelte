@@ -7,11 +7,11 @@
   import type { DatasourceItem } from '$core/types/db-explorer';
   import type { ValueMapParams } from '$core/types/schema-mapper';
   import { listDatasources } from '$features/db-explorer/api';
+  import SqlEditor from '$features/db-explorer/components/SqlEditor.svelte';
   import { createFieldMappingState } from '$features/schema-mapper/state/field-mapping-state.svelte';
   import BadgeList from '$lib/components/BadgeList.svelte';
   import ItemSelectorDrawer from '$lib/components/ItemSelectorDrawer.svelte';
   import SqlGuideModal from '$lib/components/SqlGuideModal.svelte';
-  import SqlHighlighter from '$lib/components/SqlHighlighter.svelte';
   import ValueMapParamsDrawer from '$lib/components/ValueMapParamsDrawer.svelte';
   import { showToast } from '$lib/toast.svelte';
 
@@ -379,15 +379,9 @@
                   Guide
                 </button>
               </div>
-              <SqlHighlighter
+              <SqlEditor
                 value={fm.script}
-                placeholder="Write your custom SQL here..."
-                oninput={(e) => {
-                  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-                  const target = e.target as HTMLTextAreaElement;
-                  fm.setScript(target.value);
-                }}
-                style="min-height: 200px;"
+                onchange={(value) => fm.setScript(String(value))}
               />
             </div>
           {/if}
@@ -947,15 +941,9 @@
                 Auto Generate
               </button>
             </div>
-            <SqlHighlighter
+            <SqlEditor
               value={fm.generateSql}
-              placeholder="SELECT source_col AS target_col FROM table..."
-              oninput={(e) => {
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-                const target = e.target as HTMLTextAreaElement;
-                fm.setGenerateSql(target.value);
-              }}
-              style="min-height: 120px;"
+              onchange={(value) => fm.setGenerateSql(String(value))}
             />
           </div>
         </div>
