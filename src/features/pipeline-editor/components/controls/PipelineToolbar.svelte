@@ -1,4 +1,7 @@
 <script lang="ts">
+  import { goto } from '$app/navigation';
+  import { resolve } from '$app/paths';
+
   import type { ConfigItem } from '$core/types/pipeline';
 
   import ConfigDropdown from './ConfigDropdown.svelte';
@@ -30,10 +33,30 @@
     onUndo: () => void;
     onRedo: () => void;
   } = $props();
+
+  async function handleBackClick() {
+    await goto(resolve('/pipelines'));
+  }
 </script>
 
 <div class="pipeline-toolbar">
   <div class="toolbar-left">
+    <button
+      class="toolbar-btn"
+      onclick={handleBackClick}
+      title="Back to pipelines"
+    >
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path
+          d="M10 3L4 8l6 5"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+      <span>Back</span>
+    </button>
     <button class="toolbar-btn toolbar-btn-untitled" onclick={onOpenDrawer}>
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
         <rect

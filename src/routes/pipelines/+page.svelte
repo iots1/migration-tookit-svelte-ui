@@ -4,6 +4,7 @@
   import { resolve } from '$app/paths';
 
   import { confirmDialog } from '$lib/confirm-dialog.svelte';
+  import { showToast } from '$lib/toast.svelte';
 
   import '$features/pipeline-editor/pipeline-editor.scss';
 
@@ -30,7 +31,10 @@
         'Are you sure you want to delete this pipeline? This action cannot be undone.',
     });
     if (!confirmed) return;
-    await state.deleteById(id);
+    const success = await state.deleteById(id);
+    if (success) {
+      showToast('Pipeline deleted successfully', 'success');
+    }
   }
 </script>
 

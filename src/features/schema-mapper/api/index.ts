@@ -65,10 +65,18 @@ export async function getConfig(id: string): Promise<ConfigDetailResponse> {
   return response.data.attributes;
 }
 
+interface ConfigCreateApiResponse {
+  data: { id: string; type: string };
+}
+
 export async function createConfig(
   payload: ConfigSavePayload
 ): Promise<{ id: string }> {
-  return api.post<{ id: string }>(API_V1.CONFIGS, payload);
+  const response = await api.post<ConfigCreateApiResponse>(
+    API_V1.CONFIGS,
+    payload
+  );
+  return { id: response.data.id };
 }
 
 export async function updateConfig(

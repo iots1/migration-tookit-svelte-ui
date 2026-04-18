@@ -227,6 +227,23 @@
 .pipeline-flow {
   width: 100%;
   height: 100%;
+
+  background: var(--bg-base) !important;
+}
+
+/* Dark mode overrides for xyflow background */
+[data-theme='dark'] .pipeline-flow {
+  svg.react-flow__background {
+    background: var(--bg-base) !important;
+  }
+
+  .react-flow__background circle {
+    fill: var(--border-color);
+  }
+
+  .react-flow__background path {
+    stroke: var(--border-color);
+  }
 }
 
 /* Pipeline Empty State */
