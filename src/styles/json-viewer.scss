@@ -1,0 +1,12 @@
+.json-viewer {
+  overflow: hidden;
+
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+}
+
+.json-viewer__container {
+  overflow: auto;
+
+  max-height: 320px;
+}

@@ -3,7 +3,9 @@
     ConfigDetailResponse,
     ConfigSavePayload,
   } from '$core/types/schema-mapper';
+  import SqlEditor from '$features/db-explorer/components/SqlEditor.svelte';
   import { getConfig, updateConfig } from '$features/schema-mapper/api';
+  import JsonViewer from '$lib/components/JsonViewer.svelte';
   import { showToast } from '$lib/toast.svelte';
 
   let {
@@ -22,6 +24,7 @@
   let configName = $state('');
   let tableName = $state('');
   let script = $state('');
+  let generateSql = $state('');
   let configType = $state('std');
   let loading = $state(false);
   let saving = $state(false);
@@ -31,7 +34,6 @@
   let originalJsonData = $state('');
   let originalDatasourceSourceId = $state<string | null>(null);
   let originalDatasourceTargetId = $state<string | null>(null);
-  let originalGenerateSql = $state<string | null>(null);
 
   async function loadConfig(id: string) {
     loading = true;
@@ -42,11 +44,14 @@
       configName = loaded.config_name;
       tableName = loaded.table_name;
       script = loaded.script ?? '';
+      generateSql = loaded.generate_sql ?? '';
       configType = loaded.config_type;
-      originalJsonData = loaded.json_data;
+      originalJsonData =
+        typeof loaded.json_data === 'string'
+          ? loaded.json_data
+          : JSON.stringify(loaded.json_data);
       originalDatasourceSourceId = loaded.datasource_source_id;
       originalDatasourceTargetId = loaded.datasource_target_id;
-      originalGenerateSql = loaded.generate_sql;
     } catch (err) {
       error = err instanceof Error ? err.message : 'Failed to load config';
     } finally {
@@ -74,7 +79,7 @@
         datasource_target_id: originalDatasourceTargetId,
         config_type: configType,
         script: configType === 'custom' ? script : null,
-        generate_sql: originalGenerateSql,
+        generate_sql: configType === 'std' ? generateSql.trim() || null : null,
       };
 
       await updateConfig(configId, payload);
@@ -169,6 +174,11 @@
           />
         </div>
 
+        <div class="form-group">
+          <span class="form-label">Config Type</span>
+          <div class="config-type-display">{configType}</div>
+        </div>
+
         {#if configType === 'std'}
           <div class="form-group">
             <label class="form-label" for="edit-table-name">Table Name</label>
@@ -181,26 +191,34 @@
               disabled={saving}
             />
           </div>
+
+          <div class="form-group">
+            <span class="form-label">Config Data (JSON)</span>
+            <JsonViewer value={originalJsonData} />
+          </div>
+
+          <div class="form-group">
+            <span class="form-label">Generate SQL</span>
+            <div class="edit-config-sql-editor">
+              <SqlEditor
+                value={generateSql}
+                onchange={(v) => (generateSql = String(v))}
+              />
+            </div>
+          </div>
         {/if}
 
         {#if configType === 'custom'}
           <div class="form-group">
-            <label class="form-label" for="edit-script">Script</label>
-            <textarea
-              id="edit-script"
-              class="form-textarea"
-              rows="8"
-              placeholder="SQL script..."
-              bind:value={script}
-              disabled={saving}
-            ></textarea>
+            <span class="form-label">SQL Script</span>
+            <div class="edit-config-sql-editor">
+              <SqlEditor
+                value={script}
+                onchange={(v) => (script = String(v))}
+              />
+            </div>
           </div>
         {/if}
-
-        <div class="form-group">
-          <span class="form-label">Config Type</span>
-          <div class="config-type-display">{configType}</div>
-        </div>
       {/if}
     </div>
 

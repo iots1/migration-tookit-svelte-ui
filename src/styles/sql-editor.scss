@@ -1,0 +1,48 @@
+.sql-editor {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.sql-editor__toolbar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--border-color);
+
+  background: var(--bg-sidebar-hover);
+}
+
+.sql-editor__format-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  padding: 4px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+
+  background: var(--bg-primary);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    border-color: var(--accent);
+
+    background: var(--accent-bg);
+    color: var(--accent);
+  }
+}
+
+.sql-editor__container {
+  flex: 1;
+  overflow: auto;
+
+  min-height: 200px;
+}

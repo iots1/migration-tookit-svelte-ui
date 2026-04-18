@@ -106,7 +106,7 @@ export interface ConfigDetailResponse {
   id: string;
   config_name: string;
   table_name: string;
-  json_data: string;
+  json_data: string | Record<string, unknown>;
   datasource_source_id: string | null;
   datasource_target_id: string | null;
   config_type: string;
