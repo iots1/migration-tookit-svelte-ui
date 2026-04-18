@@ -1,6 +1,6 @@
 <script lang="ts">
   import { SvelteFlowProvider, type Edge, type Node } from '@xyflow/svelte';
-  import { onMount, tick } from 'svelte';
+  import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import { page } from '$app/state';
 

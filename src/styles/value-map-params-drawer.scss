@@ -19,14 +19,17 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+
   margin-bottom: 16px;
 }
 
 .vm-rule {
+  overflow: hidden;
+
   border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
+
   background: var(--bg-secondary);
-  overflow: hidden;
 }
 
 .vm-rule-header {
@@ -36,6 +39,7 @@
 
   padding: 8px 12px;
   border-bottom: 1px solid var(--border-color);
+
   background: var(--bg-table-header);
 }
 
@@ -81,10 +85,11 @@
 }
 
 .vm-rule-body {
-  padding: 12px;
   display: flex;
   flex-direction: column;
   gap: 10px;
+
+  padding: 12px;
 }
 
 .vm-conditions {
@@ -95,6 +100,8 @@
 
 .vm-conditions-label {
   display: inline-block;
+
+  margin-bottom: 2px;
   padding: 1px 6px;
   border-radius: 3px;
 
@@ -103,7 +110,6 @@
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.5px;
-  margin-bottom: 2px;
 }
 
 .vm-condition-row {
@@ -114,28 +120,34 @@
 
 .vm-select {
   flex: 1;
+
   min-width: 0;
-  font-size: 13px;
   padding: 6px 8px;
+
+  font-size: 13px;
 }
 
 .vm-input {
   flex: 1;
+
   min-width: 0;
-  font-size: 13px;
   padding: 6px 8px;
+
+  font-size: 13px;
 }
 
 .vm-then {
   display: flex;
   align-items: center;
   gap: 6px;
+
   padding-top: 6px;
   border-top: 1px dashed var(--border-color);
 }
 
 .vm-then-label {
   display: inline-block;
+
   padding: 1px 6px;
   border-radius: 3px;
 
@@ -152,6 +164,7 @@
   justify-content: center;
   align-items: center;
   gap: 6px;
+
   width: 100%;
   padding: 8px 12px;
   border: 1px dashed var(--border-color);
@@ -167,8 +180,9 @@
     border-color 0.15s ease;
 
   &:hover {
-    background: var(--bg-secondary);
     border-color: var(--accent-light);
+
+    background: var(--bg-secondary);
     color: var(--accent);
   }
 }

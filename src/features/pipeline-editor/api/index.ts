@@ -58,10 +58,10 @@ export async function listPipelines(params?: {
 export async function savePipeline(
   pipeline: PipelineSavePayload
 ): Promise<{ id: string; message: string }> {
-  const raw = (await api.post(API_V1.PIPELINES, pipeline)) as Record<
-    string,
-    unknown
-  >;
+  const raw = await api.post<Record<string, unknown>>(
+    API_V1.PIPELINES,
+    pipeline
+  );
   const data = raw.data as Record<string, unknown>;
   return {
     id: (data?.id as string) ?? '',
@@ -99,10 +99,10 @@ export async function updatePipeline(
   id: string,
   pipeline: PipelineSavePayload
 ): Promise<{ id: string; message: string }> {
-  const raw = (await api.put(`${API_V1.PIPELINES}/${id}`, pipeline)) as Record<
-    string,
-    unknown
-  >;
+  const raw = await api.put<Record<string, unknown>>(
+    `${API_V1.PIPELINES}/${id}`,
+    pipeline
+  );
   const data = raw.data as Record<string, unknown>;
   return {
     id: (data?.id as string) ?? id,

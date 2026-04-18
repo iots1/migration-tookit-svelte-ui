@@ -676,6 +676,7 @@
 
 .vm-configure-btn {
   display: flex;
+  flex-shrink: 0;
   justify-content: center;
   align-items: center;
 
@@ -687,7 +688,6 @@
   background: var(--orange-bg);
   color: var(--peach-text);
   cursor: pointer;
-  flex-shrink: 0;
   transition:
     background 0.15s ease,
     color 0.15s ease;

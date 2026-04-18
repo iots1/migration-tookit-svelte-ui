@@ -76,3 +76,65 @@ export interface QueryResult {
   limit: number;
   truncated: boolean;
 }
+
+// === Query Tab ===
+
+export interface QueryTab {
+  id: string;
+  title: string;
+  sql: string;
+}
+
+// === Schema Exploration Types ===
+
+export interface TableItem {
+  name: string;
+}
+
+export interface ColumnItem {
+  name: string;
+  dataType: string;
+  nullable: boolean;
+  primaryKey: boolean;
+}
+
+interface TableApiResource {
+  type: string;
+  id: string;
+  attributes: {
+    name: string;
+  };
+}
+
+export interface TableListResponse {
+  data: TableApiResource[];
+  meta: {
+    timestamp?: string;
+  };
+  status: {
+    code: number;
+    message: string;
+  };
+}
+
+interface ColumnApiResource {
+  type: string;
+  id: string;
+  attributes: {
+    name: string;
+    data_type: string;
+    nullable: boolean;
+    primary_key: boolean;
+  };
+}
+
+export interface ColumnListResponse {
+  data: ColumnApiResource[];
+  meta: {
+    timestamp?: string;
+  };
+  status: {
+    code: number;
+    message: string;
+  };
+}

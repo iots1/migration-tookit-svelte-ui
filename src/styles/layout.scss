@@ -59,6 +59,7 @@
     &:hover:not(.sidebar-mobile-open) {
       width: var(--sidebar-width);
       min-width: var(--sidebar-width);
+
       box-shadow: var(--shadow-lg);
     }
   }
@@ -107,6 +108,7 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+
   opacity: 1;
   transition: opacity 0.15s ease;
 
@@ -234,9 +236,10 @@
 
 .nav-label {
   overflow: hidden;
-  text-overflow: ellipsis;
+
   opacity: 1;
   transition: opacity 0.15s ease;
+  text-overflow: ellipsis;
 
   .sidebar-collapsed & {
     opacity: 0;
@@ -380,19 +383,22 @@
   width: calc(100% - 40px);
   height: 56px;
   margin: 0 20px 20px;
+  padding: 16px 20px;
   border: none;
   border-radius: var(--radius-md);
-  padding: 16px 20px;
 
   background: var(--bg-sidebar-hover);
   color: var(--text-muted);
+  font-size: 15px;
+  font-weight: 500;
+
+  opacity: 0;
+  visibility: hidden;
   cursor: pointer;
   transition:
     background 0.15s ease,
     color 0.15s ease,
     opacity 0.15s ease;
-  font-size: 15px;
-  font-weight: 500;
 
   @media (min-width: 769px) {
     display: flex;
@@ -406,17 +412,15 @@
     border-radius: var(--radius-sm);
   }
 
-  opacity: 0;
-  visibility: hidden;
-
   .sidebar-collapsed & {
-    opacity: 1;
-    visibility: visible;
     width: 36px;
     height: 36px;
     margin: 4px auto 10px;
     padding: 0;
     border-radius: var(--radius-sm);
+
+    opacity: 1;
+    visibility: visible;
   }
 
   .sidebar-collapsed:hover & {
@@ -437,11 +441,12 @@
 
 .logout-icon-sm {
   display: flex;
+  flex-shrink: 0;
   justify-content: center;
   align-items: center;
+
   width: 24px;
   height: 24px;
-  flex-shrink: 0;
 
   svg {
     width: 24px;
@@ -455,8 +460,8 @@
 
 .logout-label-sm {
   font-size: 15px;
-  line-height: 1.4;
   font-weight: 500;
+  line-height: 1.4;
 
   @media (min-width: 769px) {
     display: none;
@@ -604,6 +609,7 @@
     &:hover.sidebar-collapsed {
       width: var(--sidebar-width);
       min-width: var(--sidebar-width);
+
       box-shadow: var(--shadow-lg);
     }
   }
@@ -612,6 +618,7 @@
     display: flex;
     flex-direction: column;
     gap: 0;
+
     padding: 0;
   }
 
@@ -619,12 +626,14 @@
     flex-direction: row;
     align-items: center;
     gap: 16px;
+
     padding: 16px 20px;
+
     text-align: left;
 
     &.active {
-      box-shadow: none;
       background: var(--bg-sidebar-active);
+      box-shadow: none;
     }
 
     &:not(:last-child) {
@@ -638,14 +647,15 @@
 
   .nav-label {
     font-size: 15px;
-    line-height: 1.4;
     font-weight: 500;
+    line-height: 1.4;
   }
 
   .nav-icon {
+    flex-shrink: 0;
+
     width: 24px;
     height: 24px;
-    flex-shrink: 0;
   }
 
   .nav-icon svg {
@@ -665,9 +675,10 @@
   }
 
   .logout-btn-sm {
+    display: flex !important;
+
     opacity: 1 !important;
     visibility: visible !important;
-    display: flex !important;
   }
 
   .sidebar-overlay {
