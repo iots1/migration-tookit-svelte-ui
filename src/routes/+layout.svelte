@@ -1,7 +1,8 @@
 <script lang="ts">
-  import type { Snippet } from 'svelte';
+  import { onMount, type Snippet } from 'svelte';
   import { page } from '$app/state';
 
+  import { themeState } from '$core/state/theme.svelte';
   import ConfirmDialog from '$lib/components/ConfirmDialog.svelte';
   import Footer from '$lib/components/layout/Footer.svelte';
   import Navbar from '$lib/components/layout/Navbar.svelte';
@@ -21,6 +22,10 @@
     page.url.pathname.startsWith('/pipeline-editor')
   );
 
+  onMount(() => {
+    themeState.init();
+  });
+
   function toggleMobile() {
     if (window.innerWidth < 768) {
       mobileOpen = !mobileOpen;
@@ -37,7 +42,7 @@
   <Sidebar bind:collapsed bind:mobileOpen />
   <div class="app-main">
     {#if !isFullHeight}
-      <Navbar onMenuToggle={toggleMobile} />
+      <Navbar onMenuToggle={toggleMobile} {themeState} />
     {/if}
     <main class="app-content" class:app-content--full-height={isFullHeight}>
       {@render children()}

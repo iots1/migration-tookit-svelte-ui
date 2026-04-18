@@ -1,5 +1,6 @@
 /* ========== Theme Variables ========== */
 :root {
+  color-scheme: light;
   /* Typography */
   --font-sans:
     'Roboto', ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
@@ -80,4 +81,67 @@
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-xl: 20px;
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  /* Backgrounds */
+  --bg-base: #0f0e1a;
+  --bg-primary: #1a1825;
+  --bg-sidebar: #1a1825;
+  --bg-sidebar-hover: #2d2a45;
+  --bg-sidebar-active: #3d3860;
+  --bg-card: #1e1c2e;
+
+  /* Text */
+  --text-primary: #e8e4ff;
+  --text-secondary: #9b97b8;
+  --text-sidebar: #8b87a8;
+  --text-sidebar-active: #a78bfa;
+  --text-muted: #6b6880;
+
+  /* Borders */
+  --border-color: #2d2a45;
+  --border-light: #252333;
+
+  /* Accent */
+  --accent: #8b5cf6;
+  --accent-light: #7c3aed;
+  --accent-bg: #1a1825;
+  --accent-hover: #9f7aea;
+  --accent-xlight: #3d3860;
+
+  /* Semantic Colors */
+  --peach-bg: #2a1a0e;
+  --peach-text: #fb923c;
+
+  --blue-bg: #0e1a2a;
+  --blue-text: #60a5fa;
+
+  --teal-bg: #0a1f1e;
+  --teal-text: #2dd4bf;
+
+  --green-bg: #0a1f14;
+  --green-text: #4ade80;
+  --green-border: #166534;
+  --green-bg-hover: #14532d;
+
+  /* Error */
+  --error-text: #f87171;
+  --error-bg: #1f0e0e;
+  --error-border: #7f1d1d;
+
+  /* Danger */
+  --danger-bg: #2a0e0e;
+  --danger-text: #f87171;
+
+  /* Table */
+  --bg-table-header: #1e1c2e;
+  --bg-table-hover: #252333;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.6);
 }

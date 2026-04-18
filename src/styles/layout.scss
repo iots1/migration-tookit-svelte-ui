@@ -524,6 +524,32 @@
   gap: 16px;
 }
 
+.theme-toggle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+
+  background: var(--bg-primary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
+
+  &:hover {
+    border-color: var(--accent-light);
+
+    background: var(--bg-sidebar-hover);
+    color: var(--accent);
+  }
+}
+
 .navbar-status {
   display: flex;
   align-items: center;
