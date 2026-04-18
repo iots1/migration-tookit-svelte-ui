@@ -37,6 +37,16 @@ export async function listConfigs(params?: {
       target_datasource:
         item.attributes.json_data.target?.datasource_name ?? '',
       target_table: item.attributes.json_data.target?.table ?? '',
+      datasource_source_name: item.attributes.datasource_source_name ?? null,
+      datasource_source_db_type:
+        item.attributes.datasource_source_db_type ?? null,
+      datasource_source_dbname:
+        item.attributes.datasource_source_dbname ?? null,
+      datasource_target_name: item.attributes.datasource_target_name ?? null,
+      datasource_target_db_type:
+        item.attributes.datasource_target_db_type ?? null,
+      datasource_target_dbname:
+        item.attributes.datasource_target_dbname ?? null,
       config_type: item.attributes.config_type,
       mapping_count: (item.attributes.json_data.mappings ?? []).filter(
         (m) => !m.ignore

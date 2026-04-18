@@ -4,6 +4,7 @@
   import { resolve } from '$app/paths';
 
   import { confirmDialog } from '$lib/confirm-dialog.svelte';
+  import { showToast } from '$lib/toast.svelte';
 
   import '$features/schema-mapper/schema-mapper.scss';
 
@@ -38,7 +39,10 @@
         'Are you sure you want to delete this config? This action cannot be undone.',
     });
     if (!confirmed) return;
-    await state.deleteById(uuid);
+    const success = await state.deleteById(uuid);
+    if (success) {
+      showToast('ลบสำเร็จ', 'success');
+    }
   }
 
   function formatDate(iso: string): string {
@@ -238,31 +242,46 @@
                 <span class="pipeline-name-cell">{config.config_name}</span>
               </td>
               <td>
-                <span class="sm-flow-text">
-                  <span>
-                    {#if config.source_datasource}
-                      <span style="color: var(--text-muted);"
-                        >{config.source_datasource}.</span
-                      >
-                    {/if}{config.source_table || '-'}
+                {#if config.config_type === 'custom'}
+                  <span class="sm-flow-text">
+                    <span>
+                      {#if config.datasource_target_name}
+                        <span style="color: var(--text-muted);"
+                          >{config.datasource_target_name} ({config.datasource_target_db_type ||
+                            '-'})</span
+                        >
+                      {:else}
+                        <span style="color: var(--text-muted);">-</span>
+                      {/if}
+                    </span>
                   </span>
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                    <path
-                      d="M3 7h8M9 4l3 3-3 3"
-                      stroke="currentColor"
-                      stroke-width="1.5"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-                  </svg>
-                  <span>
-                    {#if config.target_datasource}
-                      <span style="color: var(--text-muted);"
-                        >{config.target_datasource}.</span
-                      >
-                    {/if}{config.target_table || '-'}
+                {:else}
+                  <span class="sm-flow-text">
+                    <span>
+                      {#if config.source_datasource}
+                        <span style="color: var(--text-muted);"
+                          >{config.source_datasource}.</span
+                        >
+                      {/if}{config.source_table || '-'}
+                    </span>
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                      <path
+                        d="M3 7h8M9 4l3 3-3 3"
+                        stroke="currentColor"
+                        stroke-width="1.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
+                    <span>
+                      {#if config.target_datasource}
+                        <span style="color: var(--text-muted);"
+                          >{config.target_datasource}.</span
+                        >
+                      {/if}{config.target_table || '-'}
+                    </span>
                   </span>
-                </span>
+                {/if}
               </td>
               <td>
                 <span class="sm-type-badge sm-type-badge--{config.config_type}">

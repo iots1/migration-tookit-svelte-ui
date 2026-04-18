@@ -46,6 +46,12 @@ export interface ConfigListItem {
   source_table: string;
   target_datasource: string;
   target_table: string;
+  datasource_source_name: string | null;
+  datasource_source_db_type: string | null;
+  datasource_source_dbname: string | null;
+  datasource_target_name: string | null;
+  datasource_target_db_type: string | null;
+  datasource_target_dbname: string | null;
   config_type: string;
   mapping_count: number;
   updated_at: string;
@@ -63,6 +69,12 @@ interface ConfigListApiResponseItem {
       mappings: ConfigMapping[];
     };
     config_type: string;
+    datasource_source_name: string | null;
+    datasource_source_db_type: string | null;
+    datasource_source_dbname: string | null;
+    datasource_target_name: string | null;
+    datasource_target_db_type: string | null;
+    datasource_target_dbname: string | null;
     updated_at: string;
   };
 }
