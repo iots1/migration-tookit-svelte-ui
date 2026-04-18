@@ -192,12 +192,19 @@
   display: flex;
   flex-shrink: 0;
   align-items: stretch;
-  overflow: hidden; /* tabs clip instead of scrolling */
+  overflow-x: auto;
 
   height: 42px;
   border-bottom: 1px solid var(--border-color);
 
   background: var(--bg-secondary);
+  overscroll-behavior-x: contain;
+
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 .db-explorer__tab {
