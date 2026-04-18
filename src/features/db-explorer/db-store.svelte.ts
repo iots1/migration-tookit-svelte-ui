@@ -1,5 +1,7 @@
 import { tick } from 'svelte';
 
+import { generateUuid } from '$core/utils/uuid';
+
 import type {
   ColumnItem,
   DatasourceItem,
@@ -102,7 +104,7 @@ export interface DbExplorerState {
 export function createDbExplorerState(): DbExplorerState {
   const stored = loadStoredTabs();
   const defaultTab: QueryTab = {
-    id: crypto.randomUUID(),
+    id: generateUuid(),
     title: 'Query 1',
     sql: '',
   };
@@ -354,7 +356,7 @@ export function createDbExplorerState(): DbExplorerState {
 
     addTab() {
       const newTab: QueryTab = {
-        id: crypto.randomUUID(),
+        id: generateUuid(),
         title: nextTabTitle(),
         sql: '',
       };
@@ -367,7 +369,7 @@ export function createDbExplorerState(): DbExplorerState {
       if (!selectedDatasourceId) return;
       const sqlStr = buildSelectTemplate(tableName);
       const newTab: QueryTab = {
-        id: crypto.randomUUID(),
+        id: generateUuid(),
         title: tableName,
         sql: sqlStr,
       };
