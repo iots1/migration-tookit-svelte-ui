@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, tick } from 'svelte';
 
+  import type { ColumnItem } from '$core/types/db-explorer';
   import SqlEditor, {
     type SqlEditorSchemaTable,
   } from '$features/db-explorer/components/SqlEditor.svelte';
@@ -70,6 +71,43 @@
     return String(value);
   }
 
+  // --- Column display helpers ---
+
+  /** Shorten verbose Postgres type names for compact display */
+  function abbreviateType(type: string): string {
+    return type
+      .replace('character varying', 'varchar')
+      .replace('timestamp with time zone', 'timestamptz')
+      .replace('timestamp without time zone', 'timestamp')
+      .replace('double precision', 'float8')
+      .replace('character', 'char')
+      .replace('boolean', 'bool');
+  }
+
+  function hasConstraintType(col: ColumnItem, constraintType: string): boolean {
+    return col.constraints.some((c) => c.type === constraintType);
+  }
+
+  function hasNonPrimaryIndex(col: ColumnItem): boolean {
+    return col.indexes.some((idx) => !idx.primary);
+  }
+
+  /** Tooltip with full column metadata */
+  function columnTooltip(col: ColumnItem): string {
+    const parts: string[] = [`Type: ${col.dataType}`];
+    if (col.length !== null) parts.push(`Length: ${col.length}`);
+    if (col.precision !== null) parts.push(`Precision: ${col.precision}`);
+    if (col.scale !== null) parts.push(`Scale: ${col.scale}`);
+    parts.push(`Nullable: ${col.nullable ? 'yes' : 'no'}`);
+    if (col.columnDefault !== null) parts.push(`Default: ${col.columnDefault}`);
+    if (col.constraints.length > 0) {
+      parts.push(
+        `Constraints: ${col.constraints.map((c) => c.type).join(', ')}`
+      );
+    }
+    return parts.join('\n');
+  }
+
   let contextMenuVisible = $state(false);
   let contextMenuX = $state(0);
   let contextMenuY = $state(0);
@@ -77,11 +115,18 @@
   let renamingTabId = $state('');
   let renameInputEl = $state<HTMLInputElement | undefined>(undefined);
 
-  function handleTabContextMenu(e: MouseEvent, tabId: string) {
-    e.preventDefault();
+  function handleTabMenuClick(e: MouseEvent, tabId: string) {
+    e.stopPropagation();
+    // Toggle: clicking the same tab's menu button closes it
+    if (contextMenuVisible && contextMenuTabId === tabId) {
+      contextMenuVisible = false;
+      return;
+    }
+    const target = e.currentTarget as HTMLButtonElement;
+    const rect = target.getBoundingClientRect();
     contextMenuTabId = tabId;
-    contextMenuX = e.clientX;
-    contextMenuY = e.clientY;
+    contextMenuX = rect.left;
+    contextMenuY = rect.bottom + 2;
     contextMenuVisible = true;
   }
 
@@ -113,6 +158,14 @@
   function cancelRename() {
     renamingTabId = '';
   }
+
+  let tableFilter = $state('');
+
+  let filteredTables = $derived(() => {
+    if (!tableFilter.trim()) return tables;
+    const filter = tableFilter.toLowerCase();
+    return tables.filter((table) => table.name.toLowerCase().includes(filter));
+  });
 
   let contextMenuItems = $derived<ContextMenuItem[]>([
     {
@@ -203,7 +256,13 @@
         >
           Tables ({tables.length})
         </div>
-        {#each tables as table (table.name)}
+        <input
+          class="form-input db-explorer__table-filter"
+          type="text"
+          placeholder="Filter tables..."
+          bind:value={tableFilter}
+        />
+        {#each filteredTables() as table (table.name)}
           <button
             class="db-explorer__tree-item {expandedTables[table.name]
               ? 'db-explorer__tree-item--expanded'
@@ -241,23 +300,79 @@
             <div class="db-explorer__tree-children">
               {#each expandedTables[table.name] as col (col.name)}
                 <button
-                  class="db-explorer__tree-item"
+                  class="db-explorer__tree-item db-explorer__tree-item--column"
+                  title={columnTooltip(col)}
                   onclick={() => explorer.insertColumnName(col.name)}
                 >
-                  <svg
-                    class="db-explorer__tree-icon"
-                    viewBox="0 0 16 16"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.5"
-                  >
-                    <circle cx="8" cy="8" r="3" />
-                  </svg>
-                  <span>{col.name}</span>
+                  <!-- column icon: key for PK, circle for others -->
                   {#if col.primaryKey}
-                    <span class="db-explorer__column-pk">PK</span>
+                    <svg
+                      class="db-explorer__tree-icon db-explorer__tree-icon--pk"
+                      viewBox="0 0 16 16"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                    >
+                      <circle cx="6" cy="8" r="3" />
+                      <path d="M9 8h5M12 6v4" />
+                    </svg>
+                  {:else}
+                    <svg
+                      class="db-explorer__tree-icon db-explorer__tree-icon--col"
+                      viewBox="0 0 16 16"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                    >
+                      <circle cx="8" cy="8" r="2.5" />
+                    </svg>
                   {/if}
-                  <span class="db-explorer__column-type">{col.dataType}</span>
+
+                  <div class="db-explorer__column-info">
+                    <div class="db-explorer__column-main">
+                      <span class="db-explorer__column-name">{col.name}</span>
+                      <div class="db-explorer__column-badges">
+                        {#if col.primaryKey}
+                          <span
+                            class="db-explorer__column-badge db-explorer__column-badge--pk"
+                            >PK</span
+                          >
+                        {/if}
+                        {#if hasConstraintType(col, 'UNIQUE')}
+                          <span
+                            class="db-explorer__column-badge db-explorer__column-badge--uq"
+                            >UQ</span
+                          >
+                        {/if}
+                        {#if hasConstraintType(col, 'FOREIGN KEY')}
+                          <span
+                            class="db-explorer__column-badge db-explorer__column-badge--fk"
+                            >FK</span
+                          >
+                        {/if}
+                        {#if hasNonPrimaryIndex(col) && !col.primaryKey && !hasConstraintType(col, 'UNIQUE')}
+                          <span
+                            class="db-explorer__column-badge db-explorer__column-badge--idx"
+                            >IDX</span
+                          >
+                        {/if}
+                        {#if col.nullable}
+                          <span
+                            class="db-explorer__column-badge db-explorer__column-badge--null"
+                            title="Nullable">?</span
+                          >
+                        {/if}
+                      </div>
+                      <span class="db-explorer__column-type"
+                        >{abbreviateType(col.dataType)}</span
+                      >
+                    </div>
+                    {#if col.comment}
+                      <div class="db-explorer__column-comment">
+                        {col.comment}
+                      </div>
+                    {/if}
+                  </div>
                 </button>
               {/each}
             </div>
@@ -292,7 +407,6 @@
           tabindex="0"
           aria-selected={tab.id === activeTabId}
           onclick={() => explorer.selectTab(tab.id)}
-          oncontextmenu={(e) => handleTabContextMenu(e, tab.id)}
           onkeydown={(e) => {
             if (e.key === 'Enter') explorer.selectTab(tab.id);
           }}
@@ -312,6 +426,26 @@
           {:else}
             <span class="db-explorer__tab-title">{tab.title}</span>
           {/if}
+          <!-- ⋯ menu button: click → dropdown (no right-click dependency) -->
+          <button
+            class="db-explorer__tab-menu-btn"
+            type="button"
+            aria-label="Tab options"
+            aria-expanded={contextMenuVisible && contextMenuTabId === tab.id}
+            onclick={(e) => handleTabMenuClick(e, tab.id)}
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 16 4"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <circle cx="2" cy="2" r="1.5" />
+              <circle cx="8" cy="2" r="1.5" />
+              <circle cx="14" cy="2" r="1.5" />
+            </svg>
+          </button>
           {#if tabs.length > 1}
             <button
               class="db-explorer__tab-close"

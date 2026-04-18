@@ -3,9 +3,11 @@ import { API_V1 } from '$core/api/endpoints';
 import type {
   ColumnItem,
   ColumnListResponse,
+  ConstraintItem,
   DatasourceItem,
   DatasourceListResponse,
   ExecuteQueryPayload,
+  IndexItem,
   QueryResult,
   QueryResultResponse,
   TableItem,
@@ -57,10 +59,27 @@ export async function listColumns(
   const response: ColumnListResponse = await api.get(
     API_V1.DATASOURCE_TABLE_COLUMNS(datasourceId, tableName)
   );
-  return response.data.map((item) => ({
-    name: item.attributes.name,
-    dataType: item.attributes.data_type,
-    nullable: item.attributes.nullable,
-    primaryKey: item.attributes.primary_key,
-  }));
+  return response.data.map((item) => {
+    const constraints: ConstraintItem[] = item.attributes.constraints.map(
+      (c) => ({ name: c.name, type: c.type })
+    );
+    const indexes: IndexItem[] = item.attributes.indexes.map((idx) => ({
+      name: idx.name,
+      unique: idx.unique,
+      primary: idx.primary,
+    }));
+    return {
+      name: item.attributes.name,
+      dataType: item.attributes.type,
+      nullable: item.attributes.is_nullable,
+      primaryKey: item.attributes.is_primary,
+      columnDefault: item.attributes.column_default,
+      length: item.attributes.length,
+      precision: item.attributes.precision,
+      scale: item.attributes.scale,
+      comment: item.attributes.comment,
+      constraints,
+      indexes,
+    };
+  });
 }

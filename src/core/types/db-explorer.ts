@@ -91,11 +91,29 @@ export interface TableItem {
   name: string;
 }
 
+export interface ConstraintItem {
+  name: string;
+  type: string;
+}
+
+export interface IndexItem {
+  name: string;
+  unique: boolean;
+  primary: boolean;
+}
+
 export interface ColumnItem {
   name: string;
   dataType: string;
   nullable: boolean;
   primaryKey: boolean;
+  columnDefault: string | null;
+  length: number | null;
+  precision: number | null;
+  scale: number | null;
+  comment: string | null;
+  constraints: ConstraintItem[];
+  indexes: IndexItem[];
 }
 
 interface TableApiResource {
@@ -122,9 +140,16 @@ interface ColumnApiResource {
   id: string;
   attributes: {
     name: string;
-    data_type: string;
-    nullable: boolean;
-    primary_key: boolean;
+    type: string;
+    is_nullable: boolean;
+    is_primary: boolean;
+    column_default: string | null;
+    length: number | null;
+    precision: number | null;
+    scale: number | null;
+    comment: string | null;
+    constraints: Array<{ name: string; type: string }>;
+    indexes: Array<{ name: string; unique: boolean; primary: boolean }>;
   };
 }
 
