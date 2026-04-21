@@ -194,7 +194,12 @@
 
           <div class="form-group">
             <span class="form-label">Config Data (JSON)</span>
-            <JsonViewer value={originalJsonData} />
+            <JsonViewer
+              value={originalJsonData}
+              onValueChange={(v: string) => {
+                originalJsonData = v;
+              }}
+            />
           </div>
 
           <div class="form-group">

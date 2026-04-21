@@ -110,13 +110,39 @@
     showValidatorDrawer = true;
   }
 
-  function handleTransformerApply(selected: string[]) {
+  function handleTransformerApply(
+    selected: string[],
+    defaults: Record<string, string>
+  ) {
     if (currentMappingIndex >= 0) {
-      fm.updateMapping(currentMappingIndex, { transformers: selected });
+      const currentParams =
+        fm.mappings[currentMappingIndex]?.transformerParams ?? {};
+      const newParams: Record<string, unknown> = {};
+      for (const name of selected) {
+        const existing = currentParams[name];
+        const defaultVal = defaults[name];
+        if (existing !== null && typeof existing === 'object') {
+          newParams[name] = defaultVal
+            ? {
+                ...(existing as Record<string, unknown>),
+                default_value: defaultVal,
+              }
+            : existing;
+        } else if (defaultVal) {
+          newParams[name] = { default_value: defaultVal };
+        }
+      }
+      fm.updateMapping(currentMappingIndex, {
+        transformers: selected,
+        transformerParams: newParams,
+      });
     }
   }
 
-  function handleValidatorApply(selected: string[]) {
+  function handleValidatorApply(
+    selected: string[],
+    _defaults: Record<string, string>
+  ) {
     if (currentMappingIndex >= 0) {
       fm.updateMapping(currentMappingIndex, { validators: selected });
     }
@@ -977,6 +1003,8 @@
     type="transformers"
     items={fm.transformers}
     selected={fm.mappings[currentMappingIndex]?.transformers ?? []}
+    transformerParams={fm.mappings[currentMappingIndex]?.transformerParams ??
+      {}}
     onClose={() => (showTransformerDrawer = false)}
     onApply={handleTransformerApply}
   />

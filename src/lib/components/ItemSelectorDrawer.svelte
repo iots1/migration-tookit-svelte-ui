@@ -12,15 +12,25 @@
     type: 'transformers' | 'validators';
     items: Array<TransformerOption | ValidatorOption>;
     selected: string[];
+    transformerParams?: Record<string, unknown>;
     onClose: () => void;
-    onApply: (selected: string[]) => void;
+    onApply: (selected: string[], defaults: Record<string, string>) => void;
   }
 
-  let { open, title, type, items, selected, onClose, onApply }: Props =
-    $props();
+  let {
+    open,
+    title,
+    type,
+    items,
+    selected,
+    transformerParams,
+    onClose,
+    onApply,
+  }: Props = $props();
 
   let searchQuery = $state('');
   let localSelected = new SvelteSet<string>();
+  let localDefaults = $state<Record<string, string>>({});
   let currentCategory = $state<string | null>(null);
 
   $effect(() => {
@@ -31,6 +41,17 @@
       }
       searchQuery = '';
       currentCategory = null;
+
+      const defaults: Record<string, string> = {};
+      for (const [key, val] of Object.entries(transformerParams ?? {})) {
+        if (val !== null && typeof val === 'object' && 'default_value' in val) {
+          const d = (val as Record<string, unknown>)['default_value'];
+          if (typeof d === 'string') {
+            defaults[key] = d;
+          }
+        }
+      }
+      localDefaults = defaults;
     }
   });
 
@@ -70,8 +91,17 @@
     }
   }
 
+  function setDefault(name: string, value: string) {
+    if (value) {
+      localDefaults = { ...localDefaults, [name]: value };
+    } else {
+      const { [name]: _, ...rest } = localDefaults;
+      localDefaults = rest;
+    }
+  }
+
   function handleApply() {
-    onApply(Array.from(localSelected));
+    onApply(Array.from(localSelected), localDefaults);
     onClose();
   }
 
@@ -217,11 +247,12 @@
         {:else}
           {#each filteredItems as item (item.name)}
             {@const itemName = item.name}
+            {@const isSelected = localSelected.has(itemName)}
             <div
               class="item-row"
-              class:item-row--selected={localSelected.has(itemName)}
+              class:item-row--selected={isSelected}
               role="option"
-              aria-selected={localSelected.has(itemName)}
+              aria-selected={isSelected}
               tabindex="0"
               onclick={() => toggleItem(itemName)}
               onkeydown={(e) => {
@@ -234,7 +265,7 @@
               <div class="item-checkbox">
                 <input
                   type="checkbox"
-                  checked={localSelected.has(itemName)}
+                  checked={isSelected}
                   onchange={(e) => {
                     e.stopPropagation();
                     toggleItem(itemName);
@@ -250,6 +281,31 @@
                 </div>
                 <div class="item-description">{item.description}</div>
                 <div class="item-code">{itemName}</div>
+
+                {#if type === 'transformers' && isSelected}
+                  <div
+                    class="item-default"
+                    role="presentation"
+                    onclick={(e) => e.stopPropagation()}
+                  >
+                    <label class="item-default-label" for="default-{itemName}">
+                      Default value
+                      <span class="item-default-optional">(optional)</span>
+                    </label>
+                    <input
+                      id="default-{itemName}"
+                      type="text"
+                      class="form-input item-default-input"
+                      placeholder="Leave empty to skip"
+                      value={localDefaults[itemName] ?? ''}
+                      oninput={(e) =>
+                        setDefault(
+                          itemName,
+                          (e.target as HTMLInputElement).value
+                        )}
+                    />
+                  </div>
+                {/if}
               </div>
             </div>
           {/each}

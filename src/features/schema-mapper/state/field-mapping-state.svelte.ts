@@ -434,6 +434,8 @@ export function createFieldMappingState(
 
     let newTargetColumn = current.targetColumn;
     let newIgnore = current.ignore;
+    let newTransformers = current.transformers;
+    let newTransformerParams = { ...current.transformerParams };
 
     if ('targetColumn' in updates) {
       newTargetColumn = updates.targetColumn ?? '';
@@ -446,11 +448,39 @@ export function createFieldMappingState(
       newTargetColumn = '';
     }
 
+    // Handle explicit transformerParams updates (e.g. from VALUE_MAP drawer)
+    if ('transformerParams' in updates && updates.transformerParams) {
+      newTransformerParams = {
+        ...newTransformerParams,
+        ...updates.transformerParams,
+      };
+    }
+
+    // Handle default value - add DEFAULT_VALUE transformer if value is not empty
+    if ('defaultValue' in updates) {
+      const defaultValue = updates.defaultValue ?? '';
+      if (defaultValue.trim() !== '') {
+        // Add DEFAULT_VALUE to transformers if not present
+        if (!newTransformers.includes('DEFAULT_VALUE')) {
+          newTransformers = [...newTransformers, 'DEFAULT_VALUE'];
+        }
+        // Add/update transformer params for DEFAULT_VALUE
+        newTransformerParams.DEFAULT_VALUE = { value: defaultValue };
+      } else {
+        // Remove DEFAULT_VALUE if default value is empty
+        newTransformers = newTransformers.filter((t) => t !== 'DEFAULT_VALUE');
+        const { DEFAULT_VALUE: _, ...restParams } = newTransformerParams;
+        newTransformerParams = restParams;
+      }
+    }
+
     updated[index] = {
       ...current,
       ...updates,
       targetColumn: newTargetColumn,
       ignore: newIgnore,
+      transformers: newTransformers,
+      transformerParams: newTransformerParams,
     };
 
     const targetColumnNames = targetColumns.map((c) => c.name);
@@ -506,17 +536,31 @@ export function createFieldMappingState(
               target: m.targetColumn,
               ignore: m.ignore,
             };
-            if (m.transformers.length > 0) {
-              mapping.transformers = m.transformers;
+
+            // Ensure DEFAULT_VALUE transformer and params are in sync with defaultValue
+            let finalTransformers = [...m.transformers];
+            let finalTransformerParams = { ...m.transformerParams };
+            if (m.defaultValue.trim() !== '') {
+              if (!finalTransformers.includes('DEFAULT_VALUE')) {
+                finalTransformers = ['DEFAULT_VALUE', ...finalTransformers];
+              }
+              finalTransformerParams.DEFAULT_VALUE = { value: m.defaultValue };
+            } else {
+              finalTransformers = finalTransformers.filter(
+                (t) => t !== 'DEFAULT_VALUE'
+              );
+              const { DEFAULT_VALUE: _, ...rest } = finalTransformerParams;
+              finalTransformerParams = rest;
+            }
+
+            if (finalTransformers.length > 0) {
+              mapping.transformers = finalTransformers;
             }
             if (m.validators.length > 0) {
               mapping.validators = m.validators;
             }
-            if (m.defaultValue) {
-              mapping.default_value = m.defaultValue;
-            }
-            if (Object.keys(m.transformerParams).length > 0) {
-              mapping.transformer_params = m.transformerParams;
+            if (Object.keys(finalTransformerParams).length > 0) {
+              mapping.transformer_params = finalTransformerParams;
             }
             return mapping;
           }),

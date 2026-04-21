@@ -8,9 +8,10 @@
 
   interface Props {
     value: string;
+    onValueChange?: (value: string) => void;
   }
 
-  let { value }: Props = $props();
+  let { value, onValueChange }: Props = $props();
 
   let containerEl: HTMLDivElement;
   let editorView: EditorView | undefined;
@@ -26,13 +27,20 @@
   onMount(() => {
     if (!browser || !containerEl) return;
 
+    const readonly = onValueChange === undefined;
+
     editorView = new EditorView({
       state: EditorState.create({
         doc: prettyJson(value),
         extensions: [
           basicSetup,
           json(),
-          EditorState.readOnly.of(true),
+          EditorState.readOnly.of(readonly),
+          EditorView.updateListener.of((update) => {
+            if (!readonly && update.docChanged && onValueChange) {
+              onValueChange(update.state.doc.toString());
+            }
+          }),
           EditorView.theme({
             '&': {
               fontSize: '13px',
@@ -54,10 +62,10 @@
               backgroundColor: 'transparent',
             },
             '.cm-activeLine': {
-              backgroundColor: 'transparent',
+              backgroundColor: readonly ? 'transparent' : null,
             },
             '.cm-cursor': {
-              display: 'none',
+              display: readonly ? 'none' : null,
             },
           }),
         ],
