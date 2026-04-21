@@ -1,28 +1,37 @@
 <script lang="ts">
   import type { ConfigItem } from '$core/types/pipeline';
+  import { loadConfigs } from '$features/pipeline-editor/api';
 
   let {
-    configs = [],
     onSelect,
   }: {
-    configs?: ConfigItem[];
     onSelect: (config: ConfigItem) => void;
   } = $props();
 
   let open = $state(false);
   let searchQuery = $state('');
+  let items = $state<ConfigItem[]>([]);
+  let loading = $state(false);
+  let debounceTimer: ReturnType<typeof setTimeout>;
 
-  let filteredConfigs = $derived(
-    configs.filter(
-      (c) =>
-        c.attributes.config_name
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase()) ||
-        c.attributes.table_name
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase())
-    )
-  );
+  async function fetchConfigs(search?: string) {
+    loading = true;
+    try {
+      items = await loadConfigs({ search: search || undefined, limit: 50 });
+    } catch {
+      items = [];
+    } finally {
+      loading = false;
+    }
+  }
+
+  function handleSearchInput(value: string) {
+    searchQuery = value;
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      void fetchConfigs(value);
+    }, 300);
+  }
 
   function handleSelect(config: ConfigItem) {
     onSelect(config);
@@ -32,6 +41,8 @@
 
   $effect(() => {
     if (!open) return;
+
+    void fetchConfigs();
 
     function handleDocumentClick(e: MouseEvent) {
       const target = e.target as HTMLElement;
@@ -92,15 +103,19 @@
         <input
           type="text"
           placeholder="Search configs..."
-          bind:value={searchQuery}
+          value={searchQuery}
+          oninput={(e) =>
+            handleSearchInput((e.target as HTMLInputElement).value)}
           class="config-search-input"
         />
       </div>
       <div class="config-dropdown-list">
-        {#if filteredConfigs.length === 0}
+        {#if loading}
+          <div class="config-dropdown-empty">Loading...</div>
+        {:else if items.length === 0}
           <div class="config-dropdown-empty">No configs found</div>
         {:else}
-          {#each filteredConfigs as config (config.id)}
+          {#each items as config (config.id)}
             <button
               class="config-dropdown-item"
               onclick={() => handleSelect(config)}

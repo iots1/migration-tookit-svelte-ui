@@ -207,7 +207,6 @@
     canRedo={editor.canRedo}
     saving={editor.saving}
     running={jobState.active}
-    configs={editor.configs}
     onOpenDrawer={() => editor.openDrawer()}
     onAddConfig={handleAddConfig}
     onSave={() => handleSave(editor.pipelineName, editor.pipelineDescription)}

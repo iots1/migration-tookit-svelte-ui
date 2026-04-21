@@ -14,8 +14,21 @@ import type {
   PipelineSavePayload,
 } from '$core/types/pipeline';
 
-export async function loadConfigs(): Promise<ConfigItem[]> {
-  const response: ConfigsResponse = await api.get(API_V1.CONFIGS);
+export async function loadConfigs(params?: {
+  search?: string;
+  limit?: number;
+}): Promise<ConfigItem[]> {
+  const query = new URLSearchParams();
+  if (params?.search) {
+    query.set('filter', `config_name||$cont||${params.search}`);
+  }
+  if (params?.limit) {
+    query.set('limit', String(params.limit));
+  }
+  const qs = query.toString();
+  const response: ConfigsResponse = await api.get(
+    `${API_V1.CONFIGS}${qs ? `?${qs}` : ''}`
+  );
   return response.data;
 }
 

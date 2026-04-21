@@ -12,7 +12,6 @@
     canRedo = false,
     saving = false,
     running = false,
-    configs = [],
     onOpenDrawer,
     onAddConfig,
     onSave,
@@ -25,7 +24,6 @@
     canRedo?: boolean;
     saving?: boolean;
     running?: boolean;
-    configs?: ConfigItem[];
     onOpenDrawer: () => void;
     onAddConfig: (config: ConfigItem) => void;
     onSave: () => void;
@@ -77,7 +75,7 @@
       </svg>
       <span>{pipelineName}</span>
     </button>
-    <ConfigDropdown {configs} onSelect={onAddConfig} />
+    <ConfigDropdown onSelect={onAddConfig} />
   </div>
 
   <div class="toolbar-center">
