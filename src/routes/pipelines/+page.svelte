@@ -8,12 +8,17 @@
 
   import '$features/pipeline-editor/pipeline-editor.scss';
 
+  import { duplicatePipeline } from '$features/pipeline-editor/api';
+  import JobHistoryModal from '$features/pipeline-editor/components/JobHistoryModal.svelte';
   import { createPipelinesListState } from '$features/pipeline-editor/state/pipelines-list-state.svelte';
 
-  const state = createPipelinesListState();
+  const listState = createPipelinesListState();
+
+  let jobHistoryPipelineId: string | null = $state(null);
+  let duplicatingId: string | null = $state(null);
 
   onMount(() => {
-    void state.fetchPipelines();
+    void listState.fetchPipelines();
   });
 
   async function handleNewPipeline() {
@@ -31,9 +36,28 @@
         'Are you sure you want to delete this pipeline? This action cannot be undone.',
     });
     if (!confirmed) return;
-    const success = await state.deleteById(id);
+    const success = await listState.deleteById(id);
     if (success) {
       showToast('Pipeline deleted successfully', 'success');
+    }
+  }
+
+  async function handleDuplicate(id: string, name: string) {
+    const confirmed = await confirmDialog({
+      title: 'Duplicate Pipeline',
+      description: `Create a copy of "${name}"?`,
+    });
+    if (!confirmed) return;
+    duplicatingId = id;
+    try {
+      await duplicatePipeline(id);
+      showToast(`Duplicated "${name}" successfully`, 'success');
+      await listState.fetchPipelines();
+    } catch (err) {
+      showToast('Failed to duplicate pipeline', 'error');
+      console.error('Duplicate pipeline error:', err);
+    } finally {
+      duplicatingId = null;
     }
   }
 </script>
@@ -88,15 +112,15 @@
         type="text"
         class="search-input"
         placeholder="Search pipelines..."
-        value={state.searchInput}
+        value={listState.searchInput}
         oninput={(e) =>
-          state.setSearchInput((e.target as HTMLInputElement).value)}
-        onkeydown={(e) => e.key === 'Enter' && state.search()}
+          listState.setSearchInput((e.target as HTMLInputElement).value)}
+        onkeydown={(e) => e.key === 'Enter' && listState.search()}
       />
-      {#if state.searchInput}
+      {#if listState.searchInput}
         <button
           class="search-clear"
-          onclick={state.clearSearch}
+          onclick={listState.clearSearch}
           aria-label="Clear search"
         >
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -110,10 +134,10 @@
         </button>
       {/if}
     </div>
-    <button class="btn btn-secondary" onclick={state.search}>Search</button>
+    <button class="btn btn-secondary" onclick={listState.search}>Search</button>
   </div>
 
-  {#if state.error}
+  {#if listState.error}
     <div class="pipeline-error">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
         <circle
@@ -130,10 +154,10 @@
           stroke-linecap="round"
         />
       </svg>
-      <span>{state.error}</span>
+      <span>{listState.error}</span>
       <button
         class="pipeline-error-close"
-        onclick={state.dismissError}
+        onclick={listState.dismissError}
         aria-label="Dismiss error"
       >
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -149,12 +173,12 @@
   {/if}
 
   <div class="pipeline-table-wrapper">
-    {#if state.loading}
+    {#if listState.loading}
       <div class="pipeline-list-loading">
         <div class="pipeline-loading-spinner"></div>
         <span>Loading...</span>
       </div>
-    {:else if state.pipelines.length === 0}
+    {:else if listState.pipelines.length === 0}
       <div class="pipeline-list-empty">
         <svg
           width="48"
@@ -210,7 +234,7 @@
           </tr>
         </thead>
         <tbody>
-          {#each state.pipelines as pipeline (pipeline.id)}
+          {#each listState.pipelines as pipeline (pipeline.id)}
             <tr>
               <td class="td-name">
                 <span class="pipeline-name-cell">{pipeline.name}</span>
@@ -248,6 +272,48 @@
                     </svg>
                   </button>
                   <button
+                    class="action-btn action-btn-history"
+                    onclick={() => (jobHistoryPipelineId = pipeline.id)}
+                    title="Job History"
+                  >
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                  </button>
+                  <button
+                    class="action-btn action-btn-duplicate"
+                    onclick={() => handleDuplicate(pipeline.id, pipeline.name)}
+                    title="Duplicate"
+                    disabled={duplicatingId === pipeline.id}
+                  >
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"
+                      ></rect>
+                      <path
+                        d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+                      ></path>
+                    </svg>
+                  </button>
+                  <button
                     class="action-btn action-btn-delete"
                     onclick={() => handleDelete(pipeline.id)}
                     title="Delete"
@@ -279,12 +345,12 @@
     {/if}
   </div>
 
-  {#if state.totalPages > 1}
+  {#if listState.totalPages > 1}
     <div class="pagination">
       <button
         class="pagination-btn"
-        disabled={state.currentPage <= 1}
-        onclick={() => state.goToPage(state.currentPage - 1)}
+        disabled={listState.currentPage <= 1}
+        onclick={() => listState.goToPage(listState.currentPage - 1)}
         aria-label="Previous page"
       >
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -298,11 +364,11 @@
         </svg>
       </button>
 
-      {#each Array.from({ length: state.totalPages }, (_, i) => i + 1) as page (page)}
+      {#each Array.from({ length: listState.totalPages }, (_, i) => i + 1) as page (page)}
         <button
           class="pagination-btn pagination-btn-page"
-          class:pagination-btn-active={page === state.currentPage}
-          onclick={() => state.goToPage(page)}
+          class:pagination-btn-active={page === listState.currentPage}
+          onclick={() => listState.goToPage(page)}
         >
           {page}
         </button>
@@ -310,8 +376,8 @@
 
       <button
         class="pagination-btn"
-        disabled={state.currentPage >= state.totalPages}
-        onclick={() => state.goToPage(state.currentPage + 1)}
+        disabled={listState.currentPage >= listState.totalPages}
+        onclick={() => listState.goToPage(listState.currentPage + 1)}
         aria-label="Next page"
       >
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -326,8 +392,14 @@
       </button>
 
       <span class="pagination-info">
-        {state.totalRecords} record{state.totalRecords !== 1 ? 's' : ''}
+        {listState.totalRecords} record{listState.totalRecords !== 1 ? 's' : ''}
       </span>
     </div>
   {/if}
+
+  <JobHistoryModal
+    open={jobHistoryPipelineId !== null}
+    pipelineId={jobHistoryPipelineId ?? ''}
+    onClose={() => (jobHistoryPipelineId = null)}
+  />
 </div>

@@ -90,6 +90,13 @@ export async function deleteConfig(id: string): Promise<void> {
   await api.delete(`${API_V1.CONFIGS}/${id}`);
 }
 
+export async function duplicateConfig(id: string): Promise<{ id: string }> {
+  const raw = await api.post<{ data: { id: string } }>(
+    API_V1.CONFIG_DUPLICATE(id)
+  );
+  return { id: raw.data.id };
+}
+
 interface DatasourceTablesApiItem {
   id: string;
   attributes: { name: string };

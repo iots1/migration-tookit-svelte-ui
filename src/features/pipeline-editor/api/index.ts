@@ -339,3 +339,10 @@ export async function createJob(
   );
   return response;
 }
+
+export async function duplicatePipeline(id: string): Promise<{ id: string }> {
+  const raw = await api.post<{ data: { id: string } }>(
+    API_V1.PIPELINE_DUPLICATE(id)
+  );
+  return { id: raw.data.id };
+}

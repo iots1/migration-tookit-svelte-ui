@@ -19,4 +19,6 @@ export const API_V1 = {
   VALIDATORS: '/validators',
   PIPELINE_JOBS: (id: string) => `/pipelines/${id}/jobs`,
   JOB_PIPELINE_RUNS: (id: string) => `/jobs/${id}/pipeline-runs`,
+  PIPELINE_DUPLICATE: (id: string) => `/pipelines/${id}/duplicate`,
+  CONFIG_DUPLICATE: (id: string) => `/configs/${id}/duplicate`,
 } as const;

@@ -110,4 +110,34 @@
       transform: translateY(-2px);
     }
   }
+
+  &.action-btn-history {
+    background-color: var(--green-bg);
+    color: var(--green-text);
+
+    &:hover {
+      background-color: var(--green-text);
+      color: white;
+      box-shadow: 0 4px 12px rgba(22, 163, 74, 0.2);
+      transform: translateY(-2px);
+    }
+  }
+
+  &.action-btn-duplicate {
+    background-color: var(--accent-bg);
+    color: var(--accent);
+
+    &:hover {
+      background-color: var(--accent);
+      color: white;
+      box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+      transform: translateY(-2px);
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+    }
+  }
 }

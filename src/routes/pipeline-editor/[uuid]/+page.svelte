@@ -13,7 +13,7 @@
   } from '$features/pipeline-editor/api';
   import PipelineToolbar from '$features/pipeline-editor/components/controls/PipelineToolbar.svelte';
   import EditConfigDrawer from '$features/pipeline-editor/components/EditConfigDrawer.svelte';
-  import JobHistoryDrawer from '$features/pipeline-editor/components/JobHistoryDrawer.svelte';
+  import JobHistoryModal from '$features/pipeline-editor/components/JobHistoryModal.svelte';
   import JobProgress from '$features/pipeline-editor/components/JobProgress.svelte';
   import PipelineDrawer from '$features/pipeline-editor/components/PipelineDrawer.svelte';
   import { showToast } from '$lib/toast.svelte';
@@ -305,7 +305,7 @@
     onClose={handleCloseJobProgress}
   />
 
-  <JobHistoryDrawer
+  <JobHistoryModal
     open={isJobHistoryOpen}
     pipelineId={editUuid ?? ''}
     onClose={() => (isJobHistoryOpen = false)}

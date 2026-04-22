@@ -8,20 +8,22 @@
 
   import '$features/schema-mapper/schema-mapper.scss';
 
+  import { duplicateConfig } from '$features/schema-mapper/api';
   import { createConfigsListState } from '$features/schema-mapper/state/configs-list-state.svelte';
 
-  const state = createConfigsListState();
+  const listState = createConfigsListState();
 
   let searchDebounce: ReturnType<typeof setTimeout>;
+  let duplicatingId: string | null = $state(null);
 
   function handleSearchInput(value: string) {
-    state.setSearchInput(value);
+    listState.setSearchInput(value);
     clearTimeout(searchDebounce);
-    searchDebounce = setTimeout(() => state.search(), 300);
+    searchDebounce = setTimeout(() => listState.search(), 300);
   }
 
   onMount(() => {
-    void state.fetchConfigs();
+    void listState.fetchConfigs();
   });
 
   async function handleNew() {
@@ -39,9 +41,28 @@
         'Are you sure you want to delete this config? This action cannot be undone.',
     });
     if (!confirmed) return;
-    const success = await state.deleteById(uuid);
+    const success = await listState.deleteById(uuid);
     if (success) {
       showToast('ลบสำเร็จ', 'success');
+    }
+  }
+
+  async function handleDuplicate(uuid: string, name: string) {
+    const confirmed = await confirmDialog({
+      title: 'Duplicate Config',
+      description: `Create a copy of "${name}"?`,
+    });
+    if (!confirmed) return;
+    duplicatingId = uuid;
+    try {
+      await duplicateConfig(uuid);
+      showToast(`Duplicated "${name}" successfully`, 'success');
+      await listState.fetchConfigs();
+    } catch (err) {
+      showToast('Failed to duplicate config', 'error');
+      console.error('Duplicate config error:', err);
+    } finally {
+      duplicatingId = null;
     }
   }
 
@@ -109,19 +130,19 @@
         type="text"
         class="search-input"
         placeholder="Search configs..."
-        value={state.searchInput}
+        value={listState.searchInput}
         oninput={(e) => handleSearchInput((e.target as HTMLInputElement).value)}
         onkeydown={(e) => {
           if (e.key === 'Enter') {
             clearTimeout(searchDebounce);
-            state.search();
+            listState.search();
           }
         }}
       />
-      {#if state.searchInput}
+      {#if listState.searchInput}
         <button
           class="search-clear"
-          onclick={state.clearSearch}
+          onclick={listState.clearSearch}
           aria-label="Clear search"
         >
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -135,10 +156,10 @@
         </button>
       {/if}
     </div>
-    <button class="btn btn-secondary" onclick={state.search}>Search</button>
+    <button class="btn btn-secondary" onclick={listState.search}>Search</button>
   </div>
 
-  {#if state.error}
+  {#if listState.error}
     <div class="sm-error-banner">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
         <circle
@@ -155,10 +176,10 @@
           stroke-linecap="round"
         />
       </svg>
-      <span>{state.error}</span>
+      <span>{listState.error}</span>
       <button
         class="sm-error-close"
-        onclick={state.dismissError}
+        onclick={listState.dismissError}
         aria-label="Dismiss error"
       >
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -174,12 +195,12 @@
   {/if}
 
   <div class="pipeline-table-wrapper">
-    {#if state.loading}
+    {#if listState.loading}
       <div class="pipeline-list-loading">
         <div class="pipeline-loading-spinner"></div>
         <span>Loading...</span>
       </div>
-    {:else if state.configs.length === 0}
+    {:else if listState.configs.length === 0}
       <div class="pipeline-list-empty">
         <svg
           width="48"
@@ -236,7 +257,7 @@
           </tr>
         </thead>
         <tbody>
-          {#each state.configs as config (config.id)}
+          {#each listState.configs as config (config.id)}
             <tr>
               <td class="td-name">
                 <span class="pipeline-name-cell">{config.config_name}</span>
@@ -320,6 +341,30 @@
                     </svg>
                   </button>
                   <button
+                    class="action-btn action-btn-duplicate"
+                    onclick={() =>
+                      handleDuplicate(config.id, config.config_name)}
+                    title="Duplicate"
+                    disabled={duplicatingId === config.id}
+                  >
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"
+                      ></rect>
+                      <path
+                        d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+                      ></path>
+                    </svg>
+                  </button>
+                  <button
                     class="action-btn action-btn-delete"
                     onclick={() => handleDelete(config.id)}
                     title="Delete"
@@ -351,12 +396,12 @@
     {/if}
   </div>
 
-  {#if state.totalPages > 1}
+  {#if listState.totalPages > 1}
     <div class="pagination">
       <button
         class="pagination-btn"
-        disabled={state.currentPage <= 1}
-        onclick={() => state.goToPage(state.currentPage - 1)}
+        disabled={listState.currentPage <= 1}
+        onclick={() => listState.goToPage(listState.currentPage - 1)}
         aria-label="Previous page"
       >
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -370,11 +415,11 @@
         </svg>
       </button>
 
-      {#each Array.from({ length: state.totalPages }, (_, i) => i + 1) as page (page)}
+      {#each Array.from({ length: listState.totalPages }, (_, i) => i + 1) as page (page)}
         <button
           class="pagination-btn pagination-btn-page"
-          class:pagination-btn-active={page === state.currentPage}
-          onclick={() => state.goToPage(page)}
+          class:pagination-btn-active={page === listState.currentPage}
+          onclick={() => listState.goToPage(page)}
         >
           {page}
         </button>
@@ -382,8 +427,8 @@
 
       <button
         class="pagination-btn"
-        disabled={state.currentPage >= state.totalPages}
-        onclick={() => state.goToPage(state.currentPage + 1)}
+        disabled={listState.currentPage >= listState.totalPages}
+        onclick={() => listState.goToPage(listState.currentPage + 1)}
         aria-label="Next page"
       >
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -398,7 +443,7 @@
       </button>
 
       <span class="pagination-info">
-        {state.totalRecords} record{state.totalRecords !== 1 ? 's' : ''}
+        {listState.totalRecords} record{listState.totalRecords !== 1 ? 's' : ''}
       </span>
     </div>
   {/if}
