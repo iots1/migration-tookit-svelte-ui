@@ -282,6 +282,8 @@
 
 .sql-guide-debug-table {
   overflow-x: auto;
+
+  -webkit-overflow-scrolling: touch;
 }
 
 .sql-guide-table {
@@ -290,6 +292,7 @@
   font-size: 13px;
 
   border-collapse: collapse;
+  table-layout: fixed;
 
   th {
     padding: 12px;
@@ -299,13 +302,18 @@
     color: var(--text-primary);
     font-weight: 600;
     text-align: left;
+    white-space: nowrap;
   }
 
   td {
+    overflow: hidden;
+
     padding: 12px;
     border-bottom: 1px solid var(--border-color);
 
     color: var(--text-secondary);
+    white-space: normal;
+    word-wrap: break-word;
   }
 }
 
@@ -407,5 +415,16 @@
   .sql-guide-body {
     min-height: calc(95vh - 80px);
     max-height: calc(95vh - 80px);
+  }
+
+  .sql-guide-table {
+    th,
+    td {
+      padding: 8px 10px;
+    }
+
+    td {
+      font-size: 12px;
+    }
   }
 }

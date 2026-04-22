@@ -786,17 +786,20 @@
 
 /* ========== Pipeline Table ========== */
 .pipeline-table-wrapper {
-  overflow: hidden;
+  overflow-x: auto;
 
   border-radius: var(--radius-md);
 
   background: var(--bg-primary);
   box-shadow: var(--shadow-md);
+
+  -webkit-overflow-scrolling: touch;
 }
 
 .pipeline-table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
 
   thead tr {
     background: var(--bg-table-header);
@@ -816,11 +819,15 @@
   }
 
   td {
+    overflow: hidden;
+
     padding: 16px;
     border-bottom: 1px solid var(--border-light);
 
     color: var(--text-primary);
     font-size: 14px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
     vertical-align: middle;
   }
 
@@ -1029,6 +1036,36 @@
     left: -100px;
 
     width: 260px;
+  }
+
+  .pipeline-table-wrapper {
+    margin: 0 -16px;
+    border-right: none;
+    border-left: none;
+    border-radius: 0;
+  }
+
+  .pipeline-table {
+    th,
+    td {
+      padding: 10px 12px;
+    }
+
+    th {
+      font-size: 11px;
+    }
+
+    td {
+      font-size: 13px;
+    }
+  }
+
+  .pipeline-name-cell {
+    max-width: 140px;
+  }
+
+  .pipeline-desc-cell {
+    max-width: 200px;
   }
 }
 

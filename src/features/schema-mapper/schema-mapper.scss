@@ -309,12 +309,15 @@
   max-height: 500px;
   border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
+
+  -webkit-overflow-scrolling: touch;
 }
 
 .sm-mapping-table {
   width: 100%;
   min-width: 900px;
   border-collapse: collapse;
+  table-layout: fixed;
 
   thead {
     position: sticky;
@@ -340,11 +343,15 @@
   }
 
   td {
+    overflow: hidden;
+
     padding: 6px 8px;
     border-bottom: 1px solid var(--border-light);
 
     color: var(--text-primary);
     font-size: 13px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
     vertical-align: middle;
   }
 
@@ -623,6 +630,29 @@
 
   .sm-type-group {
     flex-direction: column;
+  }
+
+  .sm-mapping-wrapper {
+    max-height: 400px;
+    margin: 0 -16px;
+    border-right: none;
+    border-left: none;
+    border-radius: 0;
+  }
+
+  .sm-mapping-table {
+    th,
+    td {
+      padding: 6px 8px;
+    }
+
+    th {
+      font-size: 10px;
+    }
+
+    td {
+      font-size: 12px;
+    }
   }
 }
 

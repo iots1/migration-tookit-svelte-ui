@@ -533,11 +533,14 @@
 
 .db-explorer__table-wrapper {
   overflow: auto;
+
+  -webkit-overflow-scrolling: touch;
 }
 
 .db-explorer__table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
 
   thead {
     position: sticky;
@@ -687,6 +690,21 @@
   .db-explorer__editor-pane {
     height: auto;
     min-height: 150px;
+  }
+
+  .db-explorer__table {
+    th,
+    td {
+      padding: 8px 10px;
+    }
+
+    th {
+      font-size: 11px;
+    }
+
+    td {
+      font-size: 12px;
+    }
   }
 }
 
