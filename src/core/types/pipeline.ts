@@ -92,6 +92,10 @@ export interface PipelineSavePayload {
 export interface PipelineNode {
   id?: string;
   config_id: string;
+  config_name?: string;
+  table_name?: string;
+  json_data_str?: string;
+  config_type?: string;
   description?: string;
   position_x: number;
   position_y: number;
@@ -127,6 +131,10 @@ export interface PipelineApiEntity {
         id: string;
         pipeline_id: string;
         config_id: string;
+        config_name: string;
+        table_name: string;
+        json_data: string;
+        config_type: string;
         position_x: number;
         position_y: number;
         order_sort: number;

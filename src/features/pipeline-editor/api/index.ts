@@ -3,6 +3,7 @@ import { API_V1 } from '$core/api/endpoints';
 import type { BaseEdge, BaseNode } from '$core/types/common';
 import type {
   ConfigItem,
+  ConfigJsonData,
   ConfigsResponse,
   CreateJobPayload,
   CreateJobResponse,
@@ -93,6 +94,10 @@ export async function loadPipeline(id: string): Promise<PipelineEntity> {
     nodes: response.data.attributes.nodes.map((node) => ({
       id: node.id,
       config_id: node.config_id,
+      config_name: node.config_name,
+      table_name: node.table_name,
+      json_data_str: node.json_data,
+      config_type: node.config_type,
       description: undefined,
       position_x: node.position_x,
       position_y: node.position_y,
@@ -192,6 +197,24 @@ export async function reconstructPipelineFromEntity(
 
     nodeByUuid.set(node.config_id, nodeId);
 
+    // Prefer inline data from the pipeline API response; fall back to separate config lookup
+    const inlineJsonData = (() => {
+      if (!node.json_data_str || node.json_data_str === '{}') return null;
+      try {
+        return JSON.parse(node.json_data_str) as ConfigJsonData;
+      } catch {
+        return null;
+      }
+    })();
+
+    const resolvedConfigName =
+      node.config_name ?? config?.attributes.config_name ?? 'Unknown Config';
+    const resolvedConfigType =
+      node.config_type ?? config?.attributes.config_type ?? 'std';
+    const resolvedTableName =
+      node.table_name ?? config?.attributes.table_name ?? '';
+    const jsonData = inlineJsonData ?? config?.attributes.json_data ?? null;
+
     return {
       id: nodeId,
       type: 'config',
@@ -200,16 +223,16 @@ export async function reconstructPipelineFromEntity(
         y: node.position_y,
       },
       data: {
-        label: config?.attributes.config_name ?? 'Unknown Config',
+        label: resolvedConfigName,
         configId: node.config_id,
         pipelineNodeId: node.id,
-        configType: config?.attributes.config_type ?? 'std',
-        tableName: config?.attributes.table_name ?? '',
-        sourceDb: config?.attributes.json_data?.source?.database ?? '',
-        sourceTable: config?.attributes.json_data?.source?.table ?? '',
-        targetDb: config?.attributes.json_data?.target?.database ?? '',
-        targetTable: config?.attributes.json_data?.target?.table ?? '',
-        mappingCount: config?.attributes.json_data?.mappings?.length ?? 0,
+        configType: resolvedConfigType,
+        tableName: resolvedTableName,
+        sourceDb: jsonData?.source?.database ?? '',
+        sourceTable: jsonData?.source?.table ?? '',
+        targetDb: jsonData?.target?.database ?? '',
+        targetTable: jsonData?.target?.table ?? '',
+        mappingCount: jsonData?.mappings?.length ?? 0,
         nodeDescription: node.description,
       },
     };
