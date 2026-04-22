@@ -10,15 +10,15 @@ pnpm build            # Build static site → build/
 pnpm preview          # Preview production build
 pnpm check            # svelte-check type checking (run after editing .svelte files)
 pnpm check:watch      # Type checking in watch mode
-pnpm lint             # Prettier check + ESLint (must pass before merging)
-pnpm format           # Auto-format with Prettier
+pnpm lint             # Prettier check + ESLint + Stylelint (must pass before merging)
+pnpm format           # Auto-format with Prettier + Stylelint --fix
 ```
 
-ESLint and Prettier run together under `pnpm lint`. Always run `pnpm lint` after making changes. There is no test suite.
+ESLint, Prettier, and Stylelint run together under `pnpm lint`. Always run `pnpm lint` after making changes. There is no test suite.
 
 ## Architecture
 
-**SvelteKit 5 static SPA** — `adapter-static` with `fallback: index.html` for client-side routing. Svelte 5 **runes mode** is mandatory (`compilerOptions.runes: true`).
+**SvelteKit 5 SPA** — `adapter-node` for server-side rendering. Svelte 5 **runes mode** is mandatory (`compilerOptions.runes: true`).
 
 ### Path aliases (defined in `svelte.config.js`)
 
@@ -27,22 +27,31 @@ ESLint and Prettier run together under `pnpm lint`. Always run `pnpm lint` after
 | `$core`     | `src/core/`                                                       |
 | `$features` | `src/features/`                                                   |
 | `$lib`      | `src/lib/` (SvelteKit default)                                    |
+| `$src`      | `src/`                                                            |
+| `$routes`   | `src/routes/`                                                     |
 | `$app/*`    | SvelteKit runtime (`$app/navigation`, `$app/paths`, `$app/state`) |
 
 ### Layer separation — strictly enforced
 
 ```
-src/routes/          ← View only: rendering + navigation (goto, href). No API calls.
+src/routes/          ← View only: rendering + navigation (goto, href). NO API CALLS, NO business logic.
 src/features/*/
-  components/        ← Pure UI components. Receive props, emit events. No state imports.
+  components/        ← Pure UI components. Receive props, emit events. No state imports, no API calls.
   state/             ← Business logic, state management, API orchestration (.svelte.ts)
   api/               ← HTTP calls + data mapping to/from API shapes. No state mutations.
 src/core/
-  api/               ← Generic ApiClient, endpoint constants, auth state
-  types/             ← Type definitions only. common.ts for shared types; pipeline.ts for pipeline domain.
+  api/               ← Generic ApiClient, endpoint constants, auth state (Svelte 5 runes)
+  state/             ← Shared state factories (e.g., createPaginatedListState<T>)
+  types/             ← Type definitions only. common.ts for shared types; per-domain files for specifics.
   utils/             ← Pure utility functions
-src/lib/components/  ← Shared layout components (Sidebar, Navbar, Footer)
+src/lib/
+  components/        ← Shared reusable components (Pagination, SearchBar, ErrorBanner, etc.)
+  components/layout/ ← Layout components (Sidebar, Navbar, Footer)
+  toast.svelte.ts    ← Global toast notification (singleton)
+  confirm-dialog.svelte.ts ← Global confirm dialog (singleton)
 ```
+
+**Critical rule:** Route pages must NEVER import from `src/features/*/api/` directly. All data loading and API orchestration must go through state modules. This is the single most important architectural boundary.
 
 ### State pattern (Svelte 5 runes)
 
@@ -64,9 +73,86 @@ export function createEditorState(): EditorState {
 
 Instantiate once at the route page level and pass state/handlers down as props.
 
+#### Shared state factories
+
+Common state patterns are extracted into reusable generic factories in `src/core/state/`:
+
+- **`createPaginatedListState<T>(fetchFn, deleteFn, label)`** — provides loading, error, pagination, search, delete for any paginated list. Feature-specific wrappers add domain aliases (e.g., `get pipelines()` → `state.items`).
+
+```typescript
+// Usage in feature state:
+import { createPaginatedListState } from '$core/state/paginated-list-state.svelte';
+
+export function createPipelinesListState() {
+  const state = createPaginatedListState<PipelineListItem>(
+    listPipelines,
+    deletePipeline,
+    'Pipelines'
+  );
+  return {
+    ...state,
+    get pipelines() { return state.items; },
+    fetchPipelines: state.fetchItems,
+  };
+}
+```
+
+**When adding a new paginated list page:** Always use `createPaginatedListState<T>` instead of writing state from scratch.
+
+#### State methods that encapsulate API calls
+
+State modules must include all API orchestration. Route pages should call state methods, not API functions:
+
+```typescript
+// ✅ Correct — state module owns the orchestration
+// editor-state.svelte.ts
+async function initialize(editUuid: string): Promise<string | null> { ... }
+async function updateNodeFromConfig(configId: string): Promise<void> { ... }
+async function saveAndCreateJob(name: string, description: string): Promise<string | null> { ... }
+
+// ✅ Correct — route page calls state only
+// pipeline-editor/[uuid]/+page.svelte
+onMount(async () => { await editor.initialize(editUuid ?? 'new'); });
+async function handleConfigSaved(configId: string) {
+  await editor.updateNodeFromConfig(configId);
+  editingConfigId = null;
+}
+```
+
+### Shared reusable components
+
+The following components in `src/lib/components/` are shared across multiple route pages. **Always reuse them** instead of duplicating markup:
+
+| Component      | Props                                                                           | Used by                     |
+| -------------- | ------------------------------------------------------------------------------- | --------------------------- |
+| `Pagination`   | `currentPage`, `totalPages`, `totalRecords`, `onPageChange`                    | All list pages              |
+| `SearchBar`    | `value`, `placeholder?`, `onInput`, `onSearch`, `onClear`                      | All list pages              |
+| `ErrorBanner`  | `message`, `onDismiss`                                                          | All pages with error state  |
+| `BadgeList`    | `items`, `limit?`, `color?`                                                    | Config editor, field mapping |
+| `Toast`        | (global singleton, use `showToast()` from `$lib/toast.svelte`)                  | Everywhere                  |
+| `ConfirmDialog`| (global singleton, use `confirmDialog()` from `$lib/confirm-dialog.svelte`)      | Everywhere                  |
+
+**Never copy-paste pagination, search bar, or error banner markup.** Import and use the shared components.
+
 ### API data flow
 
-The backend returns JSON:API-style envelopes. Mapping from API shapes to UI types happens exclusively inside `src/features/pipeline-editor/api/index.ts` — route pages and state modules never touch raw API response types (`PipelineApiEntity`, `PipelineApiListResponse`, etc.).
+The backend returns JSON:API-style envelopes. Mapping from API shapes to UI types happens exclusively inside `src/features/*/api/index.ts` — route pages and state modules never touch raw API response types (`PipelineApiEntity`, `PipelineApiListResponse`, etc.).
+
+### Endpoint constants
+
+All API URLs must use constants from `src/core/api/endpoints.ts`. Never construct endpoint URLs with string templates when a constant already exists:
+
+```typescript
+// ✅ Correct
+await api.get(API_V1.PIPELINE_DETAIL(id));
+await api.get(API_V1.CONFIG_DETAIL(id));
+
+// ❌ Wrong — uses string template instead of defined constant
+await api.get(`${API_V1.PIPELINES}/${id}`);
+await api.get(`${API_V1.CONFIGS}/${id}`);
+```
+
+When adding a new endpoint, define it in `API_V1` as a function `(id: string) => string` for parameterized routes.
 
 ### Pipeline editor specifics
 
@@ -74,9 +160,28 @@ The backend returns JSON:API-style envelopes. Mapping from API shapes to UI type
 - Internal node/edge types (`BaseNode`, `BaseEdge` from `$core/types/common`) do not extend xyflow types — bridge with `as unknown as Node[]` only at the canvas boundary in the route page, not deeper.
 - Node `data` field is typed `Record<string, unknown>`. Cast to concrete types only at usage sites in `ConfigNode.svelte` and `api/index.ts`.
 
+### Cross-feature dependencies
+
+- Components in one feature should NOT import from another feature's `api/` or `state/` modules. If a component is shared (e.g., `SqlEditor`), move it to `$lib/components/`.
+- Types that represent the same domain concept must be unified. Do not create duplicate types across features (e.g., `DatasourceItem` vs `DatasourceListItem` — use one type in `$core/types/`).
+
 ### Environment
 
 `PUBLIC_API_URL` is the only environment variable (Vite prefix `PUBLIC_`). It is declared in `src/env.d.ts` so `import.meta.env.PUBLIC_API_URL` is typed as `string`. Add new `PUBLIC_*` variables there.
+
+### Toast messages
+
+All user-facing messages (toast notifications, error messages) must be in **English**. Never use Thai or other languages in toast messages:
+
+```typescript
+// ✅ Correct
+showToast('Saved successfully');
+showToast('Pipeline deleted successfully', 'success');
+
+// ❌ Wrong
+showToast('บันทึกสำเร็จ');
+showToast('ลบสำเร็จ', 'success');
+```
 
 ### SCSS / Styling
 
@@ -94,10 +199,20 @@ src/
     ├── forms.scss              # .form-group, .form-label, .form-input, .form-textarea
     ├── tables.scss             # .table-wrapper, .table, .table th, .table td
     ├── drawer.scss             # .drawer, .drawer-overlay, .drawer-header/body/footer
-    └── animations.scss         # @keyframes (spin, pulse-dot, fadeIn), utility classes
+    ├── animations.scss         # @keyframes (spin, pulse-dot, fadeIn), utility classes
+    ├── error-banner.scss       # .error-banner, .error-banner-close
+    ├── toast.scss              # .toast-container, .toast variants
+    ├── dialog.scss             # .dialog, .dialog-overlay, dialog variants
+    ├── badge-list.scss         # .badge-list, .badge, .badge-overflow
+    ├── item-selector-drawer.scss
+    ├── value-map-params-drawer.scss
+    ├── sql-guide-modal.scss
+    ├── sql-editor.scss
+    ├── sql-highlighter.scss
+    └── json-viewer.scss
 
-src/features/pipeline-editor/
-└── pipeline-editor.scss        # Feature-specific styles (converted to SCSS with nesting)
+src/features/*/
+└── <feature>.scss              # Feature-specific styles with nesting
 ```
 
 **SCSS rules:**
@@ -118,6 +233,7 @@ src/features/pipeline-editor/
 - Forms: `.form-group`, `.form-label`, `.form-input`, `.form-textarea`
 - Tables: `.table-wrapper`, `.table`
 - Drawer: `.drawer`, `.drawer-overlay`, `.drawer-header`, `.drawer-title`, `.drawer-close`, `.drawer-body`, `.drawer-footer`
+- Error Banner: `.error-banner`, `.error-banner-close`
 - Animations: `.spin` (for loading spinners)
 
 ## ESLint Rules (from eslint.config.js)
@@ -176,3 +292,9 @@ All `no-unsafe-*` rules are **disabled** in `.svelte.ts` files because the TypeS
 - Svelte files use `let` (not `const`) for `$props()` and `$derived()`
 - Navigation uses `base` from `$app/paths` prefixed to all `href` and `goto()` paths. The `svelte/no-navigation-without-resolve` rule is disabled (adapter-static, empty base path).
 - No `console.log` in production code; use `console.warn` / `console.error` for logging
+- **No API calls in route pages** — all data fetching goes through state modules
+- **Reuse shared components** (Pagination, SearchBar, ErrorBanner) — never duplicate their markup
+- **Use endpoint constants** from `$core/api/endpoints` — never construct URLs with string templates
+- **English only** in toast messages and user-facing strings
+- **Use `createPaginatedListState<T>`** for new list pages — never write pagination state from scratch
+- **Avoid unnecessary `$derived` aliases** — use `state.property` directly in templates instead of creating intermediate variables

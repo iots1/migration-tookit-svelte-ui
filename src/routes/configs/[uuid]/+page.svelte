@@ -69,7 +69,7 @@
     const savedId = await fm.save();
     if (savedId) {
       // cspell:disable-next-line
-      showToast('บันทึกสำเร็จ');
+      showToast('Saved successfully');
       if (rawId === 'new') {
         await goto(`/configs/${savedId}`, {
           replaceState: true,

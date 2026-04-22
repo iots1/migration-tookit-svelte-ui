@@ -2,6 +2,7 @@ export const API_V1 = {
   CONFIGS: '/configs',
   CONFIG_DETAIL: (id: string) => `/configs/${id}`,
   PIPELINES: '/pipelines',
+  PIPELINE_DETAIL: (id: string) => `/pipelines/${id}`,
   PIPELINE_RUN: (id: string) => `/pipelines/${id}/run`,
   PIPELINE_VALIDATE: (id: string) => `/pipelines/${id}/validate`,
   TABLES: '/schema/tables',

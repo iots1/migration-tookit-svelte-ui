@@ -83,7 +83,7 @@
       };
 
       await updateConfig(configId, payload);
-      showToast('บันทึกสำเร็จ');
+      showToast('Saved successfully');
       await onSaved(configId);
     } catch (err) {
       error = err instanceof Error ? err.message : 'Failed to save config';

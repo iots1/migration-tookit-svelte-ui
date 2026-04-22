@@ -88,9 +88,7 @@ export async function savePipeline(
 }
 
 export async function loadPipeline(id: string): Promise<PipelineEntity> {
-  const response: PipelineApiEntity = await api.get(
-    `${API_V1.PIPELINES}/${id}`
-  );
+  const response: PipelineApiEntity = await api.get(API_V1.PIPELINE_DETAIL(id));
   return {
     id: response.data.id,
     name: response.data.attributes.name,
@@ -122,7 +120,7 @@ export async function updatePipeline(
   pipeline: PipelineSavePayload
 ): Promise<{ id: string; message: string }> {
   const raw = await api.put<Record<string, unknown>>(
-    `${API_V1.PIPELINES}/${id}`,
+    API_V1.PIPELINE_DETAIL(id),
     pipeline
   );
   const data = raw.data as Record<string, unknown>;
@@ -133,7 +131,7 @@ export async function updatePipeline(
 }
 
 export async function deletePipeline(id: string): Promise<void> {
-  await api.delete(`${API_V1.PIPELINES}/${id}`);
+  await api.delete(API_V1.PIPELINE_DETAIL(id));
 }
 
 export async function runPipeline(id: string): Promise<PipelineRunResponse> {

@@ -4,13 +4,6 @@
   import { goto } from '$app/navigation';
   import { page } from '$app/state';
 
-  import type { ConfigItem } from '$core/types/pipeline';
-  import {
-    createJob,
-    loadConfigs,
-    loadPipeline,
-    reconstructPipelineFromEntity,
-  } from '$features/pipeline-editor/api';
   import PipelineToolbar from '$features/pipeline-editor/components/controls/PipelineToolbar.svelte';
   import EditConfigDrawer from '$features/pipeline-editor/components/EditConfigDrawer.svelte';
   import JobHistoryModal from '$features/pipeline-editor/components/JobHistoryModal.svelte';
@@ -35,67 +28,15 @@
   }
 
   async function handleConfigSaved(configId: string) {
-    const configs = await loadConfigs();
-    editor.setConfigs(configs);
-    const updated = configs.find((c) => c.id === configId);
-    if (updated) {
-      const jsonData = updated.attributes.json_data as unknown as Record<
-        string,
-        unknown
-      >;
-      const source = (jsonData.source ?? {}) as Record<string, unknown>;
-      const target = (jsonData.target ?? {}) as Record<string, unknown>;
-      const mappings = (jsonData.mappings ?? []) as unknown[];
-
-      editor.setNodes(
-        editor.nodes.map((n) =>
-          (n.data.configId as string) === configId
-            ? {
-                ...n,
-                data: {
-                  ...n.data,
-                  label: updated.attributes.config_name,
-                  configType: updated.attributes.config_type,
-                  tableName: updated.attributes.table_name,
-                  sourceTable: (source.table as string) ?? '',
-                  targetTable: (target.table as string) ?? '',
-                  mappingCount: mappings.length,
-                },
-              }
-            : n
-        )
-      );
-    }
+    await editor.updateNodeFromConfig(configId);
     editingConfigId = null;
   }
 
   onMount(async () => {
-    try {
-      editor.setLoading(true);
-      const configs = await loadConfigs();
-      editor.setConfigs(configs);
-
-      if (editUuid && editUuid !== 'new') {
-        const entity = await loadPipeline(editUuid);
-        const result = await reconstructPipelineFromEntity(entity, configs);
-        editor.setPipelineFromLoad(
-          result.name,
-          result.description,
-          result.nodes,
-          result.edges
-        );
-        editor.setPipelineId(editUuid);
-      }
-    } catch (err) {
-      editor.setError(
-        err instanceof Error ? err.message : 'Failed to load data'
-      );
-    } finally {
-      editor.setLoading(false);
-    }
+    await editor.initialize(editUuid ?? 'new');
   });
 
-  function handleAddConfig(config: ConfigItem) {
+  function handleAddConfig(config: Parameters<typeof editor.addConfigNode>[0]) {
     editor.addConfigNode(config);
   }
 
@@ -118,7 +59,7 @@
   async function handleSave(name: string, description: string) {
     const id = await editor.save(name, description);
     if (id) {
-      showToast('บันทึกสำเร็จ');
+      showToast('Saved successfully');
       if (!editUuid || editUuid === 'new') {
         await goto(`/pipeline-editor/${id}`);
       }
@@ -135,23 +76,19 @@
       return;
     }
 
-    try {
-      const id = await editor.save(name, description);
-      if (!id) return;
+    const jobId = await editor.saveAndCreateJob(name, description);
+    if (!jobId) return;
 
-      if (!editUuid || editUuid === 'new') {
+    if (!editUuid || editUuid === 'new') {
+      const id = editor.pipelineId;
+      if (id) {
         await goto(`/pipeline-editor/${id}`);
       }
-      editor.closeDrawer();
-
-      const jobResponse = await createJob({ pipeline_id: id });
-      initialJobId = jobResponse.job_id;
-      isJobHistoryOpen = true;
-    } catch (err) {
-      editor.setError(
-        err instanceof Error ? err.message : 'Failed to start job'
-      );
     }
+    editor.closeDrawer();
+
+    initialJobId = jobId;
+    isJobHistoryOpen = true;
   }
 </script>
 

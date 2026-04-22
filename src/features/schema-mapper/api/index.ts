@@ -60,7 +60,7 @@ export async function listConfigs(params?: {
 
 export async function getConfig(id: string): Promise<ConfigDetailResponse> {
   const response: ConfigDetailApiResponse = await api.get(
-    `${API_V1.CONFIGS}/${id}`
+    API_V1.CONFIG_DETAIL(id)
   );
   return response.data.attributes;
 }
@@ -83,11 +83,11 @@ export async function updateConfig(
   id: string,
   payload: ConfigSavePayload
 ): Promise<void> {
-  await api.put(`${API_V1.CONFIGS}/${id}`, payload);
+  await api.put(API_V1.CONFIG_DETAIL(id), payload);
 }
 
 export async function deleteConfig(id: string): Promise<void> {
-  await api.delete(`${API_V1.CONFIGS}/${id}`);
+  await api.delete(API_V1.CONFIG_DETAIL(id));
 }
 
 export async function duplicateConfig(id: string): Promise<{ id: string }> {

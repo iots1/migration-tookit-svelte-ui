@@ -1,6 +1,8 @@
 import type { BaseEdge, BaseNode, HistoryEntry } from '$core/types/common';
 import type { ConfigItem, PipelineRunResponse } from '$core/types/pipeline';
 import {
+  createJob,
+  loadConfigs,
   loadPipeline,
   reconstructPipelineFromEntity,
   runPipeline,
@@ -48,6 +50,15 @@ interface EditorState {
     edges: BaseEdge[]
   ) => void;
   setPipelineId: (value: string | null) => void;
+  /** Loads configs and optionally loads an existing pipeline by ID. */
+  initialize: (editUuid: string) => Promise<string | null>;
+  /** Refreshes configs and updates a specific node's data from the config. */
+  updateNodeFromConfig: (configId: string) => Promise<void>;
+  /** Saves pipeline, creates a job, returns job ID or null. */
+  saveAndCreateJob: (
+    name: string,
+    description: string
+  ) => Promise<string | null>;
   /** Saves pipeline and returns its ID, or null on failure. */
   save: (name: string, description: string) => Promise<string | null>;
   /** Saves then runs pipeline, returns run response or null on failure. */
@@ -332,6 +343,81 @@ export function createEditorState(): EditorState {
     }
   }
 
+  async function initialize(editUuid: string): Promise<string | null> {
+    try {
+      loading = true;
+      const loadedConfigs = await loadConfigs();
+      configs = loadedConfigs;
+
+      if (editUuid && editUuid !== 'new') {
+        const entity = await loadPipeline(editUuid);
+        const result = await reconstructPipelineFromEntity(entity, configs);
+        setPipelineFromLoad(
+          result.name,
+          result.description,
+          result.nodes,
+          result.edges
+        );
+        pipelineId = editUuid;
+        return editUuid;
+      }
+      return null;
+    } catch (err) {
+      error = err instanceof Error ? err.message : 'Failed to load data';
+      return null;
+    } finally {
+      loading = false;
+    }
+  }
+
+  async function updateNodeFromConfig(configId: string): Promise<void> {
+    const updatedConfigs = await loadConfigs();
+    configs = updatedConfigs;
+    const updated = updatedConfigs.find((c) => c.id === configId);
+    if (updated) {
+      const jsonData = updated.attributes.json_data as unknown as Record<
+        string,
+        unknown
+      >;
+      const source = (jsonData.source ?? {}) as Record<string, unknown>;
+      const target = (jsonData.target ?? {}) as Record<string, unknown>;
+      const mappings = (jsonData.mappings ?? []) as unknown[];
+
+      nodes = nodes.map((n) =>
+        (n.data.configId as string) === configId
+          ? {
+              ...n,
+              data: {
+                ...n.data,
+                label: updated.attributes.config_name,
+                configType: updated.attributes.config_type,
+                tableName: updated.attributes.table_name,
+                sourceTable: (source.table as string) ?? '',
+                targetTable: (target.table as string) ?? '',
+                mappingCount: mappings.length,
+              },
+            }
+          : n
+      );
+    }
+  }
+
+  async function saveAndCreateJob(
+    name: string,
+    description: string
+  ): Promise<string | null> {
+    const id = await save(name, description);
+    if (!id) return null;
+
+    try {
+      const jobResponse = await createJob({ pipeline_id: id });
+      return jobResponse.job_id;
+    } catch (err) {
+      error = err instanceof Error ? err.message : 'Failed to start job';
+      return null;
+    }
+  }
+
   return {
     get nodes() {
       return nodes;
@@ -407,6 +493,9 @@ export function createEditorState(): EditorState {
     setPipelineFromLoad,
     save,
     saveAndRun,
+    saveAndCreateJob,
+    initialize,
+    updateNodeFromConfig,
     scheduleAutoSave,
   };
 }

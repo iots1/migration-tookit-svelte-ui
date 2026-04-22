@@ -16,26 +16,10 @@
 
   const explorer = createDbExplorerState();
 
-  let selectedDatasourceId = $derived(explorer.selectedDatasourceId);
-  let sql = $derived(explorer.sql);
-  let results = $derived(explorer.results);
-  let datasources = $derived(explorer.datasources);
-  let running = $derived(explorer.running);
-  let error = $derived(explorer.error);
-  let tables = $derived(explorer.tables);
-  let loadingTables = $derived(explorer.loadingTables);
-  let expandedTables = $derived(explorer.expandedTables);
-  let loadingColumns = $derived(explorer.loadingColumns);
-  let defaultLimit = $derived(explorer.defaultLimit);
-  let activeDatasource = $derived(explorer.activeDatasource);
-  let tabs = $derived(explorer.tabs);
-  let activeTabId = $derived(explorer.activeTabId);
-  let globalError = $derived(explorer.globalError);
-
   let editorSchema = $derived<SqlEditorSchemaTable[]>(
-    tables.map((table) => ({
+    explorer.tables.map((table) => ({
       name: table.name,
-      columns: (expandedTables[table.name] ?? []).map((col) => ({
+      columns: (explorer.expandedTables[table.name] ?? []).map((col) => ({
         name: col.name,
         type: col.dataType,
       })),
@@ -43,12 +27,12 @@
   );
 
   let sqlDialect = $derived<SqlLanguage>(
-    activeDatasource?.db_type === 'mssql' ||
-      activeDatasource?.db_type === 'sqlserver'
+    explorer.activeDatasource?.db_type === 'mssql' ||
+      explorer.activeDatasource?.db_type === 'sqlserver'
       ? 'tsql'
-      : activeDatasource?.db_type === 'postgresql'
+      : explorer.activeDatasource?.db_type === 'postgresql'
         ? 'postgresql'
-        : activeDatasource?.db_type === 'mysql'
+        : explorer.activeDatasource?.db_type === 'mysql'
           ? 'mysql'
           : 'sql'
   );
@@ -162,9 +146,11 @@
   let tableFilter = $state('');
 
   let filteredTables = $derived(() => {
-    if (!tableFilter.trim()) return tables;
+    if (!tableFilter.trim()) return explorer.tables;
     const filter = tableFilter.toLowerCase();
-    return tables.filter((table) => table.name.toLowerCase().includes(filter));
+    return explorer.tables.filter((table) =>
+      table.name.toLowerCase().includes(filter)
+    );
   });
 
   let contextMenuItems = $derived<ContextMenuItem[]>([
@@ -180,17 +166,17 @@
     {
       label: 'Close Tab',
       action: () => explorer.removeTab(contextMenuTabId),
-      disabled: tabs.length <= 1,
+      disabled: explorer.tabs.length <= 1,
     },
     {
       label: 'Close Other Tabs',
       action: () => explorer.closeOtherTabs(contextMenuTabId),
-      disabled: tabs.length <= 1,
+      disabled: explorer.tabs.length <= 1,
     },
     {
       label: 'Close All Tabs',
       action: () => explorer.closeAllTabs(),
-      disabled: tabs.length <= 1,
+      disabled: explorer.tabs.length <= 1,
     },
   ]);
 </script>
@@ -211,23 +197,26 @@
           explorer.selectDatasource(val || null);
         }}
       >
-        <option value="" disabled selected={!selectedDatasourceId}>
+        <option value="" disabled selected={!explorer.selectedDatasourceId}>
           {explorer.loadingDatasources ? 'Loading...' : 'Select a datasource'}
         </option>
-        {#each datasources as ds (ds.id)}
-          <option value={ds.id} selected={ds.id === selectedDatasourceId}>
+        {#each explorer.datasources as ds (ds.id)}
+          <option
+            value={ds.id}
+            selected={ds.id === explorer.selectedDatasourceId}
+          >
             {ds.name}
           </option>
         {/each}
       </select>
-      {#if activeDatasource}
+      {#if explorer.activeDatasource}
         <span class="db-explorer__datasource-badge">
-          {activeDatasource.host}:{activeDatasource.port}
+          {explorer.activeDatasource.host}:{explorer.activeDatasource.port}
         </span>
       {/if}
     </div>
 
-    {#if globalError}
+    {#if explorer.globalError}
       <div class="db-explorer__global-error">
         <svg
           class="db-explorer__error-icon"
@@ -240,12 +229,12 @@
             clip-rule="evenodd"
           />
         </svg>
-        <span>{globalError}</span>
+        <span>{explorer.globalError}</span>
       </div>
     {/if}
 
-    {#if selectedDatasourceId}
-      {#if loadingTables}
+    {#if explorer.selectedDatasourceId}
+      {#if explorer.loadingTables}
         <div class="db-explorer__loading">
           <span class="spin"></span>
           Loading tables...
@@ -254,7 +243,7 @@
         <div
           class="db-explorer__sidebar-label db-explorer__sidebar-label--tables"
         >
-          Tables ({tables.length})
+          Tables ({explorer.tables.length})
         </div>
         <input
           class="form-input db-explorer__table-filter"
@@ -264,7 +253,7 @@
         />
         {#each filteredTables() as table (table.name)}
           <button
-            class="db-explorer__tree-item {expandedTables[table.name]
+            class="db-explorer__tree-item {explorer.expandedTables[table.name]
               ? 'db-explorer__tree-item--expanded'
               : ''}"
             onclick={() => explorer.toggleTableColumns(table.name)}
@@ -277,7 +266,7 @@
               stroke="currentColor"
               stroke-width="1.5"
             >
-              {#if expandedTables[table.name]}
+              {#if explorer.expandedTables[table.name]}
                 <path d="M4 6l4 4 4-4" />
               {:else}
                 <path d="M6 4l4 4-4 4" />
@@ -296,9 +285,9 @@
             <span>{table.name}</span>
           </button>
 
-          {#if expandedTables[table.name]}
+          {#if explorer.expandedTables[table.name]}
             <div class="db-explorer__tree-children">
-              {#each expandedTables[table.name] as col (col.name)}
+              {#each explorer.expandedTables[table.name] as col (col.name)}
                 <button
                   class="db-explorer__tree-item db-explorer__tree-item--column"
                   title={columnTooltip(col)}
@@ -376,7 +365,7 @@
                 </button>
               {/each}
             </div>
-          {:else if loadingColumns[table.name]}
+          {:else if explorer.loadingColumns[table.name]}
             <div class="db-explorer__tree-children">
               <div class="db-explorer__loading db-explorer__loading--sm">
                 <span
@@ -398,14 +387,14 @@
   <main class="db-explorer__main">
     <!-- Tab Bar -->
     <div class="db-explorer__tab-bar" role="tablist">
-      {#each tabs as tab (tab.id)}
+      {#each explorer.tabs as tab (tab.id)}
         <div
-          class="db-explorer__tab {tab.id === activeTabId
+          class="db-explorer__tab {tab.id === explorer.activeTabId
             ? 'db-explorer__tab--active'
             : ''}"
           role="tab"
           tabindex="0"
-          aria-selected={tab.id === activeTabId}
+          aria-selected={tab.id === explorer.activeTabId}
           onclick={() => explorer.selectTab(tab.id)}
           onkeydown={(e) => {
             if (e.key === 'Enter') explorer.selectTab(tab.id);
@@ -446,7 +435,7 @@
               <circle cx="14" cy="2" r="1.5" />
             </svg>
           </button>
-          {#if tabs.length > 1}
+          {#if explorer.tabs.length > 1}
             <button
               class="db-explorer__tab-close"
               type="button"
@@ -503,7 +492,7 @@
               class="form-input db-explorer__limit-input"
               type="number"
               min={1}
-              value={defaultLimit}
+              value={explorer.defaultLimit}
               onchange={(e) =>
                 explorer.setDefaultLimit(
                   Number.parseInt((e.target as HTMLInputElement).value, 10)
@@ -511,7 +500,9 @@
             />
             <button
               class="btn btn-secondary"
-              disabled={!sql.trim() && results.length === 0 && !error}
+              disabled={!explorer.sql.trim() &&
+                explorer.results.length === 0 &&
+                !explorer.error}
               onclick={() => {
                 explorer.setSql('');
                 explorer.clearResults();
@@ -521,10 +512,12 @@
             </button>
             <button
               class="btn btn-primary"
-              disabled={!selectedDatasourceId || !sql.trim() || running}
+              disabled={!explorer.selectedDatasourceId ||
+                !explorer.sql.trim() ||
+                explorer.running}
               onclick={handleRun}
             >
-              {#if running}
+              {#if explorer.running}
                 <span
                   class="spin"
                   style="width: 14px; height: 14px; border-width: 2px;"
@@ -537,14 +530,14 @@
           </div>
         </div>
         <SqlEditor
-          value={sql}
+          value={explorer.sql}
           onchange={(v: string) => explorer.setSql(v)}
           schema={editorSchema}
           dialect={sqlDialect}
           onrun={handleRun}
         />
       </div>
-      {#if error}
+      {#if explorer.error}
         <div class="db-explorer__error db-explorer__error--pane">
           <svg
             class="db-explorer__error-icon"
@@ -557,14 +550,14 @@
               clip-rule="evenodd"
             />
           </svg>
-          <span>{error}</span>
+          <span>{explorer.error}</span>
         </div>
       {/if}
     </div>
 
     <!-- Results Pane -->
     <div class="db-explorer__results-pane">
-      {#if running}
+      {#if explorer.running}
         <div class="db-explorer__loading">
           <span
             class="spin"
@@ -572,8 +565,8 @@
           ></span>
           Executing query...
         </div>
-      {:else if results.length > 0}
-        {#each results as result, index (index)}
+      {:else if explorer.results.length > 0}
+        {#each explorer.results as result, index (index)}
           <div class="db-explorer__result-grid">
             <div class="db-explorer__results-header">
               <span class="db-explorer__results-title">
@@ -653,7 +646,7 @@
             {/if}
           </div>
         {/each}
-      {:else if !error}
+      {:else if !explorer.error}
         <div class="db-explorer__empty">
           <div class="db-explorer__empty-icon">
             <svg
