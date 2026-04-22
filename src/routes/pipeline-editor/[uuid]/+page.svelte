@@ -13,6 +13,7 @@
   } from '$features/pipeline-editor/api';
   import PipelineToolbar from '$features/pipeline-editor/components/controls/PipelineToolbar.svelte';
   import EditConfigDrawer from '$features/pipeline-editor/components/EditConfigDrawer.svelte';
+  import JobHistoryDrawer from '$features/pipeline-editor/components/JobHistoryDrawer.svelte';
   import JobProgress from '$features/pipeline-editor/components/JobProgress.svelte';
   import PipelineDrawer from '$features/pipeline-editor/components/PipelineDrawer.svelte';
   import { showToast } from '$lib/toast.svelte';
@@ -27,6 +28,7 @@
   const jobState = createJobState();
 
   let isJobDrawerOpen = $state(false);
+  let isJobHistoryOpen = $state(false);
   let editingConfigId = $state<string | null>(null);
 
   let editUuid = $derived(page.params.uuid);
@@ -207,12 +209,14 @@
     canRedo={editor.canRedo}
     saving={editor.saving}
     running={jobState.active}
+    isEditMode={editUuid !== 'new'}
     onOpenDrawer={() => editor.openDrawer()}
     onAddConfig={handleAddConfig}
     onSave={() => handleSave(editor.pipelineName, editor.pipelineDescription)}
     onSaveRun={handleSaveRun}
     onUndo={() => editor.undo()}
     onRedo={() => editor.redo()}
+    onOpenJobHistory={() => (isJobHistoryOpen = true)}
   />
 
   <div class="pipeline-canvas-area">
@@ -299,6 +303,12 @@
     batches={jobState.batches}
     errorMessage={jobState.errorMessage}
     onClose={handleCloseJobProgress}
+  />
+
+  <JobHistoryDrawer
+    open={isJobHistoryOpen}
+    pipelineId={editUuid ?? ''}
+    onClose={() => (isJobHistoryOpen = false)}
   />
 
   <EditConfigDrawer

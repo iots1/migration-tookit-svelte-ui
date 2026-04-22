@@ -12,24 +12,28 @@
     canRedo = false,
     saving = false,
     running = false,
+    isEditMode = false,
     onOpenDrawer,
     onAddConfig,
     onSave,
     onSaveRun,
     onUndo,
     onRedo,
+    onOpenJobHistory,
   }: {
     pipelineName?: string;
     canUndo?: boolean;
     canRedo?: boolean;
     saving?: boolean;
     running?: boolean;
+    isEditMode?: boolean;
     onOpenDrawer: () => void;
     onAddConfig: (config: ConfigItem) => void;
     onSave: () => void;
     onSaveRun: () => void;
     onUndo: () => void;
     onRedo: () => void;
+    onOpenJobHistory?: () => void;
   } = $props();
 
   async function handleBackClick() {
@@ -120,6 +124,31 @@
   </div>
 
   <div class="toolbar-right">
+    {#if isEditMode && onOpenJobHistory}
+      <button
+        class="toolbar-btn"
+        onclick={onOpenJobHistory}
+        title="View job history"
+      >
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle
+            cx="8"
+            cy="8"
+            r="6"
+            stroke="currentColor"
+            stroke-width="1.5"
+          />
+          <path
+            d="M8 5v3l2 2"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+        <span>Job History</span>
+      </button>
+    {/if}
     <button class="toolbar-btn" onclick={onSave} disabled={saving || running}>
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
         <path d="M3 3h10v10H3z" stroke="currentColor" stroke-width="1.5" />

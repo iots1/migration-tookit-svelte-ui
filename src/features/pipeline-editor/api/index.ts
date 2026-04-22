@@ -10,8 +10,12 @@ import type {
   PipelineApiEntity,
   PipelineApiListResponse,
   PipelineEntity,
+  PipelineJobsApiResponse,
+  PipelineJobsResponse,
   PipelineListResponse,
   PipelineRunResponse,
+  PipelineRunsApiResponse,
+  PipelineRunsResponse,
   PipelineSavePayload,
 } from '$core/types/pipeline';
 
@@ -265,6 +269,64 @@ export async function reconstructPipelineFromEntity(
     description: entity.description,
     nodes,
     edges,
+  };
+}
+
+export async function loadPipelineJobs(
+  pipelineId: string,
+  params?: { limit?: number; offset?: number }
+): Promise<PipelineJobsResponse> {
+  const query = new URLSearchParams();
+  if (params?.limit !== undefined) query.set('limit', String(params.limit));
+  if (params?.offset !== undefined) query.set('offset', String(params.offset));
+  const qs = query.toString();
+  const raw: PipelineJobsApiResponse = await api.get(
+    `${API_V1.PIPELINE_JOBS(pipelineId)}${qs ? `?${qs}` : ''}`
+  );
+  return {
+    data: raw.data.map((item) => ({
+      id: item.id,
+      pipeline_id: item.attributes.pipeline_id,
+      status: item.attributes.status,
+      created_at: item.attributes.created_at,
+      completed_at: item.attributes.completed_at,
+      error_message: item.attributes.error_message,
+      total_config: item.attributes.total_config,
+      summary: item.attributes.summary,
+    })),
+    status: raw.status,
+  };
+}
+
+export async function loadJobPipelineRuns(
+  jobId: string,
+  params?: { limit?: number; offset?: number; sort?: string }
+): Promise<PipelineRunsResponse> {
+  const query = new URLSearchParams();
+  if (params?.limit !== undefined) query.set('limit', String(params.limit));
+  if (params?.offset !== undefined) query.set('offset', String(params.offset));
+  if (params?.sort) query.set('sort', params.sort);
+  const qs = query.toString();
+  const raw: PipelineRunsApiResponse = await api.get(
+    `${API_V1.JOB_PIPELINE_RUNS(jobId)}${qs ? `?${qs}` : ''}`
+  );
+  return {
+    data: raw.data.map((item) => ({
+      id: item.id,
+      pipeline_id: item.attributes.pipeline_id,
+      job_id: item.attributes.job_id,
+      config_name: item.attributes.config_name,
+      batch_round: item.attributes.batch_round,
+      rows_in_batch: item.attributes.rows_in_batch,
+      rows_cumulative: item.attributes.rows_cumulative,
+      batch_size: item.attributes.batch_size,
+      total_records_in_config: item.attributes.total_records_in_config,
+      status: item.attributes.status,
+      error_message: item.attributes.error_message,
+      transformation_warnings: item.attributes.transformation_warnings,
+      created_at: item.attributes.created_at,
+    })),
+    status: raw.status,
   };
 }
 

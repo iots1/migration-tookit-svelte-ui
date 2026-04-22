@@ -1273,6 +1273,591 @@
   }
 }
 
+/* ========== Job History Modal ========== */
+
+.jh-overlay {
+  position: fixed;
+  z-index: 200;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background: rgba(0, 0, 0, 0.45);
+  animation: fadeIn 0.15s ease;
+  backdrop-filter: blur(2px);
+  inset: 0;
+}
+
+.jh-modal {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+
+  width: 92%;
+  max-width: 1200px;
+  height: 80vh;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+
+  background: var(--bg-primary);
+  box-shadow: var(--shadow-lg);
+  animation: dialogSlideIn 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.jh-modal-header {
+  display: flex;
+  flex-shrink: 0;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.jh-modal-title {
+  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.jh-modal-close {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: var(--radius-sm);
+
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+
+  &:hover {
+    background: var(--bg-sidebar-hover);
+    color: var(--text-primary);
+  }
+}
+
+.jh-modal-body {
+  display: flex;
+  flex: 1;
+
+  min-height: 0;
+}
+
+/* --- Left panel: Jobs --- */
+
+.jh-panel-left {
+  display: flex;
+  flex: 0 0 280px;
+  flex-direction: column;
+
+  border-right: 1px solid var(--border-color);
+}
+
+.jh-panel-right {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+
+  min-width: 0;
+}
+
+.jh-panel-divider {
+  display: none;
+}
+
+.jh-panel-header {
+  display: flex;
+  flex-shrink: 0;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.jh-panel-title {
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.jh-panel-scroll {
+  flex: 1;
+  overflow-y: auto;
+
+  padding: 12px;
+  overscroll-behavior: contain;
+}
+
+.jh-panel-empty {
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+}
+
+.jh-count {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.jh-job-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.jh-job-card {
+  display: block;
+
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+
+  background: transparent;
+  color: inherit;
+  font-family: inherit;
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+
+  &:hover {
+    background: var(--bg-sidebar-hover);
+  }
+
+  &.jh-job-card-active {
+    border-color: var(--accent-light);
+
+    background: var(--accent-bg);
+  }
+}
+
+.jh-job-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-bottom: 4px;
+}
+
+.jh-job-status {
+  padding: 2px 8px;
+  border-radius: 20px;
+
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+
+  &.jh-job-status-completed {
+    background: var(--green-bg);
+    color: var(--green-text);
+  }
+
+  &.jh-job-status-failed {
+    background: var(--error-bg);
+    color: var(--error-text);
+  }
+
+  &.jh-job-status-running {
+    background: var(--accent-bg);
+    color: var(--accent);
+  }
+
+  &.jh-job-status-pending,
+  &.jh-job-status-queued {
+    background: var(--bg-sidebar-hover);
+    color: var(--text-secondary);
+  }
+}
+
+.jh-job-time {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.jh-job-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+.jh-job-date {
+  color: var(--text-muted);
+}
+
+.jh-job-meta-sep {
+  color: var(--text-muted);
+}
+
+.jh-job-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid var(--border-light);
+}
+
+.jh-job-summary-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.jh-job-summary-value {
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.jh-job-summary-label {
+  color: var(--text-muted);
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.jh-job-error {
+  margin-top: 4px;
+  padding: 4px 6px;
+  border-radius: var(--radius-sm);
+
+  background: var(--error-bg);
+  color: var(--error-text);
+  font-size: 10px;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.jh-limit-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.jh-limit-label {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.jh-limit-select {
+  width: 80px;
+  padding: 5px 8px;
+
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.jh-load-more {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  width: 100%;
+  margin-top: 8px;
+  padding: 7px 12px;
+  border: 1px dashed var(--border-color);
+  border-radius: var(--radius-sm);
+
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+
+  &:hover:not(:disabled) {
+    border-color: var(--accent-light);
+
+    background: var(--accent-bg);
+    color: var(--accent);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.jh-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 24px 0;
+
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.jh-empty {
+  padding: 24px 0;
+
+  color: var(--text-muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+/* --- Right panel: Config groups --- */
+
+.jh-config-group {
+  margin-bottom: 16px;
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+
+  background: var(--bg-primary);
+}
+
+.jh-config-name {
+  overflow: hidden;
+
+  margin-bottom: 8px;
+
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.jh-progress-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  margin-bottom: 6px;
+}
+
+.jh-progress-bar {
+  flex: 1;
+  overflow: hidden;
+
+  height: 8px;
+  border-radius: 4px;
+
+  background: var(--bg-sidebar-hover);
+}
+
+.jh-progress-fill {
+  height: 100%;
+  border-radius: 4px;
+
+  background: var(--accent);
+  transition: width 0.3s ease;
+
+  &.jh-progress-fill-done {
+    background: var(--green-text);
+  }
+}
+
+.jh-progress-pct {
+  flex-shrink: 0;
+
+  min-width: 36px;
+
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 700;
+  text-align: right;
+}
+
+.jh-progress-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  margin-bottom: 10px;
+
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+.jh-progress-meta-sep {
+  color: var(--text-muted);
+}
+
+.jh-progress-error {
+  color: var(--error-text);
+  font-weight: 600;
+}
+
+/* --- Batch log --- */
+
+.jh-batch-log {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+
+  max-height: 360px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+
+  background: var(--bg-base);
+}
+
+.jh-batch-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+
+  padding: 5px 8px;
+  border-bottom: 1px solid var(--border-light);
+
+  font-size: 11px;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &.jh-batch-row-error {
+    background: var(--error-bg);
+  }
+}
+
+.jh-batch-num {
+  flex-shrink: 0;
+
+  min-width: 28px;
+
+  color: var(--text-muted);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.jh-batch-status {
+  flex-shrink: 0;
+
+  padding: 1px 6px;
+  border-radius: 20px;
+
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+
+  &.jh-batch-status-success {
+    background: var(--green-bg);
+    color: var(--green-text);
+  }
+
+  &.jh-batch-status-error,
+  &.jh-batch-status-failed {
+    background: var(--error-bg);
+    color: var(--error-text);
+  }
+
+  &.jh-batch-status-running {
+    background: var(--accent-bg);
+    color: var(--accent);
+  }
+}
+
+.jh-batch-rows {
+  flex: 1;
+
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.jh-batch-warn {
+  flex-shrink: 0;
+
+  color: #d97706;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: help;
+}
+
+.jh-batch-time {
+  flex-shrink: 0;
+
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.jh-batch-error-msg {
+  flex-basis: 100%;
+
+  padding: 4px 6px;
+  border-radius: 4px;
+
+  background: var(--error-bg);
+  color: var(--error-text);
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+/* ========== Responsive ========== */
+
+@media (max-width: 900px) {
+  .jh-modal {
+    width: 96%;
+    height: 85vh;
+  }
+
+  .jh-panel-left {
+    flex: 0 0 220px;
+  }
+}
+
+@media (max-width: 640px) {
+  .jh-modal {
+    width: 100%;
+    max-width: none;
+    height: 95vh;
+    border-radius: 0;
+  }
+
+  .jh-modal-body {
+    flex-direction: column;
+  }
+
+  .jh-panel-left {
+    flex: none;
+
+    max-height: 40%;
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .jh-batch-log {
+    max-height: 220px;
+  }
+}
+
 /* ========== Edit Config Drawer ========== */
 
 .edit-config-spinner {

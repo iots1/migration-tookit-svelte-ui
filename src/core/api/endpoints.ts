@@ -17,4 +17,6 @@ export const API_V1 = {
     `/datasources/${id}/tables/${table}/columns`,
   TRANSFORMERS: '/transformers',
   VALIDATORS: '/validators',
+  PIPELINE_JOBS: (id: string) => `/pipelines/${id}/jobs`,
+  JOB_PIPELINE_RUNS: (id: string) => `/jobs/${id}/pipeline-runs`,
 } as const;

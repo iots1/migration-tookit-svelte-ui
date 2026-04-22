@@ -210,6 +210,90 @@ export interface PipelineRunResponse {
   message: string;
 }
 
+// ─── Job History Types ────────────────────────────────────────────────────
+
+export interface PipelineJobItem {
+  id: string;
+  pipeline_id: string;
+  status: string;
+  created_at: string;
+  completed_at?: string | null;
+  error_message?: string | null;
+  total_config?: number;
+  summary?: Record<string, unknown> | null;
+}
+
+export interface PipelineJobApiEntity {
+  type: string;
+  id: string;
+  attributes: {
+    pipeline_id: string;
+    status: string;
+    created_at: string;
+    completed_at?: string | null;
+    error_message?: string | null;
+    total_config?: number;
+    last_heartbeat?: string | null;
+    summary?: Record<string, unknown> | null;
+  };
+}
+
+export interface PipelineJobsApiResponse {
+  data: PipelineJobApiEntity[];
+  status: ApiStatus;
+}
+
+export interface PipelineJobsResponse {
+  data: PipelineJobItem[];
+  status: ApiStatus;
+}
+
+export interface PipelineRunItem {
+  id: string;
+  pipeline_id: string;
+  job_id: string;
+  config_name: string;
+  batch_round: number;
+  rows_in_batch: number;
+  rows_cumulative: number;
+  batch_size: number;
+  total_records_in_config: number;
+  status: string;
+  error_message?: string | null;
+  transformation_warnings?: string | null;
+  created_at: string;
+}
+
+export interface PipelineRunApiEntity {
+  type: string;
+  id: string;
+  attributes: {
+    pipeline_id: string;
+    job_id: string;
+    config_name: string;
+    batch_round: number;
+    rows_in_batch: number;
+    rows_cumulative: number;
+    batch_size: number;
+    total_records_in_config: number;
+    status: string;
+    error_message?: string | null;
+    transformation_warnings?: string | null;
+    created_at: string;
+    updated_at: string;
+  };
+}
+
+export interface PipelineRunsApiResponse {
+  data: PipelineRunApiEntity[];
+  status: ApiStatus;
+}
+
+export interface PipelineRunsResponse {
+  data: PipelineRunItem[];
+  status: ApiStatus;
+}
+
 // ─── Job Types ────────────────────────────────────────────────────────────
 
 export interface CreateJobPayload {
