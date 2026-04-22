@@ -44,6 +44,33 @@
       <p class="card-desc">View, search and manage your migration pipelines</p>
     </a>
 
+    <a href={resolve('/datasources')} class="home-card">
+      <div class="card-icon icon-peach">
+        <svg width="28" height="28" viewBox="0 0 20 20" fill="none">
+          <ellipse
+            cx="10"
+            cy="5"
+            rx="7"
+            ry="3"
+            stroke="currentColor"
+            stroke-width="1.5"
+          />
+          <path
+            d="M3 5v10c0 1.657 3.134 3 7 3s7-1.343 7-3V5"
+            stroke="currentColor"
+            stroke-width="1.5"
+          />
+          <path
+            d="M3 10c0 1.657 3.134 3 7 3s7-1.343 7-3"
+            stroke="currentColor"
+            stroke-width="1.5"
+          />
+        </svg>
+      </div>
+      <h2 class="card-title">Datasources</h2>
+      <p class="card-desc">Manage your database connections and credentials</p>
+    </a>
+
     <a href={resolve('/pipeline-editor')} class="home-card">
       <div class="card-icon icon-purple">
         <svg width="28" height="28" viewBox="0 0 20 20" fill="none">

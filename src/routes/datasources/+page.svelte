@@ -6,90 +6,46 @@
   import { confirmDialog } from '$lib/confirm-dialog.svelte';
   import { showToast } from '$lib/toast.svelte';
 
-  import '$features/schema-mapper/schema-mapper.scss';
+  import '$features/datasource/datasource.scss';
 
-  import { duplicateConfig } from '$features/schema-mapper/api';
-  import { createConfigsListState } from '$features/schema-mapper/state/configs-list-state.svelte';
+  import { createDatasourcesListState } from '$features/datasource/state/datasource-list-state.svelte';
 
-  const listState = createConfigsListState();
-
-  let searchDebounce: ReturnType<typeof setTimeout>;
-  let duplicatingId: string | null = $state(null);
-
-  function handleSearchInput(value: string) {
-    listState.setSearchInput(value);
-    clearTimeout(searchDebounce);
-    searchDebounce = setTimeout(() => listState.search(), 300);
-  }
+  const listState = createDatasourcesListState();
 
   onMount(() => {
-    void listState.fetchConfigs();
+    void listState.fetchDatasources();
   });
 
   async function handleNew() {
-    await goto(resolve('/configs/new'));
+    await goto(resolve('/datasources/new'));
   }
 
-  async function handleEdit(uuid: string) {
-    await goto(`/configs/${uuid}`);
+  async function handleEdit(id: string) {
+    await goto(`/datasources/${id}`);
   }
 
-  async function handleDelete(uuid: string) {
+  async function handleDelete(id: string, name: string) {
     const confirmed = await confirmDialog({
-      title: 'Delete Config',
-      description:
-        'Are you sure you want to delete this config? This action cannot be undone.',
+      title: 'Delete Datasource',
+      description: `Are you sure you want to delete "${name}"? This action cannot be undone.`,
     });
     if (!confirmed) return;
-    const success = await listState.deleteById(uuid);
+    const success = await listState.deleteById(id);
     if (success) {
-      showToast('ลบสำเร็จ', 'success');
-    }
-  }
-
-  async function handleDuplicate(uuid: string, name: string) {
-    const confirmed = await confirmDialog({
-      type: 'duplicate',
-      title: 'Duplicate Config',
-      description: `Create a copy of "${name}"?`,
-    });
-    if (!confirmed) return;
-    duplicatingId = uuid;
-    try {
-      await duplicateConfig(uuid);
-      showToast(`Duplicated "${name}" successfully`, 'success');
-      await listState.fetchConfigs();
-    } catch (err) {
-      showToast('Failed to duplicate config', 'error');
-      console.error('Duplicate config error:', err);
-    } finally {
-      duplicatingId = null;
-    }
-  }
-
-  function formatDate(iso: string): string {
-    if (!iso) return '-';
-    try {
-      return new Date(iso).toLocaleDateString('en-GB', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-      });
-    } catch {
-      return iso;
+      showToast('Datasource deleted successfully', 'success');
     }
   }
 </script>
 
 <svelte:head>
-  <title>Schema Mapper - Migration Toolkit</title>
+  <title>Datasources - Migration Toolkit</title>
 </svelte:head>
 
-<div class="sm-list-page">
-  <div class="sm-list-header">
+<div class="ds-list-page">
+  <div class="ds-list-header">
     <div>
-      <h2 class="sm-list-title">Schema Mapper</h2>
-      <p class="sm-list-subtitle">Manage field mapping configurations</p>
+      <h2 class="ds-list-title">Datasources</h2>
+      <p class="ds-list-subtitle">Manage your database connections</p>
     </div>
     <button class="btn btn-primary" onclick={handleNew}>
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -100,7 +56,7 @@
           stroke-linecap="round"
         />
       </svg>
-      <span>New Config</span>
+      <span>New Datasource</span>
     </button>
   </div>
 
@@ -130,15 +86,11 @@
       <input
         type="text"
         class="search-input"
-        placeholder="Search configs..."
+        placeholder="Search datasources..."
         value={listState.searchInput}
-        oninput={(e) => handleSearchInput((e.target as HTMLInputElement).value)}
-        onkeydown={(e) => {
-          if (e.key === 'Enter') {
-            clearTimeout(searchDebounce);
-            listState.search();
-          }
-        }}
+        oninput={(e) =>
+          listState.setSearchInput((e.target as HTMLInputElement).value)}
+        onkeydown={(e) => e.key === 'Enter' && listState.search()}
       />
       {#if listState.searchInput}
         <button
@@ -161,7 +113,7 @@
   </div>
 
   {#if listState.error}
-    <div class="sm-error-banner">
+    <div class="ds-error-banner">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
         <circle
           cx="8"
@@ -179,7 +131,7 @@
       </svg>
       <span>{listState.error}</span>
       <button
-        class="sm-error-close"
+        class="ds-error-close"
         onclick={listState.dismissError}
         aria-label="Dismiss error"
       >
@@ -195,13 +147,13 @@
     </div>
   {/if}
 
-  <div class="pipeline-table-wrapper">
+  <div class="ds-table-wrapper">
     {#if listState.loading}
       <div class="pipeline-list-loading">
         <div class="pipeline-loading-spinner"></div>
         <span>Loading...</span>
       </div>
-    {:else if listState.configs.length === 0}
+    {:else if listState.datasources.length === 0}
       <div class="pipeline-list-empty">
         <svg
           width="48"
@@ -210,117 +162,60 @@
           fill="none"
           class="empty-icon"
         >
-          <rect
-            x="6"
-            y="6"
-            width="16"
-            height="16"
-            rx="4"
-            stroke="currentColor"
-            stroke-width="2"
-          />
-          <rect
-            x="26"
-            y="26"
-            width="16"
-            height="16"
-            rx="4"
+          <ellipse
+            cx="24"
+            cy="18"
+            rx="14"
+            ry="6"
             stroke="currentColor"
             stroke-width="2"
           />
           <path
-            d="M22 14h4l6 6v4"
+            d="M10 18v12c0 3.314 6.268 6 14 6s14-2.686 14-6V18"
             stroke="currentColor"
             stroke-width="2"
-            stroke-linecap="round"
           />
-          <circle
-            cx="26"
-            cy="20"
-            r="3"
+          <path
+            d="M10 24c0 3.314 6.268 6 14 6s14-2.686 14-6"
             stroke="currentColor"
             stroke-width="2"
           />
         </svg>
-        <h3>No configs yet</h3>
-        <p>Create your first field mapping config to get started</p>
+        <h3>No datasources yet</h3>
+        <p>Create your first database connection to get started</p>
       </div>
     {:else}
-      <table class="pipeline-table">
+      <table class="ds-table">
         <thead>
           <tr>
-            <th class="th-name">Config Name</th>
-            <th>Source &rarr; Target</th>
-            <th>Type</th>
-            <th class="th-meta">Mappings</th>
-            <th>Updated</th>
-            <th class="th-actions">Actions</th>
+            <th class="ds-th-name">Name</th>
+            <th class="ds-th-type">Type</th>
+            <th class="ds-th-host">Host</th>
+            <th class="ds-th-db">Database</th>
+            <th class="ds-th-actions">Actions</th>
           </tr>
         </thead>
         <tbody>
-          {#each listState.configs as config (config.id)}
+          {#each listState.datasources as ds (ds.id)}
             <tr>
-              <td class="td-name">
-                <span class="pipeline-name-cell">{config.config_name}</span>
+              <td class="ds-td-name">
+                <span class="ds-name-cell">{ds.name}</span>
               </td>
-              <td>
-                {#if config.config_type === 'custom'}
-                  <span class="sm-flow-text">
-                    <span>
-                      {#if config.datasource_target_name}
-                        <span style="color: var(--text-muted);"
-                          >{config.datasource_target_name} ({config.datasource_target_db_type ||
-                            '-'})</span
-                        >
-                      {:else}
-                        <span style="color: var(--text-muted);">-</span>
-                      {/if}
-                    </span>
-                  </span>
-                {:else}
-                  <span class="sm-flow-text">
-                    <span>
-                      {#if config.source_datasource}
-                        <span style="color: var(--text-muted);"
-                          >{config.source_datasource}.</span
-                        >
-                      {/if}{config.source_table || '-'}
-                    </span>
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                      <path
-                        d="M3 7h8M9 4l3 3-3 3"
-                        stroke="currentColor"
-                        stroke-width="1.5"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      />
-                    </svg>
-                    <span>
-                      {#if config.target_datasource}
-                        <span style="color: var(--text-muted);"
-                          >{config.target_datasource}.</span
-                        >
-                      {/if}{config.target_table || '-'}
-                    </span>
-                  </span>
-                {/if}
+              <td class="ds-th-type">
+                <span class="ds-type-badge">{ds.db_type}</span>
               </td>
-              <td>
-                <span class="sm-type-badge sm-type-badge--{config.config_type}">
-                  {config.config_type}
+              <td class="ds-td-host">
+                <span class="ds-host-cell">
+                  {ds.host}
+                  <span class="ds-host-cell-port">:{ds.port}</span>
                 </span>
               </td>
-              <td class="td-meta">
-                <span class="sm-mapping-count">{config.mapping_count}</span>
-              </td>
-              <td style="color: var(--text-secondary); font-size: 13px;">
-                {formatDate(config.updated_at)}
-              </td>
-              <td class="td-actions">
+              <td class="ds-td-db">{ds.dbname}</td>
+              <td class="ds-td-actions">
                 <div class="action-group">
                   <button
                     class="action-btn action-btn-edit"
-                    onclick={() => handleEdit(config.id)}
+                    onclick={() => handleEdit(ds.id)}
                     title="Edit"
                   >
                     <svg
@@ -342,32 +237,8 @@
                     </svg>
                   </button>
                   <button
-                    class="action-btn action-btn-duplicate"
-                    onclick={() =>
-                      handleDuplicate(config.id, config.config_name)}
-                    title="Duplicate"
-                    disabled={duplicatingId === config.id}
-                  >
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    >
-                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"
-                      ></rect>
-                      <path
-                        d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
-                      ></path>
-                    </svg>
-                  </button>
-                  <button
                     class="action-btn action-btn-delete"
-                    onclick={() => handleDelete(config.id)}
+                    onclick={() => handleDelete(ds.id, ds.name)}
                     title="Delete"
                   >
                     <svg

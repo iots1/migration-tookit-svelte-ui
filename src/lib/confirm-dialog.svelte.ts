@@ -1,4 +1,4 @@
-type DialogType = 'danger' | 'success';
+type DialogType = 'danger' | 'success' | 'duplicate' | 'warning';
 
 interface DialogOptions {
   title?: string;
@@ -30,6 +30,18 @@ const DEFAULTS: Record<DialogType, Omit<DialogState, 'open' | 'type'>> = {
     description: 'Are you sure you want to proceed?',
     cancelText: 'Cancel',
     confirmText: 'Confirm',
+  },
+  duplicate: {
+    title: 'Duplicate',
+    description: 'Create a copy of this item?',
+    cancelText: 'Cancel',
+    confirmText: 'Duplicate',
+  },
+  warning: {
+    title: 'Warning',
+    description: 'Are you sure you want to proceed?',
+    cancelText: 'Cancel',
+    confirmText: 'Proceed',
   },
 };
 

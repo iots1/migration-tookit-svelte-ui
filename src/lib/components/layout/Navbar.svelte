@@ -15,6 +15,7 @@
     '/': 'Home',
     '/configs': 'Schema Mapper',
     '/pipeline-editor': 'Pipeline Editor',
+    '/datasources': 'Datasources',
     '/db-explorer': 'DB Explorer',
     '/migration-runner': 'Migration Runner',
     '/settings': 'Settings',
@@ -25,6 +26,7 @@
     if (routeName[pathname]) return routeName[pathname];
     if (pathname.startsWith('/configs/')) return 'Schema Mapper';
     if (pathname.startsWith('/pipeline-editor/')) return 'Pipeline Editor';
+    if (pathname.startsWith('/datasources/')) return 'Datasources';
     return 'Migration Toolkit';
   }
 </script>

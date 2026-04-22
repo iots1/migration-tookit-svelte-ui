@@ -44,6 +44,7 @@
 
   async function handleDuplicate(id: string, name: string) {
     const confirmed = await confirmDialog({
+      type: 'duplicate',
       title: 'Duplicate Pipeline',
       description: `Create a copy of "${name}"?`,
     });

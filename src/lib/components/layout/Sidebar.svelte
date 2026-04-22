@@ -12,6 +12,7 @@
     { href: '/', label: 'Home', icon: 'home' },
     { href: '/pipelines', label: 'Pipelines', icon: 'pipelines' },
     { href: '/configs', label: 'Schema Mapper', icon: 'schema' },
+    { href: '/datasources', label: 'Datasources', icon: 'datasources' },
     { href: '/db-explorer', label: 'DB Explorer', icon: 'database' },
     { href: '/settings', label: 'Settings', icon: 'settings' },
   ];
@@ -26,6 +27,7 @@
       pipelines: `<path d="M3 4h14v12H3z" stroke="currentColor" stroke-width="1.5" rx="1"/><path d="M3 8h14" stroke="currentColor" stroke-width="1.5"/><path d="M7 12h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M7 15h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" opacity="0.5"/>`,
       schema: `<rect x="1.5" y="1.5" width="7" height="7" rx="2" stroke="currentColor" stroke-width="1.5"/><rect x="11.5" y="11.5" width="7" height="7" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M8.5 5h3l4.5 4.5v3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="11" cy="9" r="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M4 13h2l2-2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>`,
       pipeline: `<rect x="1.5" y="1.5" width="6" height="6" rx="2" stroke="currentColor" stroke-width="1.5"/><rect x="12.5" y="12.5" width="6" height="6" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M7.5 4.5h2l3.5 3.5v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="11" cy="8" r="1.5" stroke="currentColor" stroke-width="1.5"/>`,
+      datasources: `<ellipse cx="10" cy="4" rx="7" ry="3" stroke="currentColor" stroke-width="1.5"/><path d="M3 4v12c0 1.657 3.134 3 7 3s7-1.343 7-3V4" stroke="currentColor" stroke-width="1.5"/><path d="M3 10c0 1.657 3.134 3 7 3s7-1.343 7-3" stroke="currentColor" stroke-width="1.5"/><path d="M17 10v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>`,
       database: `<ellipse cx="10" cy="5" rx="7" ry="3" stroke="currentColor" stroke-width="1.5"/><path d="M3 5v10c0 1.657 3.134 3 7 3s7-1.343 7-3V5" stroke="currentColor" stroke-width="1.5"/><path d="M3 10c0 1.657 3.134 3 7 3s7-1.343 7-3" stroke="currentColor" stroke-width="1.5"/>`,
       settings: `<circle cx="10" cy="10" r="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.22 4.22l1.42 1.42M14.36 14.36l1.42 1.42M4.22 15.78l1.42-1.42M14.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>`,
       user: `<circle cx="10" cy="7" r="3.5" stroke="currentColor" stroke-width="1.5"/><path d="M3 18c0-3.866 3.134-7 7-7s7 3.134 7 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>`,
