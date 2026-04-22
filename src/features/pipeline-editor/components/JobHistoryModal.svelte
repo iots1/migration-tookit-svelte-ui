@@ -1,9 +1,18 @@
 <script lang="ts">
-  import type { PipelineJobItem, PipelineRunItem } from '$core/types/pipeline';
+  import type {
+    JobBatchEvent,
+    JobCompletedEvent,
+    JobErrorEvent,
+    PipelineJobItem,
+    PipelineRunItem,
+  } from '$core/types/pipeline';
   import {
     loadJobPipelineRuns,
     loadPipelineJobs,
   } from '$features/pipeline-editor/api';
+
+  import { env } from '$env/dynamic/public';
+  import { io } from 'socket.io-client';
 
   interface ConfigGroup {
     configName: string;
@@ -17,10 +26,12 @@
   let {
     open = false,
     pipelineId,
+    initialJobId = null,
     onClose,
   }: {
     open?: boolean;
     pipelineId: string;
+    initialJobId?: string | null;
     onClose: () => void;
   } = $props();
 
@@ -40,6 +51,8 @@
   let hasMoreRuns = $state(false);
 
   let openedPipelineId = '';
+
+  let socket: ReturnType<typeof io> | null = null;
 
   let configGroups = $derived(buildConfigGroups(runs));
   let selectedJob = $derived(jobs.find((j) => j.id === selectedJobId) ?? null);
@@ -84,6 +97,131 @@
     }
   }
 
+  function connectSocket() {
+    disconnectSocket();
+
+    const baseEnvUrl =
+      env?.PUBLIC_WS_URL ??
+      env?.PUBLIC_API_URL ??
+      'http://localhost:8000/api/v1';
+
+    const wsUrl = baseEnvUrl
+      .replace(/\/api\/v1\/?$/, '')
+      .replace(/^http/, 'ws');
+
+    socket = io(wsUrl, {
+      path: '/ws/socket.io/',
+      transports: ['websocket', 'polling'],
+    });
+
+    socket.on('job:batch', (data: JobBatchEvent) => {
+      updateJobStatus(data.job_id, 'running');
+      appendRunFromBatch(data);
+    });
+
+    socket.on('job:error', (data: JobErrorEvent) => {
+      updateJobStatus(data.job_id, 'failed', data.error_message);
+      appendRunFromError(data);
+    });
+
+    socket.on('job:completed', (data: JobCompletedEvent) => {
+      updateJobStatus(data.job_id, 'completed');
+      refreshRunsIfSelected(data.job_id);
+      void refreshJobList();
+    });
+
+    socket.on('connect_error', () => {
+      disconnectSocket();
+    });
+  }
+
+  function disconnectSocket() {
+    if (socket) {
+      socket.disconnect();
+      socket = null;
+    }
+  }
+
+  function updateJobStatus(
+    jobId: string,
+    status: string,
+    errorMessage?: string
+  ) {
+    jobs = jobs.map((j) =>
+      j.id === jobId
+        ? {
+            ...j,
+            status,
+            error_message: errorMessage ?? j.error_message,
+            completed_at:
+              status === 'completed' || status === 'failed'
+                ? (j.completed_at ?? new Date().toISOString())
+                : j.completed_at,
+          }
+        : j
+    );
+  }
+
+  function appendRunFromBatch(data: JobBatchEvent) {
+    if (data.job_id !== selectedJobId) return;
+    const now = new Date().toISOString();
+    const newRun: PipelineRunItem = {
+      id: `ws-${data.run_id}-${data.batch_num}`,
+      pipeline_id: data.pipeline_id,
+      job_id: data.job_id,
+      config_name: data.step,
+      batch_round: data.batch_num,
+      rows_in_batch: data.rows_processed,
+      rows_cumulative: data.rows_processed,
+      batch_size: 0,
+      total_records_in_config: 0,
+      status: 'success',
+      created_at: now,
+    };
+    runs = [...runs, newRun];
+  }
+
+  function appendRunFromError(data: JobErrorEvent) {
+    if (data.job_id !== selectedJobId) return;
+    const now = new Date().toISOString();
+    const newRun: PipelineRunItem = {
+      id: `ws-${data.run_id}-${data.batch_num}`,
+      pipeline_id: data.pipeline_id,
+      job_id: data.job_id,
+      config_name: data.step,
+      batch_round: data.batch_num,
+      rows_in_batch: 0,
+      rows_cumulative: 0,
+      batch_size: 0,
+      total_records_in_config: 0,
+      status: 'error',
+      error_message: data.error_message,
+      created_at: now,
+    };
+    runs = [...runs, newRun];
+  }
+
+  function refreshRunsIfSelected(jobId: string) {
+    if (jobId === selectedJobId) {
+      void fetchRuns(true);
+    }
+  }
+
+  async function refreshJobList() {
+    try {
+      const res = await loadPipelineJobs(pipelineId, {
+        limit: JOBS_LIMIT,
+        offset: 0,
+      });
+      const existingIds = new Set(jobs.map((j) => j.id));
+      const newJobs = res.data.filter((j) => !existingIds.has(j.id));
+      jobs = [...newJobs, ...jobs];
+      hasMoreJobs = res.data.length === JOBS_LIMIT;
+    } catch {
+      // silent — keep current data
+    }
+  }
+
   async function fetchJobs(reset = false) {
     if (reset) {
       jobsOffset = 0;
@@ -103,7 +241,11 @@
       hasMoreJobs = res.data.length === JOBS_LIMIT;
       jobsOffset += res.data.length;
       if (reset && res.data.length > 0) {
-        selectedJobId = res.data[0].id;
+        const targetId =
+          initialJobId && res.data.some((j) => j.id === initialJobId)
+            ? initialJobId
+            : res.data[0].id;
+        selectedJobId = targetId;
         await fetchRuns(true);
       }
     } finally {
@@ -139,8 +281,10 @@
         openedPipelineId = pipelineId;
         void fetchJobs(true);
       }
+      connectSocket();
     } else {
       openedPipelineId = '';
+      disconnectSocket();
     }
   });
 
@@ -213,6 +357,12 @@
     if (total <= 0) return 0;
     return Math.min(100, Math.round((cumulative / total) * 100));
   }
+
+  $effect(() => {
+    return () => {
+      disconnectSocket();
+    };
+  });
 </script>
 
 <svelte:window onkeydown={handleKeydown} />

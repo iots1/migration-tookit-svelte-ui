@@ -14,7 +14,6 @@
   import PipelineToolbar from '$features/pipeline-editor/components/controls/PipelineToolbar.svelte';
   import EditConfigDrawer from '$features/pipeline-editor/components/EditConfigDrawer.svelte';
   import JobHistoryModal from '$features/pipeline-editor/components/JobHistoryModal.svelte';
-  import JobProgress from '$features/pipeline-editor/components/JobProgress.svelte';
   import PipelineDrawer from '$features/pipeline-editor/components/PipelineDrawer.svelte';
   import { showToast } from '$lib/toast.svelte';
 
@@ -22,14 +21,12 @@
 
   import PipelineCanvas from '$features/pipeline-editor/PipelineCanvas.svelte';
   import { createEditorState } from '$features/pipeline-editor/state/editor-state.svelte';
-  import { createJobState } from '$features/pipeline-editor/state/job-state.svelte';
 
   const editor = createEditorState();
-  const jobState = createJobState();
 
-  let isJobDrawerOpen = $state(false);
   let isJobHistoryOpen = $state(false);
   let editingConfigId = $state<string | null>(null);
+  let initialJobId = $state<string | null>(null);
 
   let editUuid = $derived(page.params.uuid);
 
@@ -148,18 +145,13 @@
       editor.closeDrawer();
 
       const jobResponse = await createJob({ pipeline_id: id });
-      jobState.connect(jobResponse.job_id, jobResponse.run_id);
-      isJobDrawerOpen = true;
+      initialJobId = jobResponse.job_id;
+      isJobHistoryOpen = true;
     } catch (err) {
       editor.setError(
         err instanceof Error ? err.message : 'Failed to start job'
       );
     }
-  }
-
-  function handleCloseJobProgress() {
-    isJobDrawerOpen = false;
-    jobState.disconnect();
   }
 </script>
 
@@ -208,7 +200,7 @@
     canUndo={editor.canUndo}
     canRedo={editor.canRedo}
     saving={editor.saving}
-    running={jobState.active}
+    running={false}
     isEditMode={editUuid !== 'new'}
     onOpenDrawer={() => editor.openDrawer()}
     onAddConfig={handleAddConfig}
@@ -216,7 +208,10 @@
     onSaveRun={handleSaveRun}
     onUndo={() => editor.undo()}
     onRedo={() => editor.redo()}
-    onOpenJobHistory={() => (isJobHistoryOpen = true)}
+    onOpenJobHistory={() => {
+      initialJobId = null;
+      isJobHistoryOpen = true;
+    }}
   />
 
   <div class="pipeline-canvas-area">
@@ -292,23 +287,14 @@
     onSave={handleSave}
   />
 
-  <JobProgress
-    open={isJobDrawerOpen}
-    active={jobState.active}
-    status={jobState.status}
-    jobId={jobState.jobId}
-    runId={jobState.runId}
-    currentStep={jobState.currentStep}
-    totalRows={jobState.totalRows}
-    batches={jobState.batches}
-    errorMessage={jobState.errorMessage}
-    onClose={handleCloseJobProgress}
-  />
-
   <JobHistoryModal
     open={isJobHistoryOpen}
     pipelineId={editUuid ?? ''}
-    onClose={() => (isJobHistoryOpen = false)}
+    {initialJobId}
+    onClose={() => {
+      isJobHistoryOpen = false;
+      initialJobId = null;
+    }}
   />
 
   <EditConfigDrawer
