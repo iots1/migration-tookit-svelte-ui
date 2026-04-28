@@ -34,6 +34,7 @@ export interface DatasourceColumn {
   type: string;
   is_nullable: boolean;
   column_default: string | null;
+  is_primary: boolean;
 }
 
 // ─── Config List Types ────────────────────────────────────────────────────────
@@ -114,6 +115,7 @@ export interface ConfigDetailResponse {
   generate_sql: string | null;
   condition: string | null;
   lookup: string | null;
+  pk_columns: string[] | null;
   updated_at: string;
 }
 
@@ -139,6 +141,7 @@ export interface ConfigSavePayload {
   config_type: string;
   script: string | null;
   generate_sql: string | null;
+  pk_columns: string[] | null;
 }
 
 // ─── VALUE_MAP Transformer Types ──────────────────────────────────────────────
@@ -165,6 +168,7 @@ export interface MappingRow {
   transformerParams: Record<string, unknown>;
   defaultValue: string;
   ignore: boolean;
+  isPk?: boolean;
   isManual?: boolean;
 }
 

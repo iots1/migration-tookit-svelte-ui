@@ -122,6 +122,7 @@ interface DatasourceColumnsApiItem {
     type: string;
     is_nullable: boolean;
     column_default: string | null;
+    is_primary: boolean;
   };
 }
 
@@ -141,6 +142,7 @@ export async function getDatasourceTableColumns(
     type: item.attributes.type,
     is_nullable: item.attributes.is_nullable,
     column_default: item.attributes.column_default,
+    is_primary: item.attributes.is_primary,
   }));
 }
 

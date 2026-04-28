@@ -91,7 +91,9 @@ export function createPipelinesListState() {
   );
   return {
     ...state,
-    get pipelines() { return state.items; },
+    get pipelines() {
+      return state.items;
+    },
     fetchPipelines: state.fetchItems,
   };
 }
@@ -123,14 +125,14 @@ async function handleConfigSaved(configId: string) {
 
 The following components in `src/lib/components/` are shared across multiple route pages. **Always reuse them** instead of duplicating markup:
 
-| Component      | Props                                                                           | Used by                     |
-| -------------- | ------------------------------------------------------------------------------- | --------------------------- |
-| `Pagination`   | `currentPage`, `totalPages`, `totalRecords`, `onPageChange`                    | All list pages              |
-| `SearchBar`    | `value`, `placeholder?`, `onInput`, `onSearch`, `onClear`                      | All list pages              |
-| `ErrorBanner`  | `message`, `onDismiss`                                                          | All pages with error state  |
-| `BadgeList`    | `items`, `limit?`, `color?`                                                    | Config editor, field mapping |
-| `Toast`        | (global singleton, use `showToast()` from `$lib/toast.svelte`)                  | Everywhere                  |
-| `ConfirmDialog`| (global singleton, use `confirmDialog()` from `$lib/confirm-dialog.svelte`)      | Everywhere                  |
+| Component       | Props                                                                       | Used by                      |
+| --------------- | --------------------------------------------------------------------------- | ---------------------------- |
+| `Pagination`    | `currentPage`, `totalPages`, `totalRecords`, `onPageChange`                 | All list pages               |
+| `SearchBar`     | `value`, `placeholder?`, `onInput`, `onSearch`, `onClear`                   | All list pages               |
+| `ErrorBanner`   | `message`, `onDismiss`                                                      | All pages with error state   |
+| `BadgeList`     | `items`, `limit?`, `color?`                                                 | Config editor, field mapping |
+| `Toast`         | (global singleton, use `showToast()` from `$lib/toast.svelte`)              | Everywhere                   |
+| `ConfirmDialog` | (global singleton, use `confirmDialog()` from `$lib/confirm-dialog.svelte`) | Everywhere                   |
 
 **Never copy-paste pagination, search bar, or error banner markup.** Import and use the shared components.
 

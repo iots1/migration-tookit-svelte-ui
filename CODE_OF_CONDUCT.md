@@ -71,9 +71,9 @@ High-level modules must not depend on low-level modules. Both should depend on a
 ```typescript
 // ✅ Correct — factory receives dependencies as parameters
 const state = createPaginatedListState<PipelineListItem>(
-  listPipelines,    // injected fetch function
-  deletePipeline,   // injected delete function
-  'Pipelines'       // injected label
+  listPipelines, // injected fetch function
+  deletePipeline, // injected delete function
+  'Pipelines' // injected label
 );
 
 // ❌ Wrong — factory hardcodes its own API dependency
@@ -90,12 +90,12 @@ function createPipelinesListState() {
 
 If markup appears in 2+ pages, extract it into a shared component in `$lib/components/`:
 
-| Pattern | Shared Component | Used By |
-|---------|-----------------|---------|
-| Pagination controls | `<Pagination>` | All list pages |
-| Search input + clear + button | `<SearchBar>` | All list pages |
-| Error message + dismiss | `<ErrorBanner>` | All pages with errors |
-| Badge pills with overflow | `<BadgeList>` | Config editor, field mapping |
+| Pattern                       | Shared Component | Used By                      |
+| ----------------------------- | ---------------- | ---------------------------- |
+| Pagination controls           | `<Pagination>`   | All list pages               |
+| Search input + clear + button | `<SearchBar>`    | All list pages               |
+| Error message + dismiss       | `<ErrorBanner>`  | All pages with errors        |
+| Badge pills with overflow     | `<BadgeList>`    | Config editor, field mapping |
 
 **Rule of three:** If you find yourself writing the same markup a third time, stop and extract a component.
 
@@ -106,6 +106,7 @@ If state logic appears in 2+ features, extract it into a generic factory in `$co
 ```typescript
 // ✅ Correct — shared factory
 import { createPaginatedListState } from '$core/state/paginated-list-state.svelte';
+
 const state = createPaginatedListState<MyItem>(fetchFn, deleteFn, 'Label');
 
 // ❌ Wrong — copy-paste state with different variable names

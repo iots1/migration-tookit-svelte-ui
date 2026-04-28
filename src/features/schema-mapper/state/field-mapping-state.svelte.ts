@@ -80,10 +80,12 @@ export interface FieldMappingState {
 function buildMappingRows(
   configMappings: ConfigMapping[],
   sourceColumns: DatasourceColumn[],
-  targetColumns: DatasourceColumn[]
+  targetColumns: DatasourceColumn[],
+  pkColumns: string[] = []
 ): MappingRow[] {
   const sourceTypes = new Map(sourceColumns.map((c) => [c.name, c.type]));
   const targetColumnNames = new Set(targetColumns.map((c) => c.name));
+  const pkSet = new Set(pkColumns);
 
   return configMappings.map((m) => ({
     sourceColumn: m.source,
@@ -98,6 +100,7 @@ function buildMappingRows(
         ? String(m.default_value)
         : '',
     ignore: m.ignore,
+    isPk: pkSet.has(m.source),
   }));
 }
 
@@ -115,6 +118,7 @@ function buildInitialMappings(
     transformerParams: {},
     defaultValue: '',
     ignore: true,
+    isPk: col.is_primary,
   }));
 }
 
@@ -281,7 +285,8 @@ export function createFieldMappingState(
         mappings = buildMappingRows(
           jsonData.mappings,
           sourceColumns,
-          targetColumns
+          targetColumns,
+          detail.pk_columns ?? []
         );
       } else if (sourceColumns.length > 0) {
         mappings = buildInitialMappings(sourceColumns, targetColumns);
@@ -416,6 +421,7 @@ export function createFieldMappingState(
       transformerParams: row?.transformerParams ?? {},
       defaultValue: row?.defaultValue ?? '',
       ignore: row?.ignore ?? true,
+      isPk: row?.isPk ?? false,
       isManual: row?.isManual ?? true,
     };
     mappings = [...mappings, newRow];
@@ -515,6 +521,9 @@ export function createFieldMappingState(
 
     try {
       let jsonDataStr: string;
+      const pkColumns = mappings
+        .filter((m) => m.isPk && m.sourceColumn)
+        .map((m) => m.sourceColumn);
 
       if (configType === 'custom') {
         jsonDataStr = JSON.stringify({});
@@ -581,6 +590,7 @@ export function createFieldMappingState(
         config_type: configType,
         script: configType === 'custom' ? script || null : null,
         generate_sql: configType === 'std' ? generateSql.trim() || null : null,
+        pk_columns: pkColumns.length > 0 ? pkColumns : null,
       };
 
       let savedId: string;

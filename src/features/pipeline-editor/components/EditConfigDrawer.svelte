@@ -34,6 +34,7 @@
   let originalJsonData = $state('');
   let originalDatasourceSourceId = $state<string | null>(null);
   let originalDatasourceTargetId = $state<string | null>(null);
+  let originalPkColumns = $state<string[] | null>(null);
 
   async function loadConfig(id: string) {
     loading = true;
@@ -52,6 +53,7 @@
           : JSON.stringify(loaded.json_data);
       originalDatasourceSourceId = loaded.datasource_source_id;
       originalDatasourceTargetId = loaded.datasource_target_id;
+      originalPkColumns = loaded.pk_columns ?? null;
     } catch (err) {
       error = err instanceof Error ? err.message : 'Failed to load config';
     } finally {
@@ -80,6 +82,7 @@
         config_type: configType,
         script: configType === 'custom' ? script : null,
         generate_sql: configType === 'std' ? generateSql.trim() || null : null,
+        pk_columns: originalPkColumns,
       };
 
       await updateConfig(configId, payload);

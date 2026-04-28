@@ -708,6 +708,12 @@
                     </th>
                     <th>Source Column</th>
                     <th style="width: 120px;">Type</th>
+                    <th style="width: 36px;">
+                      <span
+                        title="Mark as primary key column (used for cursor-based pagination)"
+                        >PK</span
+                      >
+                    </th>
                     <th>Target Column</th>
                     <th style="width: 130px;">Transformers</th>
                     <th style="width: 120px;">Validators</th>
@@ -777,6 +783,15 @@
                         {:else}
                           {mapping.sourceType}
                         {/if}
+                      </td>
+                      <td style="text-align: center;">
+                        <input
+                          type="checkbox"
+                          class="sm-mapping-checkbox"
+                          checked={mapping.isPk ?? false}
+                          onchange={() =>
+                            fm.updateMapping(i, { isPk: !mapping.isPk })}
+                        />
                       </td>
                       <td>
                         <select
