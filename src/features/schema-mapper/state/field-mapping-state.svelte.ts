@@ -448,6 +448,10 @@ export function createFieldMappingState(
       newTargetColumn = '';
     }
 
+    if ('transformers' in updates) {
+      newTransformers = updates.transformers ?? [];
+    }
+
     // Handle explicit transformerParams updates (e.g. from VALUE_MAP drawer)
     if ('transformerParams' in updates && updates.transformerParams) {
       newTransformerParams = {
