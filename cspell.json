@@ -1,0 +1,19 @@
+{
+  "version": "0.2",
+  "ignorePaths": [
+    "node_modules/**",
+    "build/**",
+    ".svelte-kit/**",
+    "pnpm-lock.yaml"
+  ],
+  "enabledLanguageIds": [
+    "typescript",
+    "javascript",
+    "svelte",
+    "scss",
+    "css",
+    "json",
+    "markdown"
+  ],
+  "ignoreRegExpList": ["[฀-๿]+"]
+}

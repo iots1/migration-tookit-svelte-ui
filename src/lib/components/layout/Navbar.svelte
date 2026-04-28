@@ -2,6 +2,7 @@
   import { page } from '$app/state';
 
   import type { ThemeState } from '$core/state/theme.svelte';
+  import EtlGuideModal from '$lib/components/EtlGuideModal.svelte';
 
   let {
     onMenuToggle,
@@ -10,6 +11,8 @@
     onMenuToggle: () => void;
     themeState: ThemeState;
   } = $props();
+
+  let showEtlGuide = $state(false);
 
   const routeName: Record<string, string> = {
     '/': 'Home',
@@ -43,6 +46,25 @@
     <h1 class="navbar-title">{getBreadcrumb()}</h1>
   </div>
   <div class="navbar-right">
+    <button
+      class="btn btn-secondary navbar-etl-guide-btn"
+      onclick={() => (showEtlGuide = true)}
+      aria-label="ETL Guide — how migration works"
+    >
+      <svg
+        width="14"
+        height="14"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <circle cx="12" cy="12" r="10" />
+        <line x1="12" y1="8" x2="12" y2="12" />
+        <line x1="12" y1="16" x2="12.01" y2="16" />
+      </svg>
+      ETL Guide
+    </button>
     <button
       class="theme-toggle"
       onclick={themeState.toggle}
@@ -84,3 +106,5 @@
     </button>
   </div>
 </header>
+
+<EtlGuideModal open={showEtlGuide} onClose={() => (showEtlGuide = false)} />

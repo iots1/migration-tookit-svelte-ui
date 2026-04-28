@@ -196,6 +196,7 @@ WHERE deleted_at IS NULL;
       role="dialog"
       aria-modal="true"
       aria-labelledby="sql-guide-title"
+      tabindex="-1"
       onclick={(e) => e.stopPropagation()}
       onkeydown={(e) => e.stopPropagation()}
     >

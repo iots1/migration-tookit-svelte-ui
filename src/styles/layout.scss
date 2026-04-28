@@ -550,6 +550,18 @@
   }
 }
 
+.navbar-etl-guide-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  height: 36px;
+  padding: 0 12px;
+
+  font-size: 13px;
+  white-space: nowrap;
+}
+
 .navbar-status {
   display: flex;
   align-items: center;

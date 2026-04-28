@@ -1,0 +1,545 @@
+/* ========== ETL Guide Modal ========== */
+
+.etl-intro {
+  margin: 0 0 20px;
+
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* ── Pipeline Flow Steps ── */
+
+.etl-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+
+  margin-bottom: 24px;
+}
+
+.etl-step {
+  position: relative;
+  display: flex;
+  gap: 16px;
+
+  padding: 16px 0;
+
+  &::before {
+    position: absolute;
+    top: 44px;
+    left: 15px;
+    z-index: 0;
+
+    width: 2px;
+    height: calc(100% - 12px);
+
+    background: var(--border-color);
+    content: '';
+  }
+
+  &:last-child::before {
+    display: none;
+  }
+
+  &--success {
+    .etl-step-title {
+      color: var(--green-text);
+    }
+  }
+}
+
+.etl-step-num {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-shrink: 0;
+  justify-content: center;
+  align-items: center;
+
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+
+  background: var(--accent);
+  color: white;
+  font-size: 13px;
+  font-weight: 700;
+
+  &--success {
+    background: var(--green);
+    font-size: 16px;
+  }
+}
+
+.etl-step-body {
+  flex: 1;
+
+  padding-bottom: 4px;
+}
+
+.etl-step-title {
+  margin-bottom: 6px;
+
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.etl-step-desc {
+  margin: 0;
+
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.6;
+
+  code {
+    padding: 1px 4px;
+    border-radius: 3px;
+
+    background: var(--bg-tertiary);
+    color: var(--accent);
+    font-size: 12px;
+  }
+}
+
+/* ── Config Type badges ── */
+
+.etl-flow-types {
+  display: flex;
+  gap: 12px;
+
+  margin-top: 8px;
+}
+
+.etl-flow-type {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 10px;
+
+  padding: 12px 16px;
+  border-radius: 8px;
+
+  font-size: 13px;
+  line-height: 1.5;
+
+  p {
+    margin: 0;
+
+    color: var(--text-secondary);
+  }
+
+  &--std {
+    border: 1px solid var(--blue);
+
+    background: color-mix(in srgb, var(--blue) 10%, transparent);
+  }
+
+  &--custom {
+    border: 1px solid var(--purple);
+
+    background: color-mix(in srgb, var(--purple) 10%, transparent);
+  }
+}
+
+.etl-flow-type-badge {
+  flex-shrink: 0;
+
+  padding: 2px 8px;
+  border-radius: 4px;
+
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+
+  .etl-flow-type--std & {
+    background: var(--blue);
+    color: white;
+  }
+
+  .etl-flow-type--custom & {
+    background: var(--purple);
+    color: white;
+  }
+}
+
+/* ── Section Titles ── */
+
+.etl-section-title {
+  margin-bottom: 16px;
+
+  color: var(--text-primary);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+/* ── Cards ── */
+
+.etl-card {
+  overflow: hidden;
+
+  margin-bottom: 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+
+  background: var(--bg-secondary);
+}
+
+.etl-card-header {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border-color);
+
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.etl-card-body {
+  padding: 14px 16px;
+
+  .sql-guide-code-block {
+    margin-top: 10px;
+    border-radius: 6px;
+  }
+}
+
+.etl-card-desc {
+  margin: 0 0 4px;
+
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.6;
+
+  code {
+    padding: 1px 4px;
+    border-radius: 3px;
+
+    background: var(--bg-primary);
+    color: var(--accent);
+    font-size: 12px;
+  }
+}
+
+/* ── Alerts ── */
+
+.etl-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: 6px;
+
+  font-size: 13px;
+  line-height: 1.5;
+
+  code {
+    padding: 1px 4px;
+    border-radius: 3px;
+
+    font-size: 12px;
+  }
+
+  strong {
+    color: inherit;
+  }
+
+  &--warning {
+    border: 1px solid var(--peach);
+
+    background: color-mix(in srgb, var(--peach) 12%, transparent);
+    color: var(--peach-text);
+
+    code {
+      background: color-mix(in srgb, var(--peach) 20%, transparent);
+      color: var(--peach-text);
+    }
+  }
+
+  &--info {
+    border: 1px solid var(--blue);
+
+    background: color-mix(in srgb, var(--blue) 10%, transparent);
+    color: var(--blue-text);
+
+    code {
+      background: color-mix(in srgb, var(--blue) 20%, transparent);
+      color: var(--blue-text);
+    }
+  }
+}
+
+/* ── Compare Cards ── */
+
+.etl-compare {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 1fr 1fr;
+
+  margin-bottom: 24px;
+}
+
+.etl-compare-card {
+  padding: 16px;
+
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+
+  &--good {
+    border-color: var(--green);
+
+    background: color-mix(in srgb, var(--green) 8%, transparent);
+  }
+
+  &--bad {
+    border-color: var(--peach);
+
+    background: color-mix(in srgb, var(--peach) 8%, transparent);
+  }
+}
+
+.etl-compare-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  margin-bottom: 12px;
+}
+
+.etl-compare-badge {
+  padding: 2px 8px;
+  border-radius: 4px;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  &--good {
+    background: var(--green);
+    color: white;
+  }
+
+  &--bad {
+    background: var(--peach);
+    color: white;
+  }
+}
+
+.etl-compare-subtitle {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+/* ── Priority List ── */
+
+.etl-priority-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  margin: 12px 0;
+}
+
+.etl-priority-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+
+  padding: 10px 14px;
+  border-radius: 6px;
+
+  background: var(--bg-primary);
+
+  p {
+    margin: 2px 0 0;
+
+    color: var(--text-muted);
+    font-size: 12px;
+  }
+
+  strong {
+    color: var(--text-primary);
+    font-size: 13px;
+  }
+
+  &--fallback {
+    opacity: 0.75;
+  }
+}
+
+.etl-priority-num {
+  display: flex;
+  flex-shrink: 0;
+  justify-content: center;
+  align-items: center;
+
+  width: 24px;
+  height: 24px;
+  margin-top: 1px;
+  border-radius: 50%;
+
+  background: var(--accent);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+
+  .etl-priority-item--fallback & {
+    background: var(--text-muted);
+  }
+}
+
+/* ── List ── */
+
+.etl-list {
+  margin: 8px 0 0;
+  padding-left: 18px;
+
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.7;
+
+  code {
+    padding: 1px 4px;
+    border-radius: 3px;
+
+    background: var(--bg-tertiary);
+    color: var(--accent);
+    font-size: 12px;
+  }
+
+  li {
+    margin-bottom: 4px;
+  }
+}
+
+/* ── Transformer Grid ── */
+
+.etl-transformer-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 1fr 1fr;
+}
+
+.etl-transformer-group {
+  padding: 14px 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+
+  background: var(--bg-secondary);
+}
+
+.etl-transformer-group-title {
+  margin-bottom: 10px;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  &--text {
+    color: var(--blue-text);
+  }
+
+  &--date {
+    color: var(--green-text);
+  }
+
+  &--data {
+    color: var(--purple-text);
+  }
+
+  &--lookup {
+    color: var(--yellow-text);
+  }
+}
+
+.etl-transformer-list {
+  margin: 0;
+  padding-left: 16px;
+
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.8;
+
+  code {
+    padding: 1px 4px;
+    border-radius: 3px;
+
+    background: var(--bg-tertiary);
+    color: var(--accent);
+    font-size: 11px;
+  }
+}
+
+/* ── Resume Flow ── */
+
+.etl-resume-flow {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  margin-top: 12px;
+}
+
+.etl-resume-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+
+  padding: 10px 14px;
+  border-radius: 6px;
+
+  background: var(--bg-primary);
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.5;
+
+  code {
+    padding: 1px 4px;
+    border-radius: 3px;
+
+    background: var(--bg-tertiary);
+    color: var(--accent);
+    font-size: 12px;
+  }
+
+  em {
+    color: var(--text-muted);
+    font-size: 12px;
+    font-style: normal;
+  }
+
+  &--success {
+    background: color-mix(in srgb, var(--green) 10%, transparent);
+    color: var(--green-text);
+  }
+}
+
+.etl-resume-icon {
+  flex-shrink: 0;
+
+  font-size: 16px;
+}
+
+.etl-resume-arrow {
+  padding-left: 26px;
+
+  color: var(--text-muted);
+  font-size: 16px;
+}
+
+/* ── Responsive ── */
+
+@media (max-width: 768px) {
+  .etl-compare {
+    grid-template-columns: 1fr;
+  }
+
+  .etl-transformer-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .etl-flow-types {
+    flex-direction: column;
+  }
+}

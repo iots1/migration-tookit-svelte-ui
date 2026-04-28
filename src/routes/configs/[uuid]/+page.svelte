@@ -10,6 +10,7 @@
   import SqlEditor from '$features/db-explorer/components/SqlEditor.svelte';
   import { createFieldMappingState } from '$features/schema-mapper/state/field-mapping-state.svelte';
   import BadgeList from '$lib/components/BadgeList.svelte';
+  import EtlGuideModal from '$lib/components/EtlGuideModal.svelte';
   import ItemSelectorDrawer from '$lib/components/ItemSelectorDrawer.svelte';
   import SqlGuideModal from '$lib/components/SqlGuideModal.svelte';
   import ValueMapParamsDrawer from '$lib/components/ValueMapParamsDrawer.svelte';
@@ -33,6 +34,7 @@
   let showValidatorDrawer = $state(false);
   let showValueMapDrawer = $state(false);
   let showSqlGuide = $state(false);
+  let showEtlGuide = $state(false);
   let currentMappingIndex = $state(-1);
 
   let activeMappings = $derived(
@@ -202,21 +204,46 @@
           {rawId === 'new' ? 'New Config' : fm.configName || 'Edit Config'}
         </h2>
       </div>
-      <button
-        class="btn btn-primary"
-        onclick={handleSave}
-        disabled={fm.saving || !fm.configName.trim()}
-      >
-        {#if fm.saving}
-          <span
-            class="spin"
-            style="width: 14px; height: 14px; border-width: 2px;"
-          ></span>
-          Saving...
-        {:else}
-          Save
-        {/if}
-      </button>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <button
+          class="btn btn-secondary"
+          onclick={() => (showEtlGuide = true)}
+          style="padding: 6px 12px; font-size: 12px; display: flex; align-items: center; gap: 6px;"
+          title="How ETL migration works"
+        >
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <circle
+              cx="7"
+              cy="7"
+              r="6"
+              stroke="currentColor"
+              stroke-width="1.5"
+            />
+            <path
+              d="M7 6v4M7 4.5v.5"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+            />
+          </svg>
+          How it works
+        </button>
+        <button
+          class="btn btn-primary"
+          onclick={handleSave}
+          disabled={fm.saving || !fm.configName.trim()}
+        >
+          {#if fm.saving}
+            <span
+              class="spin"
+              style="width: 14px; height: 14px; border-width: 2px;"
+            ></span>
+            Saving...
+          {:else}
+            Save
+          {/if}
+        </button>
+      </div>
     </div>
 
     {#if fm.error}
@@ -1049,4 +1076,7 @@
 
   <!-- SQL Guide Modal -->
   <SqlGuideModal open={showSqlGuide} onClose={() => (showSqlGuide = false)} />
+
+  <!-- ETL Guide Modal -->
+  <EtlGuideModal open={showEtlGuide} onClose={() => (showEtlGuide = false)} />
 {/if}
