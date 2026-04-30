@@ -17,9 +17,9 @@ export async function listDatasourcesPaginated(params?: {
   if (params?.page) query.set('page', String(params.page));
   if (params?.limit) query.set('limit', String(params.limit));
   if (params?.search) {
-    query.set('filter', `name||$cont||${params.search}`);
-    query.append('filter', `host||$cont||${params.search}`);
-    query.append('filter', `dbname||$cont||${params.search}`);
+    query.set('or', `name||$cont||${params.search}`);
+    query.append('or', `host||$cont||${params.search}`);
+    query.append('or', `dbname||$cont||${params.search}`);
   }
   const qs = query.toString();
   const response: DatasourceApiListResponse = await api.get(

@@ -25,7 +25,7 @@ export async function loadConfigs(params?: {
 }): Promise<ConfigItem[]> {
   const query = new URLSearchParams();
   if (params?.search) {
-    query.set('filter', `config_name||$cont||${params.search}`);
+    query.set('or', `config_name||$cont||${params.search}`);
   }
   if (params?.limit) {
     query.set('limit', String(params.limit));
@@ -51,8 +51,8 @@ export async function listPipelines(params?: {
   if (params?.page) query.set('page', String(params.page));
   if (params?.limit) query.set('limit', String(params.limit));
   if (params?.search) {
-    query.set('filter', `name||$cont||${params.search}`);
-    query.append('filter', `description||$cont||${params.search}`);
+    query.set('or', `name||$cont||${params.search}`);
+    query.append('or', `description||$cont||${params.search}`);
   }
   const qs = query.toString();
   const response: PipelineApiListResponse = await api.get(

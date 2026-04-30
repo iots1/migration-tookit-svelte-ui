@@ -20,7 +20,7 @@ export async function listConfigs(params?: {
   if (params?.page) query.set('page', String(params.page));
   if (params?.limit) query.set('limit', String(params.limit));
   if (params?.search) {
-    query.set('filter', `config_name||$cont||${params.search}`);
+    query.set('or', `config_name||$cont||${params.search}`);
   }
   const qs = query.toString();
   const response: ConfigListApiResponse = await api.get(
