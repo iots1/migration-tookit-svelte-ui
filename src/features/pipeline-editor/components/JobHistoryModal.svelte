@@ -4,6 +4,7 @@
     JobCompletedEvent,
     JobErrorEvent,
     PipelineJobItem,
+    PipelineRunBatchEvent,
     PipelineRunItem,
   } from '$core/types/pipeline';
   import {
@@ -53,7 +54,6 @@
   let openedPipelineId = '';
 
   let socket: ReturnType<typeof io> | null = null;
-  let wsTotalFetched = false;
 
   let configGroups = $derived(buildConfigGroups(runs));
   let selectedJob = $derived(jobs.find((j) => j.id === selectedJobId) ?? null);
@@ -117,7 +117,10 @@
 
     socket.on('job:batch', (data: JobBatchEvent) => {
       updateJobStatus(data.job_id, 'running');
-      appendRunFromBatch(data);
+    });
+
+    socket.on('pipeline_run:batch', (data: PipelineRunBatchEvent) => {
+      appendRunFromPipelineEvent(data);
     });
 
     socket.on('job:error', (data: JobErrorEvent) => {
@@ -163,36 +166,25 @@
     );
   }
 
-  function appendRunFromBatch(data: JobBatchEvent) {
-    if (data.job_id !== selectedJobId) return;
-    const existingForConfig = runs.filter((r) => r.config_name === data.step);
-    const knownTotal = existingForConfig.reduce(
-      (max, r) => Math.max(max, r.total_records_in_config),
-      0
-    );
-    const prevCumulative = existingForConfig.reduce(
-      (max, r) => Math.max(max, r.rows_cumulative),
-      0
-    );
+  function appendRunFromPipelineEvent(data: PipelineRunBatchEvent) {
+    if (!data.job_id || data.job_id !== selectedJobId) return;
     const now = new Date().toISOString();
     const newRun: PipelineRunItem = {
-      id: `ws-${data.run_id}-${data.batch_num}`,
+      id: `ws-${data.pipeline_id}-${data.batch_round}`,
       pipeline_id: data.pipeline_id,
       job_id: data.job_id,
-      config_name: data.step,
-      batch_round: data.batch_num,
-      rows_in_batch: data.rows_processed,
-      rows_cumulative: prevCumulative + data.rows_processed,
-      batch_size: 0,
-      total_records_in_config: knownTotal,
-      status: 'success',
+      config_name: data.config_name,
+      batch_round: data.batch_round,
+      rows_in_batch: data.rows_in_batch,
+      rows_cumulative: data.rows_cumulative,
+      batch_size: data.batch_size,
+      total_records_in_config: data.total_records_in_config,
+      status: data.status,
+      error_message: data.error_message,
+      transformation_warnings: data.transformation_warnings,
       created_at: now,
     };
     runs = [...runs, newRun];
-    if (knownTotal === 0 && !wsTotalFetched) {
-      wsTotalFetched = true;
-      void fetchRunsFromApi();
-    }
   }
 
   function appendRunFromError(data: JobErrorEvent) {
@@ -223,37 +215,6 @@
   function refreshRunsIfSelected(jobId: string) {
     if (jobId === selectedJobId) {
       void fetchRuns(true);
-    }
-  }
-
-  async function fetchRunsFromApi() {
-    if (!selectedJobId) return;
-    try {
-      const res = await loadJobPipelineRuns(selectedJobId, {
-        limit: runsLimit,
-        offset: 0,
-        sort: 'created_at:asc',
-      });
-      const apiIds = new Set(res.data.map((r) => r.id));
-      const wsOnlyRuns = runs.filter((r) => !apiIds.has(r.id));
-      const totalByConfig: Record<string, number> = {};
-      for (const r of res.data) {
-        const current = totalByConfig[r.config_name] ?? 0;
-        totalByConfig[r.config_name] = Math.max(
-          current,
-          r.total_records_in_config
-        );
-      }
-      const updatedWsRuns = wsOnlyRuns.map((r) => ({
-        ...r,
-        total_records_in_config:
-          totalByConfig[r.config_name] ?? r.total_records_in_config,
-      }));
-      runs = [...res.data, ...updatedWsRuns];
-      runsOffset = res.data.length;
-      hasMoreRuns = res.data.length === runsLimit;
-    } catch {
-      // silent — keep current data
     }
   }
 
@@ -329,13 +290,11 @@
     if (open && pipelineId) {
       if (pipelineId !== openedPipelineId) {
         openedPipelineId = pipelineId;
-        wsTotalFetched = false;
         void fetchJobs(true);
       }
       connectSocket();
     } else {
       openedPipelineId = '';
-      wsTotalFetched = false;
       disconnectSocket();
     }
   });

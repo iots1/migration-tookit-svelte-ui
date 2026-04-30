@@ -331,3 +331,17 @@ export interface JobCompletedEvent {
   status: string;
   total_rows: number;
 }
+
+export interface PipelineRunBatchEvent {
+  pipeline_id: string;
+  job_id: string | null;
+  config_name: string;
+  batch_round: number;
+  rows_in_batch: number;
+  rows_cumulative: number;
+  batch_size: number;
+  total_records_in_config: number;
+  status: string;
+  error_message: string | null;
+  transformation_warnings: string | null;
+}
