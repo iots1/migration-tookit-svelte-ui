@@ -668,6 +668,23 @@
   }
 }
 
+.toolbar-btn-danger {
+  border-color: var(--danger-border, #fca5a5);
+
+  background: var(--danger-bg, #fef2f2);
+  color: var(--danger-text, #dc2626);
+
+  &:hover:not(:disabled) {
+    border-color: var(--danger, #ef4444);
+
+    background: var(--danger-bg-hover, #fee2e2);
+  }
+
+  svg {
+    color: var(--danger-text, #dc2626);
+  }
+}
+
 /* ========== Add Config Bar ========== */
 .pipeline-toolbar-add-config-bar {
   display: flex;

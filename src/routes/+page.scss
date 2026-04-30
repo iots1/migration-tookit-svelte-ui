@@ -4,47 +4,48 @@
   flex-direction: column;
   align-items: center;
 
-  padding-top: 40px;
+  width: 100%;
+  padding-top: 24px;
 }
 
 .home-hero {
-  margin-bottom: 44px;
+  margin-bottom: 28px;
 
   text-align: center;
 }
 
 .home-title {
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 
   color: var(--text-primary);
-  font-size: 30px;
+  font-size: 24px;
   font-weight: 700;
   letter-spacing: -0.02em;
 }
 
 .home-subtitle {
   color: var(--text-secondary);
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 400;
 }
 
+/* ========== Cards — compact horizontal layout ========== */
 .home-cards {
   display: grid;
-  gap: 20px;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  grid-template-columns: repeat(4, 1fr);
 
   width: 100%;
-  max-width: 1060px;
 }
 
 .home-card {
   display: flex;
-  flex-direction: column;
   align-items: center;
+  gap: 12px;
 
-  padding: 32px 24px;
+  padding: 16px 18px;
   border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
 
   background: var(--bg-card);
   box-shadow: var(--shadow-sm);
@@ -57,19 +58,19 @@
     border-color: var(--accent-light);
 
     box-shadow: var(--shadow-md);
-    transform: translateY(-2px);
+    transform: translateY(-1px);
   }
 }
 
 .card-icon {
   display: flex;
+  flex-shrink: 0;
   justify-content: center;
   align-items: center;
 
-  width: 56px;
-  height: 56px;
-  margin-bottom: 18px;
-  border-radius: var(--radius-md);
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
 
   &.icon-teal {
     background: var(--teal-bg);
@@ -92,18 +93,273 @@
   }
 }
 
-.card-title {
-  margin-bottom: 6px;
+.card-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+}
 
-  font-size: 15px;
+.card-title {
+  font-size: 13px;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .card-desc {
+  overflow: hidden;
+
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.4;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* ========== Roadmap Section ========== */
+.home-roadmap {
+  width: 100%;
+  margin-top: 48px;
+  padding-bottom: 64px;
+}
+
+.roadmap-header {
+  margin-bottom: 32px;
+
+  text-align: center;
+}
+
+.roadmap-title {
+  margin-bottom: 4px;
+
+  color: var(--text-primary);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.roadmap-subtitle {
   color: var(--text-secondary);
   font-size: 13px;
-  line-height: 1.5;
-  text-align: center;
+}
+
+/* ========== Roadmap Flow — horizontal grid rows ========== */
+.roadmap-flow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.roadmap-row {
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  gap: 0;
+
+  width: 100%;
+}
+
+/* ========== Step Box ========== */
+.roadmap-step {
+  flex: 1 1 0;
+
+  min-width: 0;
+
+  opacity: 0;
+  transition:
+    opacity 0.4s ease,
+    transform 0.4s ease;
+  transform: translateY(12px);
+
+  &--visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.roadmap-step-box {
+  position: relative;
+
+  display: flex;
+  flex-direction: column;
+
+  height: 100%;
+  min-height: 110px;
+  padding: 18px 18px 18px 18px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+
+  background: var(--bg-card);
+  box-shadow:
+    var(--shadow-sm),
+    inset 0 0 0 1px color-mix(in srgb, var(--neon) 8%, transparent);
+  transition:
+    box-shadow 0.4s ease,
+    border-color 0.4s ease;
+
+  .roadmap-step--visible & {
+    border-color: color-mix(in srgb, var(--neon) 30%, var(--border-color));
+
+    box-shadow:
+      var(--shadow-sm),
+      0 0 16px -6px color-mix(in srgb, var(--neon) 25%, transparent);
+  }
+}
+
+.roadmap-step-badge {
+  position: absolute;
+  top: -9px;
+  left: 14px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+
+  background: var(--neon);
+  color: white;
+
+  font-size: 10px;
+  font-weight: 700;
+
+  box-shadow: 0 0 10px -2px var(--neon);
+}
+
+.roadmap-step-icon {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+
+  font-size: 20px;
+  opacity: 0.7;
+}
+
+.roadmap-step-title {
+  margin-bottom: 4px;
+
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.roadmap-step-desc {
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+/* ========== Horizontal Connector (→) ========== */
+.roadmap-h-connector {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+
+  width: 28px;
+}
+
+.roadmap-h-line {
+  flex: 1;
+
+  height: 2px;
+  border-radius: 1px;
+
+  background: var(--border-color);
+  transition: background 0.4s ease 0.2s;
+
+  .roadmap-h-connector--visible & {
+    background: linear-gradient(to right, var(--neon), var(--neon-next));
+  }
+}
+
+.roadmap-h-arrow {
+  flex-shrink: 0;
+
+  color: var(--border-color);
+  opacity: 0;
+  transition:
+    color 0.3s ease 0.4s,
+    opacity 0.3s ease 0.4s,
+    transform 0.3s ease 0.4s;
+  transform: translateX(-2px);
+
+  .roadmap-h-connector--visible & {
+    color: var(--neon-next);
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ========== Vertical Connector (↓) between rows ========== */
+.roadmap-v-spacer {
+  display: flex;
+  justify-content: center;
+
+  width: 100%;
+  height: 36px;
+}
+
+.roadmap-v-connector {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  width: 2px;
+  height: 100%;
+}
+
+.roadmap-v-line {
+  flex: 1;
+
+  width: 2px;
+  border-radius: 1px;
+
+  background: var(--border-color);
+  transition: background 0.4s ease 0.2s;
+
+  .roadmap-v-connector--visible & {
+    background: linear-gradient(to bottom, var(--neon), var(--neon-next));
+  }
+}
+
+.roadmap-v-glow {
+  position: absolute;
+
+  width: 6px;
+  height: 0;
+  border-radius: 3px;
+
+  background: linear-gradient(to bottom, var(--neon), var(--neon-next));
+  opacity: 0.4;
+  transition: height 0.4s ease 0.2s;
+  filter: blur(3px);
+
+  .roadmap-v-connector--visible & {
+    height: 100%;
+  }
+}
+
+.roadmap-v-arrow {
+  flex-shrink: 0;
+
+  margin-top: -2px;
+
+  color: var(--border-color);
+  opacity: 0;
+  transition:
+    color 0.3s ease 0.5s,
+    opacity 0.3s ease 0.5s,
+    transform 0.3s ease 0.5s;
+  transform: translateY(-2px);
+
+  .roadmap-v-connector--visible & {
+    color: var(--neon-next);
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ========== Page Placeholder ========== */

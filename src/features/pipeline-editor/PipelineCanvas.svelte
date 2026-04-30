@@ -19,6 +19,7 @@
     onEdgesChange,
     onNodeDragStop,
     onNodeEdit,
+    onNodeSelect,
   }: {
     nodes: Node[];
     edges: Edge[];
@@ -26,6 +27,7 @@
     onEdgesChange: (edges: Edge[]) => void;
     onNodeDragStop: (node: Node) => void;
     onNodeEdit?: (configId: string) => void;
+    onNodeSelect?: (nodeId: string | null) => void;
   } = $props();
 
   let nodesWithHandler = $state.raw<Node[]>([]);
@@ -62,10 +64,18 @@
     nodes: Node[];
     edges: Edge[];
   }) {
-    if (deletedNodes.length > 0) {
-      const deletedNodeIds = new Set(deletedNodes.map((n) => n.id));
-      onNodesChange(nodes.filter((n) => !deletedNodeIds.has(n.id)));
+    const deletedNodeIds = new Set(deletedNodes.map((n) => n.id));
+
+    if (deletedNodeIds.size > 0) {
+      const remainingNodes = nodes.filter((n) => !deletedNodeIds.has(n.id));
+      const remainingEdges = edges.filter(
+        (e) => !deletedNodeIds.has(e.source) && !deletedNodeIds.has(e.target)
+      );
+      onNodesChange(remainingNodes);
+      onEdgesChange(remainingEdges);
+      return;
     }
+
     if (deletedEdges.length > 0) {
       const deletedEdgeIds = new Set(deletedEdges.map((e) => e.id));
       onEdgesChange(edges.filter((e) => !deletedEdgeIds.has(e.id)));
@@ -80,6 +90,12 @@
     {nodeTypes}
     onconnect={handleConnect}
     ondelete={handleDelete}
+    onnodeclick={({ node }) => {
+      if (onNodeSelect) onNodeSelect(node.id);
+    }}
+    onpaneclick={() => {
+      if (onNodeSelect) onNodeSelect(null);
+    }}
     onnodedragstop={(e) => {
       if (e.targetNode) onNodeDragStop(e.targetNode);
     }}

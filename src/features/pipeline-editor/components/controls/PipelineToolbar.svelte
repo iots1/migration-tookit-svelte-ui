@@ -13,6 +13,7 @@
     saving = false,
     running = false,
     isEditMode = false,
+    selectedNodeName = null,
     onOpenDrawer,
     onAddConfig,
     onSave,
@@ -20,6 +21,7 @@
     onUndo,
     onRedo,
     onOpenJobHistory,
+    onDeleteNode,
   }: {
     pipelineName?: string;
     canUndo?: boolean;
@@ -27,6 +29,7 @@
     saving?: boolean;
     running?: boolean;
     isEditMode?: boolean;
+    selectedNodeName?: string | null;
     onOpenDrawer: () => void;
     onAddConfig: (config: ConfigItem) => void;
     onSave: () => void;
@@ -34,6 +37,7 @@
     onUndo: () => void;
     onRedo: () => void;
     onOpenJobHistory?: () => void;
+    onDeleteNode?: () => void;
   } = $props();
 
   async function handleBackClick() {
@@ -80,6 +84,24 @@
       <span>{pipelineName}</span>
     </button>
     <ConfigDropdown onSelect={onAddConfig} />
+    {#if selectedNodeName && onDeleteNode}
+      <button
+        class="toolbar-btn toolbar-btn-danger"
+        onclick={onDeleteNode}
+        title="Delete selected node"
+      >
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path
+            d="M3 4h10M6 4V3h4v1M5 4l.5 9h5L11 4"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+        <span>Delete</span>
+      </button>
+    {/if}
   </div>
 
   <div class="toolbar-center">

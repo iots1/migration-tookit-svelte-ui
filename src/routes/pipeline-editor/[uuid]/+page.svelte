@@ -23,6 +23,13 @@
 
   let editUuid = $derived(page.params.uuid);
 
+  let selectedNodeName = $derived(
+    editor.selectedNodeId
+      ? ((editor.nodes.find((n) => n.id === editor.selectedNodeId)?.data
+          .label as string) ?? null)
+      : null
+  );
+
   function handleEditConfig(configId: string) {
     editingConfigId = configId;
   }
@@ -54,6 +61,16 @@
 
   function handleNodeDragStop(node: Node) {
     editor.updateNodePosition(node.id, node.position);
+  }
+
+  function handleNodeSelect(nodeId: string | null) {
+    editor.selectNode(nodeId);
+  }
+
+  function handleDeleteNode() {
+    if (editor.selectedNodeId) {
+      editor.deleteNode(editor.selectedNodeId);
+    }
   }
 
   async function handleSave(name: string, description: string) {
@@ -139,12 +156,14 @@
     saving={editor.saving}
     running={false}
     isEditMode={editUuid !== 'new'}
+    {selectedNodeName}
     onOpenDrawer={() => editor.openDrawer()}
     onAddConfig={handleAddConfig}
     onSave={() => handleSave(editor.pipelineName, editor.pipelineDescription)}
     onSaveRun={handleSaveRun}
     onUndo={() => editor.undo()}
     onRedo={() => editor.redo()}
+    onDeleteNode={handleDeleteNode}
     onOpenJobHistory={() => {
       initialJobId = null;
       isJobHistoryOpen = true;
@@ -209,6 +228,7 @@
           onEdgesChange={handleEdgesChange}
           onNodeDragStop={handleNodeDragStop}
           onNodeEdit={handleEditConfig}
+          onNodeSelect={handleNodeSelect}
         />
       </SvelteFlowProvider>
     {/if}

@@ -50,6 +50,7 @@ interface EditorState {
     edges: BaseEdge[]
   ) => void;
   setPipelineId: (value: string | null) => void;
+  deleteNode: (nodeId: string) => void;
   /** Loads configs and optionally loads an existing pipeline by ID. */
   initialize: (editUuid: string) => Promise<string | null>;
   /** Refreshes configs and updates a specific node's data from the config. */
@@ -157,6 +158,16 @@ export function createEditorState(): EditorState {
     position: { x: number; y: number }
   ) {
     nodes = nodes.map((n) => (n.id === nodeId ? { ...n, position } : n));
+    pushHistory();
+    scheduleAutoSave();
+  }
+
+  function deleteNode(nodeId: string) {
+    nodes = nodes.filter((n) => n.id !== nodeId);
+    edges = edges.filter((e) => e.source !== nodeId && e.target !== nodeId);
+    if (selectedNodeId === nodeId) {
+      selectedNodeId = null;
+    }
     pushHistory();
     scheduleAutoSave();
   }
@@ -481,6 +492,7 @@ export function createEditorState(): EditorState {
     setPipelineId(value: string | null) {
       pipelineId = value;
     },
+    deleteNode,
     setLoading(value: boolean) {
       loading = value;
     },
