@@ -205,6 +205,9 @@ export function createFieldMappingState(
         jsonData = {
           name: (parsed as Record<string, unknown>).name ?? detail.config_name,
           module: (parsed as Record<string, unknown>).module ?? '',
+          batch_size: (parsed as Record<string, unknown>).batch_size as
+            | number
+            | undefined,
           source: (parsed as Record<string, unknown>).source ?? {
             database: '',
             table: '',
