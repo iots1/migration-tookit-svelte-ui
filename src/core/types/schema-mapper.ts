@@ -175,6 +175,7 @@ export interface MappingRow {
 export interface FieldMappingConfigData {
   name: string;
   module: string;
+  batch_size?: number;
   source: {
     database: string;
     table: string;

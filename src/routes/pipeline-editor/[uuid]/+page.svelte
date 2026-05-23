@@ -4,6 +4,7 @@
   import { goto } from '$app/navigation';
   import { page } from '$app/state';
 
+  import ConflictResumeModal from '$features/pipeline-editor/components/ConflictResumeModal.svelte';
   import PipelineToolbar from '$features/pipeline-editor/components/controls/PipelineToolbar.svelte';
   import EditConfigDrawer from '$features/pipeline-editor/components/EditConfigDrawer.svelte';
   import JobHistoryModal from '$features/pipeline-editor/components/JobHistoryModal.svelte';
@@ -20,6 +21,7 @@
   let isJobHistoryOpen = $state(false);
   let editingConfigId = $state<string | null>(null);
   let initialJobId = $state<string | null>(null);
+  let conflictLoading = $state(false);
 
   let editUuid = $derived(page.params.uuid);
 
@@ -96,6 +98,21 @@
     const jobId = await editor.saveAndCreateJob(name, description);
     if (!jobId) return;
 
+    await navigateToPipeline();
+    openJobHistory(jobId);
+  }
+
+  async function handleConflictResume(resume: boolean) {
+    conflictLoading = true;
+    const jobId = await editor.createJobWithResume(resume);
+    conflictLoading = false;
+    if (!jobId) return;
+
+    await navigateToPipeline();
+    openJobHistory(jobId);
+  }
+
+  async function navigateToPipeline() {
     if (!editUuid || editUuid === 'new') {
       const id = editor.pipelineId;
       if (id) {
@@ -103,7 +120,9 @@
       }
     }
     editor.closeDrawer();
+  }
 
+  function openJobHistory(jobId: string) {
     initialJobId = jobId;
     isJobHistoryOpen = true;
   }
@@ -259,5 +278,13 @@
     configId={editingConfigId}
     onClose={() => (editingConfigId = null)}
     onSaved={handleConfigSaved}
+  />
+
+  <ConflictResumeModal
+    open={editor.jobConflict}
+    loading={conflictLoading}
+    onResume={() => handleConflictResume(true)}
+    onNewRun={() => handleConflictResume(false)}
+    onCancel={() => editor.setError(null)}
   />
 </div>

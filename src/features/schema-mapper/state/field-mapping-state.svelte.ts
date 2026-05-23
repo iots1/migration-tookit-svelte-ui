@@ -40,6 +40,7 @@ export interface FieldMappingState {
   readonly mappings: MappingRow[];
   readonly transformers: TransformerOption[];
   readonly validators: ValidatorOption[];
+  readonly batchSize: number;
   readonly generateSql: string;
   readonly loading: boolean;
   readonly saving: boolean;
@@ -68,6 +69,7 @@ export interface FieldMappingState {
   addMapping: (row?: Partial<MappingRow>) => void;
   removeMapping: (index: number) => void;
   setGenerateSql: (sql: string) => void;
+  setBatchSize: (size: number) => void;
   autoGenerateSql: () => void;
   goToStep: (step: number) => void;
   nextStep: () => void;
@@ -161,6 +163,7 @@ export function createFieldMappingState(
   let transformers = $state<TransformerOption[]>([]);
   let validators = $state<ValidatorOption[]>([]);
   let generateSql = $state('');
+  let batchSize = $state(1000);
   let loading = $state(false);
   let saving = $state(false);
   let loadingTables = $state(false);
@@ -228,6 +231,7 @@ export function createFieldMappingState(
       targetTableName = jsonData.target?.table ?? null;
       targetDatasourceName = jsonData.target?.datasource_name ?? null;
       targetDatabaseName = jsonData.target?.database ?? null;
+      batchSize = jsonData.batch_size ?? 1000;
 
       const loadWarnings: string[] = [];
 
@@ -531,6 +535,7 @@ export function createFieldMappingState(
         const jsonData: FieldMappingConfigData = {
           name: configName,
           module: 'default',
+          batch_size: batchSize,
           source: {
             database: sourceDatabaseName ?? sourceDatasourceName ?? '',
             table: sourceTableName ?? '',
@@ -700,6 +705,9 @@ export function createFieldMappingState(
     get generateSql() {
       return generateSql;
     },
+    get batchSize() {
+      return batchSize;
+    },
     get loading() {
       return loading;
     },
@@ -761,6 +769,10 @@ export function createFieldMappingState(
     removeMapping,
     setGenerateSql(sql: string) {
       generateSql = sql;
+      isDirty = true;
+    },
+    setBatchSize(size: number) {
+      batchSize = size;
       isDirty = true;
     },
     autoGenerateSql,

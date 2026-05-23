@@ -1014,6 +1014,20 @@
               onchange={(value) => fm.setGenerateSql(String(value))}
             />
           </div>
+          <div class="form-group" style="margin-top: 16px; max-width: 200px;">
+            <label class="form-label" for="batch-size">Batch Size</label>
+            <input
+              id="batch-size"
+              type="number"
+              class="form-input"
+              min="1"
+              value={fm.batchSize}
+              oninput={(e) => {
+                const val = Number((e.target as HTMLInputElement).value);
+                if (val > 0) fm.setBatchSize(val);
+              }}
+            />
+          </div>
         </div>
 
         <div class="sm-card-footer">

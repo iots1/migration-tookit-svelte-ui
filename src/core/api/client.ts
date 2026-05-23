@@ -17,6 +17,16 @@ function hasErrors(errorBody: ApiErrorBody): errorBody is ApiErrorBody & {
   return Boolean(errorBody.errors) && Array.isArray(errorBody.errors);
 }
 
+export class ApiError extends Error {
+  readonly status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+  }
+}
+
 class ApiClient {
   private readonly baseUrl: string;
 
@@ -59,7 +69,7 @@ class ApiClient {
           errorMessage = details.join(', ');
         }
       }
-      throw new Error(errorMessage);
+      throw new ApiError(errorMessage, response.status);
     }
 
     return (await response.json()) as T;
@@ -118,7 +128,7 @@ class ApiClient {
           errorMessage = details.join(', ');
         }
       }
-      throw new Error(errorMessage);
+      throw new ApiError(errorMessage, response.status);
     }
 
     if (response.status === 204) {

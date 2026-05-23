@@ -298,6 +298,7 @@ export interface PipelineRunsResponse {
 
 export interface CreateJobPayload {
   pipeline_id: string;
+  resume?: boolean;
 }
 
 export interface CreateJobResponse {

@@ -1,3 +1,4 @@
+import { ApiError } from '$core/api/client';
 import type { BaseEdge, BaseNode, HistoryEntry } from '$core/types/common';
 import type { ConfigItem, PipelineRunResponse } from '$core/types/pipeline';
 import {
@@ -26,6 +27,7 @@ interface EditorState {
   readonly canUndo: boolean;
   readonly canRedo: boolean;
   readonly isDrawerOpen: boolean;
+  readonly jobConflict: boolean;
   pushHistory: () => void;
   undo: () => boolean;
   redo: () => boolean;
@@ -60,6 +62,8 @@ interface EditorState {
     name: string,
     description: string
   ) => Promise<string | null>;
+  /** Retries job creation with resume flag after 409 conflict. */
+  createJobWithResume: (resume: boolean) => Promise<string | null>;
   /** Saves pipeline and returns its ID, or null on failure. */
   save: (name: string, description: string) => Promise<string | null>;
   /** Saves then runs pipeline, returns run response or null on failure. */
@@ -84,6 +88,7 @@ export function createEditorState(): EditorState {
   let running = $state(false);
   let error = $state<string | null>(null);
   let isDrawerOpen = $state(false);
+  let jobConflict = $state(false);
 
   const MAX_HISTORY = 50;
 
@@ -424,6 +429,26 @@ export function createEditorState(): EditorState {
       const jobResponse = await createJob({ pipeline_id: id });
       return jobResponse.job_id;
     } catch (err) {
+      if (err instanceof ApiError && err.status === 409) {
+        jobConflict = true;
+        return null;
+      }
+      error = err instanceof Error ? err.message : 'Failed to start job';
+      return null;
+    }
+  }
+
+  async function createJobWithResume(resume: boolean): Promise<string | null> {
+    if (!pipelineId) return null;
+
+    try {
+      jobConflict = false;
+      const jobResponse = await createJob({
+        pipeline_id: pipelineId,
+        resume,
+      });
+      return jobResponse.job_id;
+    } catch (err) {
       error = err instanceof Error ? err.message : 'Failed to start job';
       return null;
     }
@@ -472,6 +497,9 @@ export function createEditorState(): EditorState {
     get isDrawerOpen() {
       return isDrawerOpen;
     },
+    get jobConflict() {
+      return jobConflict;
+    },
     pushHistory,
     undo,
     redo,
@@ -506,6 +534,7 @@ export function createEditorState(): EditorState {
     save,
     saveAndRun,
     saveAndCreateJob,
+    createJobWithResume,
     initialize,
     updateNodeFromConfig,
     scheduleAutoSave,
