@@ -10,6 +10,7 @@
   import { showToast } from '$lib/toast.svelte';
 
   import '$features/schema-mapper/schema-mapper.scss';
+  import '$features/pipeline-editor/pipeline-editor.scss';
 
   import { duplicateConfig } from '$features/schema-mapper/api';
   import { createConfigsListState } from '$features/schema-mapper/state/configs-list-state.svelte';
@@ -35,6 +36,25 @@
 
   async function handleEdit(uuid: string) {
     await goto(`/configs/${uuid}`);
+  }
+
+  function handleNameClick(e: MouseEvent, uuid: string) {
+    const url = resolve(`/configs/${uuid}`);
+
+    if (e.button === 1 || e.ctrlKey || e.metaKey) {
+      e.preventDefault();
+      window.open(url, '_blank');
+    } else if (e.button === 0) {
+      e.preventDefault();
+      void handleEdit(uuid);
+    }
+  }
+
+  function handleNameKeydown(e: KeyboardEvent, uuid: string) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      void handleEdit(uuid);
+    }
   }
 
   async function handleDelete(uuid: string) {
@@ -185,7 +205,17 @@
           {#each listState.configs as config (config.id)}
             <tr>
               <td class="td-name">
-                <span class="pipeline-name-cell">{config.config_name}</span>
+                <span
+                  class="pipeline-name-cell"
+                  onclick={(e) =>
+                    handleNameClick(e as unknown as MouseEvent, config.id)}
+                  onkeydown={(e) => handleNameKeydown(e, config.id)}
+                  role="button"
+                  tabindex="0"
+                  title="Click to edit (Ctrl+Click for new tab)"
+                >
+                  {config.config_name}
+                </span>
               </td>
               <td>
                 {#if config.config_type === 'custom'}
@@ -318,13 +348,13 @@
           {/each}
         </tbody>
       </table>
+
+      <Pagination
+        currentPage={listState.currentPage}
+        totalPages={listState.totalPages}
+        totalRecords={listState.totalRecords}
+        onPageChange={listState.goToPage}
+      />
     {/if}
   </div>
-
-  <Pagination
-    currentPage={listState.currentPage}
-    totalPages={listState.totalPages}
-    totalRecords={listState.totalRecords}
-    onPageChange={listState.goToPage}
-  />
 </div>

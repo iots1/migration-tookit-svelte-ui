@@ -32,6 +32,25 @@
     await goto(resolve('/pipeline-editor/[uuid]', { uuid: id }));
   }
 
+  function handleNameClick(e: MouseEvent, id: string) {
+    const url = resolve('/pipeline-editor/[uuid]', { uuid: id });
+
+    if (e.button === 1 || e.ctrlKey || e.metaKey) {
+      e.preventDefault();
+      window.open(url, '_blank');
+    } else if (e.button === 0) {
+      e.preventDefault();
+      void handleEdit(id);
+    }
+  }
+
+  function handleNameKeydown(e: KeyboardEvent, id: string) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      void handleEdit(id);
+    }
+  }
+
   async function handleDelete(id: string) {
     const confirmed = await confirmDialog({
       title: 'Delete Pipeline',
@@ -166,7 +185,17 @@
           {#each listState.pipelines as pipeline (pipeline.id)}
             <tr>
               <td class="td-name">
-                <span class="pipeline-name-cell">{pipeline.name}</span>
+                <span
+                  class="pipeline-name-cell"
+                  onclick={(e) =>
+                    handleNameClick(e as unknown as MouseEvent, pipeline.id)}
+                  onkeydown={(e) => handleNameKeydown(e, pipeline.id)}
+                  role="button"
+                  tabindex="0"
+                  title="Click to edit (Ctrl+Click for new tab)"
+                >
+                  {pipeline.name}
+                </span>
               </td>
               <td class="td-desc">
                 <span class="pipeline-desc-cell"
@@ -271,15 +300,15 @@
           {/each}
         </tbody>
       </table>
+
+      <Pagination
+        currentPage={listState.currentPage}
+        totalPages={listState.totalPages}
+        totalRecords={listState.totalRecords}
+        onPageChange={listState.goToPage}
+      />
     {/if}
   </div>
-
-  <Pagination
-    currentPage={listState.currentPage}
-    totalPages={listState.totalPages}
-    totalRecords={listState.totalRecords}
-    onPageChange={listState.goToPage}
-  />
 
   <JobHistoryModal
     open={jobHistoryPipelineId !== null}
